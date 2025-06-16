@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ing. Giorgio Saggiomo - Progettazione strutturale, perizie tecniche, consulenze forensi e supporto legale a Napoli e provincia. Rapidità, trasparenza, numeri e norme.">
+    <title>Ing. Giorgio Saggiomo – Strutturista e Consulente Tecnico</title>
+    <style>
+        :root {
+            --primary: #22313f;
+            --secondary: #b2b2b1;
+            --accent: #e67e22;
+            --light: #f8f9fa;
+            --font: 'Segoe UI', 'Arial', sans-serif;
+        }
+        body {
+            font-family: var(--font);
+            background: var(--light);
+            margin: 0;
+            color: var(--primary);
+        }
+        header {
+            background: var(--primary);
+            color: #fff;
+            padding: 40px 0 30px 0;
+            text-align: center;
+        }
+        header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            letter-spacing: 1px;
+        }
+        header p {
+            margin: 0;
+            font-size: 1.2em;
+            color: var(--secondary);
+        }
+        nav {
+            background: var(--secondary);
+            text-align: center;
+            padding: 12px 0;
+        }
+        nav a {
+            color: var(--primary);
+            text-decoration: none;
+            margin: 0 18px;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        nav a:hover {
+            color: var(--accent);
+        }
+        .container {
+            max-width: 980px;
+            margin: 35px auto;
+            padding: 0 18px;
+        }
+        section {
+            margin-bottom: 38px;
+        }
+        h2 {
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 12px;
+            border-left: 5px solid var(--accent);
+            padding-left: 12px;
+            font-size: 1.6em;
+        }
+        .bio {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 32px;
+            align-items: center;
+        }
+        .bio-img {
+            flex: 0 0 150px;
+            border-radius: 50%;
+            border: 3px solid var(--secondary);
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            background: #eee;
+        }
+        .bio-content {
+            flex: 1 1 200px;
+        }
+        .services-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+        }
+        .service {
+            flex: 1 1 260px;
+            background: #fff;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px #22313f22;
+            padding: 20px;
+            margin-bottom: 18px;
+            min-width: 230px;
+            border-left: 5px solid var(--accent);
+        }
+        .portfolio {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+        }
+        .case {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #22313f11;
+            padding: 16px;
+            flex: 1 1 250px;
+            min-width: 230px;
+            margin-bottom: 15px;
+        }
+        .case img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 7px;
+            object-fit: cover;
+            max-height: 120px;
+        }
+        .testimonial {
+            font-style: italic;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        form {
+            background: #fff;
+            padding: 25px 18px;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px #22313f13;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        form label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        form input, form textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--secondary);
+            border-radius: 5px;
+            margin-bottom: 18px;
+            font-size: 1em;
+            resize: vertical;
+        }
+        form button {
+            background: var(--accent);
+            color: #fff;
+            padding: 10px 32px;
+            border: none;
+            border-radius: 7px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.18s;
+        }
+        form button:hover {
+            background: #cf711d;
+        }
+        footer {
+            background: var(--primary);
+            color: #fff;
+            text-align: center;
+            padding: 20px 0 10px 0;
+            font-size: 1em;
+        }
+        .contact-data {
+            margin: 18px 0;
+            font-size: 1em;
+        }
+        @media (max-width: 850px) {
+            .services-list, .portfolio, .bio {
+                flex-direction: column;
+                gap: 18px;
+            }
+            .bio-img {
+                margin: 0 auto 14px auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Ing. Giorgio Saggiomo</h1>
+        <p>Strutturista, CTU/CTP, Consulente Tecnico Forense<br>
+        “Soluzioni strutturali senza compromessi: numeri e norme al servizio della sicurezza.”</p>
+    </header>
+    <nav>
+        <a href="#bio">Chi sono</a>
+        <a href="#servizi">Servizi</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#approfondimenti">Approfondimenti</a>
+        <a href="#contatti">Contatti</a>
+    </nav>
+    <div class="container">
+        <section id="bio">
+            <h2>Chi sono</h2>
+            <div class="bio">
+                <img src="img/giorgio-saggiomo.jpg" alt="Logo Giorgio Saggiomo" class="bio-img">
+                <div class="bio-content">
+                    <p>
+                        Laureato in Ingegneria Edile presso l’Università Federico II di Napoli, iscritto all’Albo degli Ingegneri di Napoli dal 2004, Master di secondo livello in Ingegneria Forense. 
+                        Esperto in progettazione strutturale, perizie giudiziarie e consulenze tecniche di parte e d’ufficio.<br><br>
+                        <strong>Visione:</strong> 
+                        Affronto ogni incarico con rigore, tempestività e trasparenza. Nessun compromesso, solo soluzioni concrete basate su numeri e normativa.
+                    </p>
+                </div>
+            </div>
+        </section>
+        <section id="servizi">
+            <h2>Servizi</h2>
+            <div class="services-list">
+                <div class="service">
+                    <strong>Progettazione strutturale</strong><br>
+                    Edifici civili e industriali, nuove costruzioni e ristrutturazioni, ampliamenti, cambio destinazione d’uso.<br>
+                    <small>NTC 2018, Eurocodici, DM 17/01/2018.</small>
+                </div>
+                <div class="service">
+                    <strong>Consulenza tecnica di parte e d’ufficio (CTU/CTP)</strong><br>
+                    Assistenza tecnica in procedimenti civili e penali, consulenze per studi legali e privati.<br>
+                    <small>c.p.c. artt. 61-62-191-201, art. 2051 c.c.</small>
+                </div>
+                <div class="service">
+                    <strong>Perizie forensi</strong><br>
+                    Analisi e valutazione danni, accertamenti tecnici preventivi, cause di crolli, difetti costruttivi.
+                </div>
+                <div class="service">
+                    <strong>Diagnosi strutturale e rilievi 3D</strong><br>
+                    Indagini non distruttive, rilievi laser scanner, nuvole di punti, modellazione FEM.
+                </div>
+                <div class="service">
+                    <strong>Collaudi statici e verifiche di vulnerabilità sismica</strong><br>
+                    Certificazioni, relazione tecnica asseverata, pratiche edilizie.
+                </div>
+                <div class="service">
+                    <strong>Supporto legale a studi e privati</strong><br>
+                    Redazione relazioni tecniche, asseverazioni, consulenza preventiva.
+                </div>
+            </div>
+        </section>
+        <section id="portfolio">
+            <h2>Portfolio e casi studio</h2>
+            <div class="portfolio">
+                <div class="case">
+                    <img src="img/portfolio1.jpg" alt="Consolidamento solaio c.a. Parco Mergellina">
+                    <strong>Consolidamento solaio in c.a. – Parco Mergellina (Napoli)</strong>
+                    <p>Analisi della vulnerabilità, progettazione degli interventi di consolidamento, verifica numerica FEM, direzione lavori.</p>
+                </div>
+                <div class="case">
+                    <img src="img/portfolio2.jpg" alt="Perizia forense crollo Pozzuoli">
+                    <strong>Perizia forense su crollo copertura – Pozzuoli</strong>
+                    <p>Accertamento tecnico, relazione ex art. 67 disp. att. c.p.c., individuazione delle cause strutturali e delle responsabilità.</p>
+                </div>
+                <div class="case">
+                    <img src="img/portfolio3.jpg" alt="Collaudo edificio residenziale">
+                    <strong>Collaudo statico edificio residenziale</strong>
+                    <p>Verifica delle opere in c.a., collaudo statico, relazione finale, rilascio certificazione di conformità normativa.</p>
+                </div>
+            </div>
+            <div class="testimonial">
+                “Competenza e chiarezza assoluta. Relazioni tecniche impeccabili.”<br>
+                <small>Avv. L. Rossi – Napoli</small>
+            </div>
+        </section>
+        <section id="approfondimenti">
+            <h2>Approfondimenti tecnici</h2>
+            <div>
+                <strong>“Come riconoscere una lesione strutturale critica in un edificio esistente”</strong><br>
+                Le principali tipologie di fessurazioni, valutazione preliminare e quando è obbligatorio richiedere una perizia.<br><br>
+                <strong>“Il ruolo del CTU nelle controversie edilizie”</strong><br>
+                Focus su responsabilità, obiettività e limiti dell’incarico ex art. 61-62 c.p.c.<br><br>
+                <strong>“Diagnosi strutturale avanzata: l’uso delle nuvole di punti”</strong><br>
+                Breve caso pratico sull’applicazione del rilievo laser scanner in ambito giudiziario.
+            </div>
+        </section>
+        <section id="contatti">
+            <h2>Contatti</h2>
+           <div class="contact-data">
+    <strong>Email:</strong> giorgiosaggiomo@email.it<br>
+    <strong>PEC:</strong> giorgiosaggiomo@pec.it<br>
+    <strong>Telefono:</strong> 333 1234567<br>
+    <strong>LinkedIn:</strong> 
+    <a href="https://www.linkedin.com/in/giorgio-saggiomo-91217862/" target="_blank" rel="noopener">
+        Profilo LinkedIn
+    </a><br>
+    <strong>Studio:</strong> Napoli – Via [Tua Via] n. XX<br>
+</div>
+            <form name="contatto" autocomplete="off">
+                <label for="nome">Nome e Cognome</label>
+                <input type="text" id="nome" name="nome" required>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+                <label for="telefono">Telefono</label>
+                <input type="tel" id="telefono" name="telefono">
+                <label for="messaggio">Messaggio</label>
+                <textarea id="messaggio" name="messaggio" rows="5" required></textarea>
+                <button type="submit">Invia richiesta</button>
+            </form>
+            <p style="font-size:0.95em;margin-top:10px;color:#666;">I dati forniti saranno trattati esclusivamente per rispondere alla richiesta. <a href="/privacy.html">Privacy policy</a></p>
+        </section>
+    </div>
+    <footer>
+        © 2025 Ing. Giorgio Saggiomo – Strutturista e Consulente Tecnico<br>
+        <span style="font-size:0.93em;">P.IVA: [Tua P.IVA] | Iscritto all’Albo Ingegneri di Napoli n. [Tuo numero]</span>
+    </footer>
+</body>
+</html>

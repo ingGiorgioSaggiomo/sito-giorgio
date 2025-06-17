@@ -17,6 +17,12 @@
             --light: #f8f9fa;
             --font: 'Segoe UI', 'Arial', sans-serif;
         }
+
+        /* Impostazione per lo scorrimento fluido */
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: var(--font);
             background: var(--light);
@@ -39,12 +45,17 @@
             margin: 0;
             font-size: 1.2em;
             color: var(--secondary);
+            /* Altezza minima per evitare "salti" durante l'effetto di scrittura */
+            min-height: 58px;
         }
         /* Barra di navigazione orizzontale */
         nav {
             background: var(--secondary);
             text-align: center;
             padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         nav a {
             color: var(--primary);
@@ -107,49 +118,59 @@
             margin-bottom: 18px;
             min-width: 230px;
             border-left: 5px solid var(--accent);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .service:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px burdensome #22313f33;
         }
         /* Portfolio: griglia di "case" */
-.portfolio {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 22px;
-}
-.case {
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px #22313f11;
-    padding: 16px;
-    flex: 1 1 250px;
-    min-width: 230px;
-    margin-bottom: 15px;
-}
-/* Portfolio con due foto grandi affiancate per ciascun caso studio */
-.case-photos {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 12px;
-}
-.case-photos img {
-    width: 48%;
-    max-width: 350px;
-    min-width: 140px;
-    border-radius: 8px;
-    object-fit: cover;
-    max-height: 240px;
-    background: #eee;
-    box-shadow: 0 1px 5px #22313f22;
-}
-/* Adattamento mobile: impila le foto in verticale */
-@media (max-width: 700px) {
-    .case-photos {
-        flex-direction: column;
-        gap: 8px;
-    }
-    .case-photos img {
-        width: 100%;
-        max-width: none;
-    }
-}
+        .portfolio {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px;
+        }
+        .case {
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px #22313f11;
+            padding: 16px;
+            flex: 1 1 250px;
+            min-width: 230px;
+            margin-bottom: 15px;
+        }
+        /* Portfolio con due foto grandi affiancate per ciascun caso studio */
+        .case-photos {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+        .case-photos img {
+            width: 48%;
+            max-width: 350px;
+            min-width: 140px;
+            border-radius: 8px;
+            object-fit: cover;
+            max-height: 240px;
+            background: #eee;
+            box-shadow: 0 1px 5px #22313f22;
+            cursor: pointer; /* Cursore a puntatore per indicare che l'immagine è cliccabile */
+            transition: transform 0.2s;
+        }
+        .case-photos img:hover {
+            transform: scale(1.05);
+        }
+        /* Adattamento mobile: impila le foto in verticale */
+        @media (max-width: 700px) {
+            .case-photos {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .case-photos img {
+                width: 100%;
+                max-width: none;
+            }
+        }
 
         /* Stile per form contatti (semplice e centrato) */
         form {
@@ -183,10 +204,11 @@
             font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
-            transition: background 0.18s;
+            transition: background 0.18s, transform 0.18s;
         }
         form button:hover {
             background: #cf711d;
+            transform: scale(1.05);
         }
         footer {
             background: var(--primary);
@@ -209,16 +231,57 @@
                 margin: 0 auto 14px auto;
             }
         }
+
+        /* --- NUOVI STILI PER LE ANIMAZIONI E LA LIGHTBOX --- */
+
+        /* Animazioni "Fade-in on scroll" */
+        .hidden-anim {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .show-anim {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Stili per la Lightbox (galleria immagini) */
+        #lightbox {
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none; /* Nascosto di default */
+            justify-content: center;
+            align-items: center;
+        }
+        #lightbox.active {
+            display: flex; /* Mostra quando attivo */
+        }
+        #lightbox img {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 10px;
+        }
+        #lightbox .close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 3em;
+            color: white;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
-    <!-- Intestazione principale del sito -->
     <header>
         <h1>Ing. Giorgio Saggiomo</h1>
-        <p>Strutturista, CTU/CTP, Consulente Tecnico Forense<br>
-        “Soluzioni strutturali e geotecniche nel rispetto delle norme”</p>
+        <p id="typing-effect">Strutturista, CTU/CTP, Consulente Tecnico Forense</p>
     </header>
-    <!-- Barra di navigazione con ancore alle sezioni principali -->
+
     <nav>
         <a href="#bio">Chi sono</a>
         <a href="#servizi">Servizi</a>
@@ -227,14 +290,11 @@
         <a href="#contatti">Contatti</a>
     </nav>
     <div class="container">
-        <!-- Sezione Chi sono / Profilo -->
-        <section id="bio">
+        <section id="bio" class="hidden-anim">
             <h2>Chi sono</h2>
             <div class="bio">
-                <!-- Immagine profilo/logo -->
                 <img src="img/giorgio-saggiomo.jpg" alt="Logo Giorgio Saggiomo" class="bio-img">
                 <div class="bio-content">
-                    <!-- Descrizione sintetica con esperienza e competenze chiave -->
                     <p>
                         Sono un ingegnere edile, specializzato in progettazione strutturale, consulenza tecnica giudiziale e valutazione della sicurezza degli edifici e delle infrastrutture. Laureato presso l’Università Federico II di Napoli, ho conseguito il Master di II livello in Ingegneria Forense e sono regolarmente iscritto all’Albo degli Ingegneri dal 2004.<br><br>
                         Svolgo da oltre 20 anni incarichi come CTU e Perito presso il Tribunale di Napoli e per la Procura della Repubblica, con esperienza comprovata nella redazione di perizie tecniche, accertamenti su dissesti statici, vulnerabilità sismica, collaudi strutturali e verifica della stabilità dei pendii.<br><br>
@@ -244,11 +304,9 @@
                 </div>
             </div>
         </section>
-        <!-- Sezione Servizi: elencati a blocchi -->
-        <section id="servizi">
+        <section id="servizi" class="hidden-anim">
             <h2>Servizi</h2>
             <div class="services-list">
-                <!-- Ogni .service rappresenta un servizio chiave offerto -->
                 <div class="service">
                     <strong>Progettazione e verifica strutturale</strong><br>
                     Strutture civili e industriali, nuove, esistenti e ristrutturazioni. Valutazione della vulnerabilità sismica, modellazione FEM e analisi avanzata dei materiali.<br>
@@ -284,8 +342,7 @@
                 </div>
             </div>
         </section>
-        <!-- Sezione Portfolio: tre esempi di incarichi (immagini e descrizioni generiche) -->
-      <section id="portfolio">
+        <section id="portfolio" class="hidden-anim">
     <h2>Portfolio e casi studio</h2>
     <div class="portfolio">
         <div class="case">
@@ -314,32 +371,24 @@
         </div>
     </div>
 </section>
-        <!-- Sezione Approfondimenti tecnici, linguaggio generico, servizi ampliati -->
-        <section id="approfondimenti">
+        <section id="approfondimenti" class="hidden-anim">
             <h2>Approfondimenti tecnici</h2>
             <div>
-                <!-- Blocco approfondimento su stabilità pendii -->
                 <strong>Valutazione della stabilità dei pendii</strong><br>
                 Analisi delle condizioni di sicurezza di versanti e scarpate tramite metodologie geotecniche e modellazione numerica. Approccio integrato tra sopralluoghi, rilievi geotecnici e utilizzo di software specialistici per la simulazione di scenari di frana e per la progettazione degli interventi di consolidamento.<br><br>
-                <!-- Approfondimento su modellazione FEM e diagnosi strutturale -->
                 <strong>Diagnosi strutturale e modellazione FEM</strong><br>
                 Applicazione di tecniche avanzate di rilievo (laser scanner, nuvole di punti) e analisi tramite modellazione agli elementi finiti (FEM) per la valutazione della sicurezza di strutture civili e industriali, esistenti o nuove. Individuazione di criticità statiche, verifica di resistenza e deformabilità, valutazione della vulnerabilità sismica.<br><br>
-                <!-- Approfondimento su consolidamento solai e strutture -->
                 <strong>Consolidamento dei solai e delle strutture esistenti</strong><br>
                 Studio e progettazione di interventi su solai ammalorati, consolidamento di travi e pilastri, rinforzi con materiali tradizionali e innovativi, tecniche di cerchiatura e adeguamento sismico. Pianificazione delle opere con analisi dei dettagli costruttivi e delle normative tecniche applicabili.<br><br>
-                <!-- Approfondimento su consulenza giudiziale -->
                 <strong>Consulenza tecnica giudiziale e perizie forensi</strong><br>
                 Redazione di perizie tecniche e accertamenti in ambito civile, penale e amministrativo: valutazione dei dissesti, determinazione delle cause e attribuzione delle responsabilità. Supporto a studi legali, enti pubblici e privati per la risoluzione delle controversie tecnico-strutturali.<br><br>
-                <!-- Approfondimento su collaudi e sicurezza sismica -->
                 <strong>Collaudi statici e verifiche di vulnerabilità sismica</strong><br>
                 Attività di collaudo su opere nuove ed esistenti, con rilascio di certificazione di conformità strutturale e valutazione dei livelli di sicurezza secondo la normativa vigente.<br><br>
-                <!-- Approfondimento su sicurezza e prevenzione incendi -->
                 <strong>Autorizzazioni amministrative, Direzione dei Lavori e Sicurezza</strong><br>
                 Prariche amministrative (CILA, SCIA, Permesso a Costruire, etc...), Direzione dei Lavori, Coordinamento della sicurezza nei cantieri (progettazione ed esecuzione).
             </div>
         </section>
-                <!-- Sezione Contatti con modulo -->
-        <section id="contatti">
+                <section id="contatti" class="hidden-anim">
             <h2>Contatti</h2>
             <div class="contact-data">
                 <strong>Email:</strong> giorgiosaggiomo@gmail.com<br>
@@ -347,7 +396,6 @@
                 <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/giorgio-saggiomo-91217862/" target="_blank" rel="noopener">Profilo LinkedIn</a><br>
                 <strong>Studio:</strong> Napoli<br>
             </div>
-            <!-- Modulo di contatto che invia i dati via email tramite FormSubmit -->
             <form action="https://formsubmit.co/giorgiosaggiomo@gmail.com" method="POST" autocomplete="off">
                 <label for="nome">Nome e Cognome</label>
                 <input type="text" id="nome" name="nome" required>
@@ -364,14 +412,92 @@
             </p>
         </section>
     
-    <!-- Footer con dati fiscali sintetici -->
     <footer>
         © 2025 Ing. Giorgio Saggiomo – Strutturista e Consulente Tecnico<br>
         <span style="font-size:0.93em;">P.IVA: [Tua P.IVA] | Iscritto all’Albo Ingegneri di Napoli n. [Tuo numero]</span>
     </footer>
-        © 2025 Ing. Giorgio Saggiomo – Strutturista e Consulente Tecnico<br>
-        <span style="font-size:0.93em;">P.IVA: [Tua P.IVA] | Iscritto all’Albo Ingegneri di Napoli n. [Tuo numero]</span>
-    </footer>
+
+    <div id="lightbox">
+        <span class="close">&times;</span>
+        <img id="lightbox-img" src="">
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            // 1. Animazione "Fade-in on scroll"
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('show-anim');
+                    }
+                });
+            }, {
+                threshold: 0.1 // L'animazione parte quando il 10% dell'elemento è visibile
+            });
+
+            const hiddenElements = document.querySelectorAll('.hidden-anim');
+            hiddenElements.forEach(el => observer.observe(el));
+
+            // 2. Galleria di immagini (Lightbox)
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const portfolioImages = document.querySelectorAll('.case-photos img');
+
+            portfolioImages.forEach(image => {
+                image.addEventListener('click', () => {
+                    lightbox.classList.add('active');
+                    lightboxImg.src = image.src;
+                });
+            });
+
+            // Chiudi la lightbox cliccando sulla X o sullo sfondo
+            lightbox.addEventListener('click', (e) => {
+                if (e.target !== lightboxImg) {
+                    lightbox.classList.remove('active');
+                }
+            });
+
+            // 3. Effetto di scrittura dinamica (Typing Effect)
+            const typingElement = document.getElementById('typing-effect');
+            const textToType = "Strutturista, CTU/CTP, Consulente Tecnico Forense";
+            const secondLine = "“Soluzioni strutturali e geotecniche nel rispetto delle norme”";
+            let index = 0;
+            let currentText = textToType;
+            let isFirstLine = true;
+
+            typingElement.innerHTML = ""; // Svuota il paragrafo
+
+            function type() {
+                if (index < currentText.length) {
+                    typingElement.innerHTML += currentText.charAt(index);
+                    index++;
+                    setTimeout(type, 50); // Velocità di scrittura
+                } else {
+                    // Dopo una pausa, cancella e scrive la seconda riga
+                    setTimeout(() => {
+                        if(isFirstLine) {
+                           // Qui potresti aggiungere un effetto di cancellazione, ma per semplicità alterniamo
+                           index = 0;
+                           currentText = secondLine;
+                           typingElement.innerHTML = "";
+                           isFirstLine = false;
+                           type();
+                        } else {
+                           // Ritorna alla prima riga
+                           index = 0;
+                           currentText = textToType;
+                           typingElement.innerHTML = "";
+                           isFirstLine = true;
+                           type();
+                        }
+                    }, 3000); // Pausa di 3 secondi prima di cambiare testo
+                }
+            }
+            
+            type();
+        });
+    </script>
 </body>
 </html>
 

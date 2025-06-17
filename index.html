@@ -1,503 +1,493 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Ing. Giorgio Saggiomo - Progettazione strutturale, perizie tecniche, consulenze forensi e supporto legale a Napoli e provincia. Rapidità, trasparenza, numeri e norme.">
     <title>Ing. Giorgio Saggiomo – Strutturista e Consulente Tecnico</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font di Google -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    
     <style>
-        /*
-         * Variabili CSS root per i colori e il font usato su tutto il sito.
-         * Permettono di modificare rapidamente la palette.
-         */
-        :root {
-            --primary: #22313f;
-            --secondary: #b2b2b1;
-            --accent: #e67e22;
-            --light: #f8f9fa;
-            --font: 'Segoe UI', 'Arial', sans-serif;
-        }
-
-        /* Impostazione per lo scorrimento fluido */
-        html {
-            scroll-behavior: smooth;
-        }
-
+        /* Stili personalizzati aggiuntivi */
         body {
-            font-family: var(--font);
-            background: var(--light);
-            margin: 0;
-            color: var(--primary);
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f7f6;
         }
-        /* Header principale con titolo e sottotitolo */
-        header {
-            background: var(--primary);
-            color: #fff;
-            padding: 40px 0 30px 0;
-            text-align: center;
-        }
-        header h1 {
-            margin: 0 0 10px 0;
-            font-size: 2.5em;
-            letter-spacing: 1px;
-        }
-        header p {
-            margin: 0;
-            font-size: 1.2em;
-            color: var(--secondary);
-            /* Altezza minima per evitare "salti" durante l'effetto di scrittura */
-            min-height: 58px;
-        }
-        /* Barra di navigazione orizzontale */
-        nav {
-            background: var(--secondary);
-            text-align: center;
-            padding: 12px 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        nav a {
-            color: var(--primary);
-            text-decoration: none;
-            margin: 0 18px;
-            font-weight: bold;
-            transition: color 0.2s;
-        }
-        nav a:hover {
-            color: var(--accent);
-        }
-        /* Container centrale */
-        .container {
-            max-width: 980px;
-            margin: 35px auto;
-            padding: 0 18px;
-        }
-        section {
-            margin-bottom: 38px;
-        }
-        h2 {
-            color: var(--primary);
-            margin-top: 0;
-            margin-bottom: 12px;
-            border-left: 5px solid var(--accent);
-            padding-left: 12px;
-            font-size: 1.6em;
-        }
-        /* Layout per "Chi sono" (bio con immagine e testo affiancati) */
-        .bio {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 32px;
-            align-items: center;
-        }
-        .bio-img {
-            flex: 0 0 150px;
-            border-radius: 50%;
-            border: 3px solid var(--secondary);
-            width: 150px;
-            height: 150px;
-            object-fit: cover;
-            background: #eee;
-        }
-        .bio-content {
-            flex: 1 1 200px;
-        }
-        /* Lista servizi su più colonne responsive */
-        .services-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 22px;
-        }
-        .service {
-            flex: 1 1 260px;
-            background: #fff;
-            border-radius: 14px;
-            box-shadow: 0 2px 8px #22313f22;
-            padding: 20px;
-            margin-bottom: 18px;
-            min-width: 230px;
-            border-left: 5px solid var(--accent);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        .service:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px burdensome #22313f33;
-        }
-        /* Portfolio: griglia di "case" */
-        .portfolio {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 22px;
-        }
-        .case {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px #22313f11;
-            padding: 16px;
-            flex: 1 1 250px;
-            min-width: 230px;
-            margin-bottom: 15px;
-        }
-        /* Portfolio con due foto grandi affiancate per ciascun caso studio */
-        .case-photos {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 12px;
-        }
-        .case-photos img {
-            width: 48%;
-            max-width: 350px;
-            min-width: 140px;
-            border-radius: 8px;
-            object-fit: cover;
-            max-height: 240px;
-            background: #eee;
-            box-shadow: 0 1px 5px #22313f22;
-            cursor: pointer; /* Cursore a puntatore per indicare che l'immagine è cliccabile */
-            transition: transform 0.2s;
-        }
-        .case-photos img:hover {
-            transform: scale(1.05);
-        }
-        /* Adattamento mobile: impila le foto in verticale */
-        @media (max-width: 700px) {
-            .case-photos {
-                flex-direction: column;
-                gap: 8px;
-            }
-            .case-photos img {
-                width: 100%;
-                max-width: none;
-            }
+        h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
         }
 
-        /* Stile per form contatti (semplice e centrato) */
-        form {
-            background: #fff;
-            padding: 25px 18px;
-            border-radius: 14px;
-            box-shadow: 0 2px 12px #22313f13;
-            max-width: 520px;
-            margin: 0 auto;
+        /* Stile per l'header con canvas */
+        .header-container {
+            position: relative;
+            background: linear-gradient(45deg, #1d2b38, #2c3e50);
         }
-        form label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
-        form input, form textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid var(--secondary);
-            border-radius: 5px;
-            margin-bottom: 18px;
-            font-size: 1em;
-            resize: vertical;
-        }
-        form button {
-            background: var(--accent);
-            color: #fff;
-            padding: 10px 32px;
-            border: none;
-            border-radius: 7px;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.18s, transform 0.18s;
-        }
-        form button:hover {
-            background: #cf711d;
-            transform: scale(1.05);
-        }
-        footer {
-            background: var(--primary);
-            color: #fff;
-            text-align: center;
-            padding: 20px 0 10px 0;
-            font-size: 1em;
-        }
-        .contact-data {
-            margin: 18px 0;
-            font-size: 1em;
-        }
-        /* Adattamento mobile: stack verticale */
-        @media (max-width: 850px) {
-            .services-list, .portfolio, .bio {
-                flex-direction: column;
-                gap: 18px;
-            }
-            .bio-img {
-                margin: 0 auto 14px auto;
-            }
-        }
-
-        /* --- NUOVI STILI PER LE ANIMAZIONI E LA LIGHTBOX --- */
-
-        /* Animazioni "Fade-in on scroll" */
-        .hidden-anim {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .show-anim {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        /* Stili per la Lightbox (galleria immagini) */
-        #lightbox {
-            position: fixed;
-            z-index: 1000;
+        #particle-canvas {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: none; /* Nascosto di default */
+            z-index: 1;
+        }
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Stile per l'effetto flip card dei servizi */
+        .flip-card {
+            background-color: transparent;
+            perspective: 1000px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+        .flip-card:hover .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden; /* Safari */
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            text-align: center;
+            padding: 1rem;
+            border-radius: 0.5rem;
         }
-        #lightbox.active {
-            display: flex; /* Mostra quando attivo */
-        }
-        #lightbox img {
-            max-width: 90%;
-            max-height: 80%;
-            border-radius: 10px;
-        }
-        #lightbox .close {
-            position: absolute;
-            top: 20px;
-            right: 30px;
-            font-size: 3em;
+        .flip-card-back {
+            background-color: #2c3e50;
             color: white;
-            cursor: pointer;
+            transform: rotateY(180deg);
+        }
+
+        /* Animazioni allo scorrimento */
+        .fade-in-section {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        .fade-in-section.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* STILI CORRETTI PER LA NAVIGAZIONE DINAMICA */
+        .nav-link {
+            position: relative;
+            color: #4A5568; /* Colore base grigio (Tailwind's gray-600) */
+            transform: scale(1.0);
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        /* Sottolineatura animata */
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background-color: #e67e22;
+            transition: width 0.3s ease-in-out;
+        }
+
+        /* Stile per il link in HOVER */
+        .nav-link:hover {
+            color: #e67e22;
+            transform: scale(1.15); /* Diventa più grande */
+        }
+
+        /* Stile per il link ATTIVO (dallo scorrimento) */
+        .nav-link.active {
+            color: #e67e22;
+            transform: scale(1.15); /* Diventa più grande */
+        }
+        
+        /* Mostra la sottolineatura sia in hover che quando attivo */
+        .nav-link.active::after,
+        .nav-link:hover::after {
+            width: 50%;
         }
     </style>
 </head>
-<body>
-    <header>
-        <h1>Ing. Giorgio Saggiomo</h1>
-        <p id="typing-effect">Strutturista, CTU/CTP, Consulente Tecnico Forense</p>
+<body class="text-gray-800">
+
+    <!-- Header -->
+    <header class="header-container text-white shadow-lg">
+        <canvas id="particle-canvas"></canvas>
+        <div class="header-content container mx-auto px-6 py-20 text-center">
+            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold">Ing. Giorgio Saggiomo</h1>
+            <p class="mt-4 text-lg md:text-xl text-gray-300">Strutturista, CTU/CTP, Consulente Tecnico Forense</p>
+        </div>
     </header>
 
-    <nav>
-        <a href="#bio">Chi sono</a>
-        <a href="#servizi">Servizi</a>
-        <a href="#portfolio">Portfolio</a>
-        <a href="#approfondimenti">Approfondimenti</a>
-        <a href="#contatti">Contatti</a>
+    <!-- Barra di Navigazione Fissa -->
+    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-center items-center h-16">
+                <a href="#bio" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Chi sono</a>
+                <a href="#servizi" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Servizi</a>
+                <a href="#portfolio" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Portfolio</a>
+                <a href="#approfondimenti" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Approfondimenti</a>
+                <a href="#contatti" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Contatti</a>
+            </div>
+        </div>
     </nav>
-    <div class="container">
-        <section id="bio" class="hidden-anim">
-            <h2>Chi sono</h2>
-            <div class="bio">
-                <img src="img/giorgio-saggiomo.jpg" alt="Logo Giorgio Saggiomo" class="bio-img">
-                <div class="bio-content">
-                    <p>
-                        Sono un ingegnere edile, specializzato in progettazione strutturale, consulenza tecnica giudiziale e valutazione della sicurezza degli edifici e delle infrastrutture. Laureato presso l’Università Federico II di Napoli, ho conseguito il Master di II livello in Ingegneria Forense e sono regolarmente iscritto all’Albo degli Ingegneri dal 2004.<br><br>
-                        Svolgo da oltre 20 anni incarichi come CTU e Perito presso il Tribunale di Napoli e per la Procura della Repubblica, con esperienza comprovata nella redazione di perizie tecniche, accertamenti su dissesti statici, vulnerabilità sismica, collaudi strutturali e verifica della stabilità dei pendii.<br><br>
-                        Sono in possesso di una solida formazione in materia di sicurezza nei cantieri, prevenzione incendi, diagnosi strutturale avanzata e utilizzo di software specialistici per il calcolo strutturale e la modellazione geotecnica.<br><br>
-                        <strong>Visione:</strong> Affronto ogni incarico con rigore, tempestività e trasparenza. Soluzioni concrete basate su numeri, normativa e responsabilità tecnica.
-                    </p>
+
+    <!-- Contenuto Principale -->
+    <main class="container mx-auto px-6 py-12">
+        
+        <!-- Sezione Chi sono -->
+        <section id="bio" class="fade-in-section mb-16 pt-20 -mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2">Chi Sono</h2>
+            <div class="w-20 h-1 bg-[#e67e22] mx-auto mb-10"></div>
+            <div class="flex flex-col md:flex-row items-center gap-10">
+                <img src="https://inggiorgiosaggiomo.github.io/sito-giorgio/img/giorgio-saggiomo.jpg" 
+                     onerror="this.onerror=null;this.src='https://placehold.co/150x150/e0e0e0/333?text=GS';"
+                     alt="Ing. Giorgio Saggiomo" class="w-40 h-40 rounded-full object-cover shadow-lg border-4 border-white">
+                <div class="text-base text-gray-600 leading-relaxed text-center md:text-left">
+                    <p>Sono un ingegnere edile, specializzato in progettazione strutturale, consulenza tecnica giudiziale e valutazione della sicurezza degli edifici e delle infrastrutture. Laureato presso l’Università Federico II di Napoli, ho conseguito il Master di II livello in Ingegneria Forense e sono regolarmente iscritto all’Albo degli Ingegneri dal 2004.</p>
+                    <p class="mt-4">Svolgo da oltre 20 anni incarichi come CTU e Perito presso il Tribunale di Napoli, con esperienza comprovata nella redazione di perizie tecniche, accertamenti su dissesti statici, vulnerabilità sismica e collaudi strutturali.</p>
+                    <p class="mt-4 font-bold text-gray-700"><strong>Visione:</strong> Affronto ogni incarico con rigore, tempestività e trasparenza. Soluzioni concrete basate su numeri, normativa e responsabilità tecnica.</p>
                 </div>
             </div>
         </section>
-        <section id="servizi" class="hidden-anim">
-            <h2>Servizi</h2>
-            <div class="services-list">
-                <div class="service">
-                    <strong>Progettazione e verifica strutturale</strong><br>
-                    Strutture civili e industriali, nuove, esistenti e ristrutturazioni. Valutazione della vulnerabilità sismica, modellazione FEM e analisi avanzata dei materiali.<br>
-                    <small>NTC 2018, Eurocodici, DM 17/01/2018.</small>
+
+        <!-- Sezione Servizi -->
+        <section id="servizi" class="fade-in-section mb-16 pt-20 -mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2">Servizi</h2>
+            <div class="w-20 h-1 bg-[#e67e22] mx-auto mb-10"></div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Servizio 1 -->
+                <div class="flip-card h-64"><div class="flip-card-inner shadow-lg rounded-lg"><div class="flip-card-front bg-white border-l-4 border-[#e67e22]"><h3 class="text-lg font-bold">Progettazione Strutturale</h3><p class="text-gray-600 mt-2 text-sm">Strutture civili, industriali, nuove ed esistenti. Analisi FEM.</p></div><div class="flip-card-back"><h3 class="text-lg font-bold">Normative</h3><p class="mt-2 text-sm">Conformità a NTC 2018, Eurocodici, DM 17/01/2018.</p></div></div></div>
+                <!-- Servizio 2 -->
+                <div class="flip-card h-64"><div class="flip-card-inner shadow-lg rounded-lg"><div class="flip-card-front bg-white border-l-4 border-[#e67e22]"><h3 class="text-lg font-bold">Stabilità Pendii</h3><p class="text-gray-600 mt-2 text-sm">Analisi geotecnica, simulazioni e interventi di consolidamento.</p></div><div class="flip-card-back"><h3 class="text-lg font-bold">Prevenzione</h3><p class="mt-2 text-sm">Prevenzione del rischio idrogeologico e messa in sicurezza.</p></div></div></div>
+                <!-- Servizio 3 -->
+                <div class="flip-card h-64"><div class="flip-card-inner shadow-lg rounded-lg"><div class="flip-card-front bg-white border-l-4 border-[#e67e22]"><h3 class="text-lg font-bold">Consulenza (CTU/CTP)</h3><p class="text-gray-600 mt-2 text-sm">Assistenza tecnica in procedimenti civili e penali.</p></div><div class="flip-card-back"><h3 class="text-lg font-bold">Supporto Legale</h3><p class="mt-2 text-sm">Perizie giudiziarie, accertamenti e supporto a studi legali.</p></div></div></div>
+                <!-- Servizio 4 -->
+                <div class="flip-card h-64"><div class="flip-card-inner shadow-lg rounded-lg"><div class="flip-card-front bg-white border-l-4 border-[#e67e22]"><h3 class="text-lg font-bold">Collaudi Statici</h3><p class="text-gray-600 mt-2 text-sm">Collaudi su opere nuove ed esistenti e certificazioni.</p></div><div class="flip-card-back"><h3 class="text-lg font-bold">Sicurezza</h3><p class="mt-2 text-sm">Valutazione dei livelli di sicurezza secondo normativa vigente.</p></div></div></div>
+                <!-- Servizio 5 -->
+                <div class="flip-card h-64"><div class="flip-card-inner shadow-lg rounded-lg"><div class="flip-card-front bg-white border-l-4 border-[#e67e22]"><h3 class="text-lg font-bold">Diagnosi Strutturale</h3><p class="text-gray-600 mt-2 text-sm">Rilievi laser scanner, modellazione FEM e verifiche.</p></div><div class="flip-card-back"><h3 class="text-lg font-bold">Tecnologia Avanzata</h3><p class="mt-2 text-sm">Uso di nuvole di punti e analisi avanzate di resistenza e deformabilità.</p></div></div></div>
+                <!-- Servizio 6 -->
+                <div class="flip-card h-64"><div class="flip-card-inner shadow-lg rounded-lg"><div class="flip-card-front bg-white border-l-4 border-[#e67e22]"><h3 class="text-lg font-bold">Consolidamento</h3><p class="text-gray-600 mt-2 text-sm">Interventi di rinforzo e ripristino per solai ed edifici.</p></div><div class="flip-card-back"><h3 class="text-lg font-bold">Tecniche Innovative</h3><p class="mt-2 text-sm">Utilizzo di tecniche tradizionali e innovative per il recupero strutturale.</p></div></div></div>
+                <!-- Servizio 7 -->
+                <div class="flip-card h-64"><div class="flip-card-inner shadow-lg rounded-lg"><div class="flip-card-front bg-white border-l-4 border-[#e67e22]"><h3 class="text-lg font-bold">Sicurezza Cantieri</h3><p class="text-gray-600 mt-2 text-sm">Redazione PSC, POS e consulenza D.Lgs. 81/08.</p></div><div class="flip-card-back"><h3 class="text-lg font-bold">Prevenzione Incendi</h3><p class="mt-2 text-sm">Progettazione e consulenza in materia di prevenzione incendi.</p></div></div></div>
+                <!-- Servizio 8 -->
+                <div class="flip-card h-64"><div class="flip-card-inner shadow-lg rounded-lg"><div class="flip-card-front bg-white border-l-4 border-[#e67e22]"><h3 class="text-lg font-bold">Software Specialistici</h3><p class="text-gray-600 mt-2 text-sm">Competenza su software leader del settore.</p></div><div class="flip-card-back"><h3 class="text-lg font-bold">Elenco Software</h3><p class="mt-2 text-xs">MasterSap, Slope, Sap2000, ACCA, Blumatica, AutoCAD, ArchiCAD.</p></div></div></div>
+            </div>
+        </section>
+
+        <!-- Sezione Portfolio -->
+        <section id="portfolio" class="fade-in-section mb-16 pt-20 -mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2">Portfolio</h2>
+            <div class="w-20 h-1 bg-[#e67e22] mx-auto mb-10"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Caso Studio 1 -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform">
+                    <div class="relative">
+                        <img src="https://inggiorgiosaggiomo.github.io/sito-giorgio/img/portfolio1a.jpg" 
+                             onerror="this.onerror=null;this.src='https://placehold.co/600x400/5e6b78/white?text=Progetto+1';"
+                             alt="Consolidamento strutture" class="w-full h-56 object-cover">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="open-lightbox text-white bg-[#e67e22] px-4 py-2 rounded-full" data-gallery="gallery1">Visualizza Progetto</button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg">Consolidamento e Rinforzo</h3>
+                        <p class="text-gray-600 mt-2 text-sm">Interventi in contesti residenziali e pubblici con modellazione FEM.</p>
+                    </div>
                 </div>
-                <div class="service">
-                    <strong>Valutazione della stabilità dei pendii</strong><br>
-                    Analisi geotecnica di versanti e scarpate, simulazioni numeriche, progettazione di interventi di consolidamento, prevenzione del rischio idrogeologico.
+                <!-- Caso Studio 2 -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform">
+                     <div class="relative">
+                        <img src="https://inggiorgiosaggiomo.github.io/sito-giorgio/img/portfolio2a.jpg" 
+                             onerror="this.onerror=null;this.src='https://placehold.co/600x400/6a7a8a/white?text=Progetto+2';"
+                             alt="Perizie giudiziarie" class="w-full h-56 object-cover">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="open-lightbox text-white bg-[#e67e22] px-4 py-2 rounded-full" data-gallery="gallery2">Visualizza Progetto</button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg">Perizie Giudiziarie</h3>
+                        <p class="text-gray-600 mt-2 text-sm">Analisi delle cause di dissesto e attribuzione responsabilità.</p>
+                    </div>
                 </div>
-                <div class="service">
-                    <strong>Consulenza tecnica di parte e d’ufficio (CTU/CTP)</strong><br>
-                    Assistenza tecnica in procedimenti civili e penali, perizie giudiziarie, accertamenti tecnici preventivi, supporto a studi legali, enti pubblici e privati.
-                </div>
-                <div class="service">
-                    <strong>Collaudi statici e vulnerabilità sismica</strong><br>
-                    Collaudo su opere nuove ed esistenti, certificazioni di conformità, valutazione dei livelli di sicurezza secondo normativa vigente.
-                </div>
-                <div class="service">
-                    <strong>Diagnosi strutturale avanzata</strong><br>
-                    Rilievi laser scanner, nuvole di punti, modellazione FEM, verifiche di resistenza, deformabilità e vulnerabilità.
-                </div>
-                <div class="service">
-                    <strong>Consolidamento di solai e strutture esistenti</strong><br>
-                    Studio, progettazione e direzione lavori di interventi di rinforzo e ripristino strutturale, utilizzo di tecniche tradizionali e innovative.
-                </div>
-                <div class="service">
-                    <strong>Coordinamento sicurezza e prevenzione incendi</strong><br>
-                    Gestione della sicurezza in cantiere (D.Lgs. 81/08), redazione PSC e POS, progettazione e consulenza in materia di prevenzione incendi.
-                </div>
-                <div class="service">
-                    <strong>Software specialistici</strong><br>
-                    MasterSap, Slope, Sap2000, ACCA, Blumatica, AutoCAD, ArchiCAD, altri.
+                <!-- Caso Studio 3 -->
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden group transform hover:-translate-y-2 transition-transform">
+                    <div class="relative">
+                        <img src="https://inggiorgiosaggiomo.github.io/sito-giorgio/img/portfolio3a.jpg" 
+                             onerror="this.onerror=null;this.src='https://placehold.co/600x400/7d8c9c/white?text=Progetto+3';"
+                             alt="Stabilità pendii" class="w-full h-56 object-cover">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                           <button class="open-lightbox text-white bg-[#e67e22] px-4 py-2 rounded-full" data-gallery="gallery3">Visualizza Progetto</button>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-bold text-lg">Stabilità Pendii e Collaudi</h3>
+                        <p class="text-gray-600 mt-2 text-sm">Modellazione geotecnica e verifica della sicurezza strutturale.</p>
+                    </div>
                 </div>
             </div>
         </section>
-        <section id="portfolio" class="hidden-anim">
-    <h2>Portfolio e casi studio</h2>
-    <div class="portfolio">
-        <div class="case">
-            <div class="case-photos">
-                <img src="img/portfolio1a.jpg" alt="Progetto strutturale consolidamento solai 1">
-                <img src="img/portfolio1b.jpg" alt="Progetto strutturale consolidamento solai 2">
+        
+        <!-- Sezione Approfondimenti -->
+        <section id="approfondimenti" class="fade-in-section mb-16 pt-20 -mt-20 bg-white p-8 rounded-lg shadow-lg">
+             <h2 class="text-3xl font-bold text-center mb-2">Approfondimenti Tecnici</h2>
+            <div class="w-20 h-1 bg-[#e67e22] mx-auto mb-10"></div>
+            <div class="space-y-6 text-gray-600 max-w-3xl mx-auto">
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800">Valutazione della stabilità dei pendii</h3>
+                    <p>Approccio integrato tra sopralluoghi, rilievi geotecnici e utilizzo di software specialistici per la simulazione di scenari di frana.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold text-lg text-gray-800">Diagnosi strutturale e modellazione FEM</h3>
+                    <p>Applicazione di tecniche avanzate di rilievo (laser scanner) e analisi tramite modellazione agli elementi finiti (FEM) per la valutazione della sicurezza.</p>
+                </div>
+                 <div>
+                    <h3 class="font-bold text-lg text-gray-800">Consulenza tecnica giudiziale e perizie forensi</h3>
+                    <p>Supporto a studi legali, enti pubblici e privati per la risoluzione delle controversie tecnico-strutturali, dalla valutazione dei dissesti alla determinazione delle responsabilità.</p>
+                </div>
             </div>
-            <strong>Consolidamento e rinforzo di strutture</strong>
-            <p>Valutazione delle criticità statiche e progettazione di interventi di consolidamento strutturale in contesti residenziali e pubblici. Applicazione di modellazione FEM e tecniche innovative di ripristino.</p>
+        </section>
+
+        <!-- Sezione Contatti -->
+        <section id="contatti" class="fade-in-section pt-20 -mt-20">
+            <h2 class="text-3xl font-bold text-center mb-2">Contatti</h2>
+            <div class="w-20 h-1 bg-[#e67e22] mx-auto mb-10"></div>
+            <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+                <div class="text-center mb-6 text-gray-600">
+                    <p><strong>Email:</strong> giorgiosaggiomo@gmail.com</p>
+                    <p><strong>Telefono:</strong> 3283531583</p>
+                    <p><strong>Studio:</strong> Napoli</p>
+                </div>
+                <form action="https://formsubmit.co/giorgiosaggiomo@gmail.com" method="POST" class="space-y-4">
+                    <div>
+                        <label for="nome" class="block text-sm font-medium text-gray-700">Nome e Cognome</label>
+                        <input type="text" name="nome" id="nome" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#e67e22] focus:border-[#e67e22]">
+                    </div>
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" name="email" id="email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#e67e22] focus:border-[#e67e22]">
+                    </div>
+                    <div>
+                        <label for="messaggio" class="block text-sm font-medium text-gray-700">Messaggio</label>
+                        <textarea name="messaggio" id="messaggio" rows="4" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#e67e22] focus:border-[#e67e22]"></textarea>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#e67e22] hover:bg-[#cf711d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e67e22] transition-colors">
+                            Invia Richiesta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#1d2b38] text-white mt-16">
+        <div class="container mx-auto px-6 py-6 text-center text-gray-400 text-sm">
+            <p>© 2025 Ing. Giorgio Saggiomo – P.IVA: [Tua P.IVA] | Iscritto Albo Ingegneri Napoli n. [Tuo numero]</p>
+            <p class="mt-2"><a href="/privacy.html" class="hover:text-white">Privacy Policy</a></p>
         </div>
-        <div class="case">
-            <div class="case-photos">
-                <img src="img/portfolio2a.jpg" alt="Perizia dissesto strutturale 1">
-                <img src="img/portfolio2b.jpg" alt="Perizia dissesto strutturale 2">
-            </div>
-            <strong>Valutazione di dissesti e perizie tecniche giudiziarie</strong>
-            <p>Accertamenti e consulenze tecniche in procedimenti civili e penali, analisi delle cause di dissesto, relazioni ex art. 67 disp. att. c.p.c., attribuzione responsabilità.</p>
-        </div>
-        <div class="case">
-            <div class="case-photos">
-                <img src="img/portfolio3a.jpg" alt="Stabilità dei pendii 1">
-                <img src="img/portfolio3b.jpg" alt="Stabilità dei pendii 2">
-            </div>
-            <strong>Valutazione stabilità pendii e collaudi statici</strong>
-            <p>Analisi della stabilità di versanti e opere di sostegno tramite rilievi, modellazione geotecnica e progettazione di interventi di consolidamento; collaudo di strutture e verifica della sicurezza secondo le normative vigenti.</p>
-        </div>
-    </div>
-</section>
-        <section id="approfondimenti" class="hidden-anim">
-            <h2>Approfondimenti tecnici</h2>
-            <div>
-                <strong>Valutazione della stabilità dei pendii</strong><br>
-                Analisi delle condizioni di sicurezza di versanti e scarpate tramite metodologie geotecniche e modellazione numerica. Approccio integrato tra sopralluoghi, rilievi geotecnici e utilizzo di software specialistici per la simulazione di scenari di frana e per la progettazione degli interventi di consolidamento.<br><br>
-                <strong>Diagnosi strutturale e modellazione FEM</strong><br>
-                Applicazione di tecniche avanzate di rilievo (laser scanner, nuvole di punti) e analisi tramite modellazione agli elementi finiti (FEM) per la valutazione della sicurezza di strutture civili e industriali, esistenti o nuove. Individuazione di criticità statiche, verifica di resistenza e deformabilità, valutazione della vulnerabilità sismica.<br><br>
-                <strong>Consolidamento dei solai e delle strutture esistenti</strong><br>
-                Studio e progettazione di interventi su solai ammalorati, consolidamento di travi e pilastri, rinforzi con materiali tradizionali e innovativi, tecniche di cerchiatura e adeguamento sismico. Pianificazione delle opere con analisi dei dettagli costruttivi e delle normative tecniche applicabili.<br><br>
-                <strong>Consulenza tecnica giudiziale e perizie forensi</strong><br>
-                Redazione di perizie tecniche e accertamenti in ambito civile, penale e amministrativo: valutazione dei dissesti, determinazione delle cause e attribuzione delle responsabilità. Supporto a studi legali, enti pubblici e privati per la risoluzione delle controversie tecnico-strutturali.<br><br>
-                <strong>Collaudi statici e verifiche di vulnerabilità sismica</strong><br>
-                Attività di collaudo su opere nuove ed esistenti, con rilascio di certificazione di conformità strutturale e valutazione dei livelli di sicurezza secondo la normativa vigente.<br><br>
-                <strong>Autorizzazioni amministrative, Direzione dei Lavori e Sicurezza</strong><br>
-                Prariche amministrative (CILA, SCIA, Permesso a Costruire, etc...), Direzione dei Lavori, Coordinamento della sicurezza nei cantieri (progettazione ed esecuzione).
-            </div>
-        </section>
-                <section id="contatti" class="hidden-anim">
-            <h2>Contatti</h2>
-            <div class="contact-data">
-                <strong>Email:</strong> giorgiosaggiomo@gmail.com<br>
-                <strong>Telefono:</strong> 3283531583<br>
-                <strong>LinkedIn:</strong> <a href="https://www.linkedin.com/in/giorgio-saggiomo-91217862/" target="_blank" rel="noopener">Profilo LinkedIn</a><br>
-                <strong>Studio:</strong> Napoli<br>
-            </div>
-            <form action="https://formsubmit.co/giorgiosaggiomo@gmail.com" method="POST" autocomplete="off">
-                <label for="nome">Nome e Cognome</label>
-                <input type="text" id="nome" name="nome" required>
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-                <label for="telefono">Telefono</label>
-                <input type="tel" id="telefono" name="telefono">
-                <label for="messaggio">Messaggio</label>
-                <textarea id="messaggio" name="messaggio" rows="5" required></textarea>
-                <button type="submit">Invia richiesta</button>
-            </form>
-            <p style="font-size:0.95em;margin-top:10px;color:#666;">
-                I dati forniti saranno trattati esclusivamente per rispondere alla richiesta. <a href="/privacy.html">Privacy policy</a>
-            </p>
-        </section>
-    
-    <footer>
-        © 2025 Ing. Giorgio Saggiomo – Strutturista e Consulente Tecnico<br>
-        <span style="font-size:0.93em;">P.IVA: [Tua P.IVA] | Iscritto all’Albo Ingegneri di Napoli n. [Tuo numero]</span>
     </footer>
 
-    <div id="lightbox">
-        <span class="close">&times;</span>
-        <img id="lightbox-img" src="">
+    <!-- Pulsante "Torna su" -->
+    <button id="back-to-top" class="hidden fixed bottom-5 right-5 bg-[#e67e22] text-white p-3 rounded-full shadow-lg hover:bg-[#cf711d] transition-all z-50">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+      </svg>
+    </button>
+    
+    <!-- Modale Lightbox -->
+    <div id="lightbox" class="hidden fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+        <button id="lightbox-close" class="absolute top-5 right-5 text-white text-5xl opacity-80 hover:opacity-100">&times;</button>
+        <button id="lightbox-prev" class="absolute left-5 text-white text-5xl opacity-80 hover:opacity-100">&#10094;</button>
+        <img id="lightbox-img" src="" alt="Vista ingrandita del progetto" class="max-w-[90vw] max-h-[85vh] rounded-lg shadow-2xl">
+        <button id="lightbox-next" class="absolute right-5 text-white text-5xl opacity-80 hover:opacity-100">&#10095;</button>
     </div>
 
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', () => {
 
-            // 1. Animazione "Fade-in on scroll"
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('show-anim');
-                    }
-                });
-            }, {
-                threshold: 0.1 // L'animazione parte quando il 10% dell'elemento è visibile
-            });
-
-            const hiddenElements = document.querySelectorAll('.hidden-anim');
-            hiddenElements.forEach(el => observer.observe(el));
-
-            // 2. Galleria di immagini (Lightbox)
-            const lightbox = document.getElementById('lightbox');
-            const lightboxImg = document.getElementById('lightbox-img');
-            const portfolioImages = document.querySelectorAll('.case-photos img');
-
-            portfolioImages.forEach(image => {
-                image.addEventListener('click', () => {
-                    lightbox.classList.add('active');
-                    lightboxImg.src = image.src;
-                });
-            });
-
-            // Chiudi la lightbox cliccando sulla X o sullo sfondo
-            lightbox.addEventListener('click', (e) => {
-                if (e.target !== lightboxImg) {
-                    lightbox.classList.remove('active');
+        // --- 1. Animazione Particelle nell'Header ---
+        const canvas = document.getElementById('particle-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            let particles = [];
+            class Particle {
+                constructor() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = Math.random() * canvas.height;
+                    this.size = Math.random() * 1.5 + 1;
+                    this.speedX = Math.random() * 0.5 - 0.25;
+                    this.speedY = Math.random() * 0.5 - 0.25;
+                    this.color = 'rgba(255, 255, 255, 0.5)';
                 }
-            });
-
-            // 3. Effetto di scrittura dinamica (Typing Effect)
-            const typingElement = document.getElementById('typing-effect');
-            const textToType = "Strutturista, CTU/CTP, Consulente Tecnico Forense";
-            const secondLine = "“Soluzioni strutturali e geotecniche nel rispetto delle norme”";
-            let index = 0;
-            let currentText = textToType;
-            let isFirstLine = true;
-
-            typingElement.innerHTML = ""; // Svuota il paragrafo
-
-            function type() {
-                if (index < currentText.length) {
-                    typingElement.innerHTML += currentText.charAt(index);
-                    index++;
-                    setTimeout(type, 50); // Velocità di scrittura
-                } else {
-                    // Dopo una pausa, cancella e scrive la seconda riga
-                    setTimeout(() => {
-                        if(isFirstLine) {
-                           // Qui potresti aggiungere un effetto di cancellazione, ma per semplicità alterniamo
-                           index = 0;
-                           currentText = secondLine;
-                           typingElement.innerHTML = "";
-                           isFirstLine = false;
-                           type();
-                        } else {
-                           // Ritorna alla prima riga
-                           index = 0;
-                           currentText = textToType;
-                           typingElement.innerHTML = "";
-                           isFirstLine = true;
-                           type();
-                        }
-                    }, 3000); // Pausa di 3 secondi prima di cambiare testo
+                update() {
+                    if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+                    if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                }
+                draw() {
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    ctx.fill();
                 }
             }
-            
-            type();
+            function initParticles() {
+                const particleCount = Math.floor(canvas.width / 20);
+                for (let i = 0; i < particleCount; i++) { particles.push(new Particle()); }
+            }
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => { p.update(); p.draw(); });
+                requestAnimationFrame(animateParticles);
+            }
+            initParticles();
+            animateParticles();
+            window.addEventListener('resize', () => {
+                canvas.width = canvas.offsetWidth;
+                canvas.height = canvas.offsetHeight;
+                particles = [];
+                initParticles();
+            });
+        }
+
+        // --- 2. Animazioni allo Scorrimento ---
+        const fadeInObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    fadeInObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in-section').forEach(section => {
+            fadeInObserver.observe(section);
         });
+        
+        // --- 3. Pulsante "Torna su" ---
+        const backToTopButton = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopButton.classList.remove('hidden');
+            } else {
+                backToTopButton.classList.add('hidden');
+            }
+        });
+        backToTopButton.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // --- 4. Lightbox per la Galleria Portfolio ---
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxClose = document.getElementById('lightbox-close');
+        const lightboxPrev = document.getElementById('lightbox-prev');
+        const lightboxNext = document.getElementById('lightbox-next');
+        const openLightboxButtons = document.querySelectorAll('.open-lightbox');
+        const galleries = {
+            gallery1: ['https://inggiorgiosaggiomo.github.io/sito-giorgio/img/portfolio1a.jpg', 'https://inggiorgiosaggiomo.github.io/sito-giorgio/img/portfolio1b.jpg'],
+            gallery2: ['https://inggiorgiosaggiomo.github.io/sito-giorgio/img/portfolio2a.jpg', 'https://inggiorgiosaggiomo.github.io/sito-giorgio/img/portfolio2b.jpg'],
+            gallery3: ['https://inggiorgiosaggiomo.github.io/sito-giorgio/img/portfolio3a.jpg', 'https://inggiorgiosaggiomo.github.io/sito-giorgio/img/portfolio3b.jpg']
+        };
+        let currentGallery = [];
+        let currentIndex = 0;
+        function showImage(index) {
+            lightboxImg.src = currentGallery[index];
+            currentIndex = index;
+            lightboxPrev.style.display = index > 0 ? 'block' : 'none';
+            lightboxNext.style.display = index < currentGallery.length - 1 ? 'block' : 'none';
+        }
+        openLightboxButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const galleryKey = button.dataset.gallery;
+                currentGallery = galleries[galleryKey];
+                if (currentGallery && currentGallery.length > 0) {
+                    lightbox.classList.remove('hidden');
+                    showImage(0);
+                }
+            });
+        });
+        lightboxClose.addEventListener('click', () => lightbox.classList.add('hidden'));
+        lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.classList.add('hidden'); });
+        lightboxPrev.addEventListener('click', () => { if (currentIndex > 0) showImage(currentIndex - 1); });
+        lightboxNext.addEventListener('click', () => { if (currentIndex < currentGallery.length - 1) showImage(currentIndex + 1); });
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('hidden')) {
+                if (e.key === 'Escape') lightbox.classList.add('hidden');
+                if (e.key === 'ArrowLeft') lightboxPrev.click();
+                if (e.key === 'ArrowRight') lightboxNext.click();
+            }
+        });
+
+        // --- 5. LOGICA PER NAVIGAZIONE E SCROLLSPY ---
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('main section[id]');
+
+        // Funzione per l'evidenziazione allo scorrimento
+        const observerOptions = {
+          rootMargin: '-30% 0px -70% 0px',
+        };
+        const sectionObserver = new IntersectionObserver((entries, observer) => {
+          entries.forEach(entry => {
+            const id = entry.target.getAttribute('id');
+            const navLink = document.querySelector(`.nav-link[href="#${id}"]`);
+            if (entry.isIntersecting) {
+              navLinks.forEach(link => link.classList.remove('active'));
+              navLink.classList.add('active');
+            }
+          });
+        }, observerOptions);
+        
+        sections.forEach(section => {
+          sectionObserver.observe(section);
+        });
+
+        // Funzione per garantire il click
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault(); // Impedisce il salto di pagina standard
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    // Calcola la posizione della sezione e sottrai l'altezza della navbar
+                    const navHeight = document.querySelector('nav').offsetHeight;
+                    const targetPosition = targetSection.offsetTop - navHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+    });
     </script>
 </body>
 </html>
-

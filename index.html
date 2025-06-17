@@ -109,32 +109,48 @@
             border-left: 5px solid var(--accent);
         }
         /* Portfolio: griglia di "case" */
-        .portfolio {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 22px;
-        }
-        .case {
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px #22313f11;
-            padding: 16px;
-            flex: 1 1 250px;
-            min-width: 230px;
-            margin-bottom: 15px;
-        }
-        .case img {
-            width: 100%;
-            border-radius: 8px;
-            margin-bottom: 7px;
-            object-fit: cover;
-            max-height: 120px;
-        }
-        .testimonial {
-            font-style: italic;
-            color: var(--accent);
-            margin-bottom: 8px;
-        }
+.portfolio {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+}
+.case {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px #22313f11;
+    padding: 16px;
+    flex: 1 1 250px;
+    min-width: 230px;
+    margin-bottom: 15px;
+}
+/* Portfolio con due foto grandi affiancate per ciascun caso studio */
+.case-photos {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+.case-photos img {
+    width: 48%;
+    max-width: 350px;
+    min-width: 140px;
+    border-radius: 8px;
+    object-fit: cover;
+    max-height: 240px;
+    background: #eee;
+    box-shadow: 0 1px 5px #22313f22;
+}
+/* Adattamento mobile: impila le foto in verticale */
+@media (max-width: 700px) {
+    .case-photos {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .case-photos img {
+        width: 100%;
+        max-width: none;
+    }
+}
+
         /* Stile per form contatti (semplice e centrato) */
         form {
             background: #fff;

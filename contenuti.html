@@ -70,6 +70,11 @@
                             La ripartizione delle spese tra finiture e solaio nei condomini: differenze tra solaio di copertura e solaio intermedio
                         </a>
                     </li>
+                    <li>
+                        <a href="#domande-commenti" class="text-[#e67e22] hover:underline">
+                            Domande e commenti
+                        </a>
+                    </li>
                 </ul>
             </nav>
             <!-- Articolo tecnico -->
@@ -276,9 +281,41 @@
                     <li>Prossimamente: <span class="italic text-gray-500">Nuovi approfondimenti tecnici e materiali scaricabili.</span></li>
                 </ul>
             </section>
+            <!-- Sezione domande e commenti -->
+            <section id="domande-commenti" class="max-w-3xl mx-auto mt-16 bg-white rounded-lg shadow-lg p-8">
+                <h2 class="text-2xl font-bold mb-4 text-[#e67e22]">Domande e commenti dei visitatori</h2>
+                <p class="mb-6 text-gray-700">
+                    Hai una domanda tecnica, vuoi lasciare un commento o proporre un argomento? Compila il modulo qui sotto, il tuo messaggio sarà pubblicato in fondo a questa pagina.
+                </p>
+                <form id="comment-form" class="space-y-4">
+                    <div>
+                        <label for="nome-commento" class="block text-sm font-medium text-gray-700">Nome</label>
+                        <input type="text" id="nome-commento" name="Nome" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#e67e22] focus:border-[#e67e22]">
+                    </div>
+                    <div>
+                        <label for="email-commento" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="email-commento" name="Email" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#e67e22] focus:border-[#e67e22]">
+                    </div>
+                    <div>
+                        <label for="messaggio-commento" class="block text-sm font-medium text-gray-700">Domanda o commento</label>
+                        <textarea id="messaggio-commento" name="Messaggio" rows="4" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#e67e22] focus:border-[#e67e22]"></textarea>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#e67e22] hover:bg-[#cf711d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#e67e22] transition-colors">
+                            Invia domanda/commento
+                        </button>
+                    </div>
+                </form>
+                <p class="mt-4 text-xs text-gray-500 text-center">I dati inviati saranno pubblicati solo su questo dispositivo. Nessun dato sarà inviato o condiviso online.</p>
+                <div class="mt-10">
+                    <h3 class="text-xl font-bold mb-4 text-[#e67e22]">Domande e commenti pubblicati</h3>
+                    <div id="comment-list" class="space-y-6">
+                        <!-- I commenti verranno inseriti qui -->
+                    </div>
+                </div>
+            </section>
         </section>
     </main>
-
     <!-- Footer -->
     <footer class="bg-[#1d2b38] text-white mt-16">
         <div class="container mx-auto px-6 py-6 text-center text-gray-400 text-sm">
@@ -318,6 +355,48 @@
             counterEl.textContent = `Visite sito: ${visits}`;
         }
     })();
+
+    // DOMANDE E COMMENTI - gestione locale
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('comment-form');
+        const commentList = document.getElementById('comment-list');
+        const storageKey = 'contenuti_domande_commenti';
+
+        function renderComments() {
+            commentList.innerHTML = '';
+            const comments = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            if (comments.length === 0) {
+                commentList.innerHTML = '<p class="text-gray-500 text-sm">Nessun commento pubblicato.</p>';
+                return;
+            }
+            comments.forEach(comment => {
+                const el = document.createElement('div');
+                el.className = "bg-gray-50 border border-gray-200 rounded-lg p-4";
+                el.innerHTML = `<div class="font-bold text-[#e67e22] mb-1">${comment.nome} <span class="text-xs text-gray-400">&lt;${comment.email}&gt;</span></div>
+                            <div class="text-gray-700 whitespace-pre-line">${comment.messaggio}</div>
+                            <div class="text-xs text-gray-400 mt-2">${comment.data}</div>`;
+                commentList.appendChild(el);
+            });
+        }
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const nome = document.getElementById('nome-commento').value.trim();
+            const email = document.getElementById('email-commento').value.trim();
+            const messaggio = document.getElementById('messaggio-commento').value.trim();
+            if (!nome || !email || !messaggio) return;
+            const now = new Date();
+            const data = now.toLocaleDateString('it-IT') + ' ' + now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+            const nuovo = { nome, email, messaggio, data };
+            const comments = JSON.parse(localStorage.getItem(storageKey) || '[]');
+            comments.push(nuovo);
+            localStorage.setItem(storageKey, JSON.stringify(comments));
+            form.reset();
+            renderComments();
+        });
+
+        renderComments();
+    });
     </script>
 </body>
 </html>

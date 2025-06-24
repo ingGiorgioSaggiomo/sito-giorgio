@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="it" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Articoli tecnici, approfondimenti e documenti di interesse a cura dell'Ing. Giorgio Saggiomo.">
+    <title>Contenuti Tecnici – Ing. Giorgio Saggiomo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background-color: #f4f7f6;}
+        h1, h2, h3 { font-family: 'Montserrat', sans-serif;}
+        .nav-link { position: relative; color: #4A5568; transform: scale(1.0); transition: color 0.3s, transform 0.3s;}
+        .nav-link::after { content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 0; height: 2px; background-color: #e67e22; transition: width 0.3s;}
+        .nav-link:hover, .nav-link.active { color: #e67e22; transform: scale(1.15);}
+        .nav-link.active::after, .nav-link:hover::after { width: 50%;}
+        .fade-in-section { opacity: 0; transform: translateY(20px); transition: opacity 0.6s, transform 0.6s;}
+        .fade-in-section.is-visible { opacity: 1; transform: translateY(0);}
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Navbar -->
+    <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-6">
+            <div class="flex justify-center items-center h-16">
+                <a href="index.html#bio" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Chi sono</a>
+                <a href="index.html#servizi" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Servizi</a>
+                <a href="index.html#portfolio" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Portfolio</a>
+                <a href="index.html#approfondimenti" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Approfondimenti</a>
+                <a href="index.html#contatti" class="nav-link px-4 py-2 rounded-md text-sm font-medium">Contatti</a>
+                <a href="contenuti.html" class="nav-link px-4 py-2 rounded-md text-sm font-medium active">Contenuti</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-6 py-12">
+        <section class="mb-16 pt-20 -mt-20 fade-in-section">
+            <h1 class="text-3xl font-bold text-center mb-2">Contenuti Tecnici e Documenti</h1>
+            <div class="w-20 h-1 bg-[#e67e22] mx-auto mb-10"></div>
+            <div class="text-center text-sm text-gray-500 mb-6">
+                <span id="visit-counter"></span>
+            </div>
+            <p class="text-center text-gray-600 mb-8">
+                In questa sezione sono raccolti articoli tecnici, approfondimenti e documenti di interesse redatti dall'Ing. Giorgio Saggiomo.
+            </p>
+            <!-- Articolo tecnico -->
+            <article class="bg-white rounded-lg shadow-lg p-8 mb-12 max-w-3xl mx-auto">
+                <h2 class="text-2xl font-bold mb-4 text-[#e67e22]">Sanatoria edilizia e rischio di demolizione: quando il permesso non basta</h2>
+                <h3 class="text-lg font-semibold mb-2">Approfondimento tecnico-giuridico</h3>
+                <h4 class="font-bold mt-4 mb-2">Premessa</h4>
+                <p class="mb-4">
+                    Un tema ricorrente nell’ambito dell’edilizia e della giurisprudenza urbanistica riguarda la reale efficacia dei provvedimenti di condono edilizio (o permessi di costruire in sanatoria) rispetto al rischio concreto di demolizione di immobili abusivi. Contrariamente a quanto comunemente creduto, il rilascio di una sanatoria non sempre tutela il proprietario dal rischio di abbattimento, specie quando sussistano abusi ulteriori, difformità, o carenze di conformità urbanistica e paesaggistica riferite all’intero compendio immobiliare.
+                </p>
+                <h4 class="font-bold mt-4 mb-2">Il principio della conformità globale</h4>
+                <p class="mb-4">
+                    La normativa di riferimento – in particolare l’art. 36 del D.P.R. 380/2001 – stabilisce che la sanatoria può essere rilasciata solo se l’intervento risulti conforme sia al momento della realizzazione che a quello della domanda rispetto alla disciplina urbanistica ed edilizia vigente. Ciò implica che l’intero immobile (non solo la parte oggetto di domanda) deve risultare conforme alle norme urbanistiche ed edilizie.
+                </p>
+                <p class="mb-4">
+                    In caso contrario, il provvedimento di sanatoria è illegittimo, anche se rilasciato, e non può costituire valido titolo ostativo all’ordine di demolizione, come ribadito da costante giurisprudenza, tra cui si cita Cass. Pen. Sez. 3, n. 29979/2019.
+                </p>
+                <h4 class="font-bold mt-4 mb-2">Limiti del provvedimento comunale</h4>
+                <p class="mb-4">
+                    Nel caso in oggetto, il Comune aveva rilasciato un permesso di costruire in sanatoria per una parte dell’immobile, escludendo dal titolo ulteriori opere (ad es. garage, deposito, portico, scala, muro di contenimento), considerate non sanabili oppure oggetto di altre istanze di condono. Queste esclusioni erano puntualmente riportate nei provvedimenti e nei pareri paesaggistici allegati. Tuttavia, tali opere erano inscindibilmente connesse a quelle principali, e risultavano parte integrante del compendio immobiliare.
+                </p>
+                <p class="mb-4">
+                    Conseguenza pratica: il titolo rilasciato in sanatoria, riguardando solo una parte dell’immobile, non impedisce l’esecuzione dell’ordine di demolizione dell’intero manufatto, inclusa la parte teoricamente “sanata”, laddove l’abuso sia globale o le parti non sanate siano strutturalmente e funzionalmente connesse.
+                </p>
+                <h4 class="font-bold mt-4 mb-2">Responsabilità degli enti comunali</h4>
+                <p class="mb-2 font-semibold">Responsabilità del rilascio di provvedimenti illegittimi:</p>
+                <p class="mb-4">
+                    Il rilascio di un permesso in sanatoria in presenza di abusi ulteriori non sanati costituisce una violazione delle norme di cui all’art. 36 DPR 380/2001. Il Comune è tenuto a verificare la regolarità dell’intero immobile e non può rilasciare titoli parziali per immobili inscindibili nella loro struttura e funzione.
+                </p>
+                <p class="mb-2 font-semibold">Responsabilità nell’inerzia e nei controlli successivi:</p>
+                <p class="mb-4">
+                    L’ente è tenuto a vigilare sull’attuazione degli ordini di demolizione emessi dall’autorità giudiziaria, anche a seguito di sentenze penali irrevocabili. La mancata o inadeguata vigilanza può determinare responsabilità amministrative e, nei casi più gravi, anche di natura erariale o penale, in caso di danno all’erario o di condotte omissive rilevanti (art. 328 c.p.).
+                </p>
+                <h4 class="font-bold mt-4 mb-2">Sanatoria e vincoli: il nodo paesaggistico</h4>
+                <p class="mb-4">
+                    Altro aspetto centrale riguarda il regime dei vincoli. Nei casi di immobili ricadenti in zona soggetta a vincolo paesaggistico o ambientale, la sanatoria richiede il parere favorevole degli enti preposti (es. Soprintendenza). Se il parere è rilasciato solo su una parte dell’immobile, il permesso in sanatoria non può estendersi all’intero fabbricato. Ne consegue che la parte priva di autorizzazione resta abusiva e soggetta a demolizione.
+                </p>
+                <h4 class="font-bold mt-4 mb-2">Conclusioni operative</h4>
+                <ul class="list-disc pl-6 mb-4 text-gray-700">
+                    <li>Il semplice rilascio di un permesso di costruire in sanatoria non garantisce l’immunità dalla demolizione se l’intero compendio immobiliare non risulta conforme.</li>
+                    <li>I provvedimenti comunali di sanatoria devono riguardare l’intera consistenza dell’abuso. In caso contrario, l’autorità giudiziaria può legittimamente ordinare la demolizione globale, anche se esiste un titolo in sanatoria parziale.</li>
+                    <li>Gli enti comunali devono esercitare un controllo rigoroso, sia in fase di istruttoria che nella gestione degli ordini giudiziari, per evitare responsabilità amministrative e danni erariali.</li>
+                </ul>
+                <h4 class="font-bold mt-4 mb-2">Riferimenti normativi e giurisprudenziali</h4>
+                <ul class="list-disc pl-6 text-gray-700 mb-2">
+                    <li>D.P.R. 6 giugno 2001, n. 380, art. 36 (Accertamento di conformità)</li>
+                    <li>Cassazione Penale, Sez. 3, Sentenza n. 29979/2019</li>
+                    <li>D.Lgs. 42/2004, art. 146 (Autorizzazione paesaggistica)</li>
+                    <li>Legge 28 febbraio 1985, n. 47 (cd. Primo Condono)</li>
+                    <li>Legge 23 dicembre 1994, n. 724 (cd. Secondo Condono)</li>
+                </ul>
+                <p class="text-gray-600 text-sm italic mt-4">
+                    Articolo a cura dell'Ing. Giorgio Saggiomo – Strutturista e Consulente Tecnico Forense
+                </p>
+            </article>
+            <!-- Placeholder per altri documenti/articoli -->
+            <section class="max-w-3xl mx-auto">
+                <h3 class="text-xl font-bold mb-2">Altri documenti e articoli</h3>
+                <ul class="list-disc pl-6 text-gray-700">
+                    <li>Prossimamente: <span class="italic text-gray-500">Nuovi approfondimenti tecnici e materiali scaricabili.</span></li>
+                </ul>
+            </section>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-[#1d2b38] text-white mt-16">
+        <div class="container mx-auto px-6 py-6 text-center text-gray-400 text-sm">
+            <p>© 2025 Ing. Giorgio Saggiomo</p>
+            <p class="mt-2"><a href="/privacy.html" class="hover:text-white">Privacy Policy</a></p>
+            <p class="mt-2">
+                <a href="https://www.linkedin.com/in/giorgio-saggiomo-91217862/" target="_blank" class="hover:text-white">LinkedIn</a>
+            </p>
+            <p class="mt-2">
+                <a href="https://www.facebook.com/giorgio.saggiomo.3" target="_blank" class="hover:text-white">Facebook</a>
+            </p>
+        </div>
+    </footer>
+    <script>
+    // Fade-in effect
+    document.addEventListener('DOMContentLoaded', () => {
+        const fadeInObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    fadeInObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.fade-in-section').forEach(section => {
+            fadeInObserver.observe(section);
+        });
+    });
+
+    // VISIT COUNTER (shared with index.html)
+    (function() {
+        const counterKey = 'visit_counter_totale';
+        let visits = parseInt(localStorage.getItem(counterKey) || '0', 10) + 1;
+        localStorage.setItem(counterKey, visits);
+        const counterEl = document.getElementById('visit-counter');
+        if (counterEl) {
+            counterEl.textContent = `Visite sito: ${visits}`;
+        }
+    })();
+    </script>
+</body>
+</html>

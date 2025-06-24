@@ -45,9 +45,6 @@
         <section class="mb-16 pt-20 -mt-20 fade-in-section is-visible">
             <h1 class="text-3xl font-bold text-center mb-2">Contenuti Tecnici e Documenti</h1>
             <div class="w-20 h-1 bg-[#e67e22] mx-auto mb-10"></div>
-            <div class="text-center text-sm text-gray-500 mb-6">
-                <span id="visit-counter"></span>
-            </div>
             <p class="text-center text-gray-600 mb-8">
                 In questa sezione sono raccolti articoli tecnici, approfondimenti e documenti di interesse redatti dall'Ing. Giorgio Saggiomo.
             </p>
@@ -343,23 +340,6 @@
         document.querySelectorAll('.fade-in-section').forEach(section => {
             fadeInObserver.observe(section);
         });
-    });
-
-    // VISIT COUNTER (globale con CountAPI, parte da 100)
-    document.addEventListener('DOMContentLoaded', function() {
-        const counterEl = document.getElementById('visit-counter');
-        fetch('https://api.countapi.xyz/hit/inggiorgiosaggiomo.github.io/sito-giorgio')
-            .then(res => res.json())
-            .then(data => {
-                if (counterEl) {
-                    counterEl.textContent = `Visite sito: ${data.value + 99}`;
-                }
-            })
-            .catch(() => {
-                if (counterEl) {
-                    counterEl.textContent = 'Visite sito: n/d';
-                }
-            });
     });
 
     // DOMANDE E COMMENTI - gestione locale

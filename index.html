@@ -40,9 +40,6 @@
         <canvas id="particle-canvas"></canvas>
         <div class="header-content container mx-auto px-6 py-20 text-center">
             <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold" data-i18n="header_title">Ing. Giorgio Saggiomo</h1>
-            <div class="text-center text-sm text-gray-200 mt-2">
-                <span id="visit-counter"></span>
-            </div>
             <p class="mt-4 text-lg md:text-xl text-gray-300" data-i18n="header_subtitle">Strutturista, CTU/CTP, Consulente Tecnico Forense</p>
         </div>
     </header>
@@ -556,14 +553,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('[data-i18n]').forEach(el => {
         el.dataset.original = el.innerHTML;
     });
-
+});
+</script>
+</body>
+</html>
     // VISIT COUNTER (globale con CountAPI, parte da 100)
     const counterEl = document.getElementById('visit-counter');
-    fetch('https://api.countapi.xyz/hit/inggiorgiosaggiomo.github.io/sito-giorgio')
+    fetch('https://api.countapi.xyz/hit/inggiorgiosaggiomo_sito_giorgio')
         .then(res => res.json())
         .then(data => {
-            if (counterEl) {
+            if (counterEl && typeof data.value === 'number') {
                 counterEl.textContent = `Visite sito: ${data.value + 99}`;
+            } else if (counterEl) {
+                counterEl.textContent = 'Visite sito: n/d';
             }
         })
         .catch(() => {

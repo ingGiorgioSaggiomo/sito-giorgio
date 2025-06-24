@@ -47,13 +47,13 @@
     <!-- Navbar -->
     <nav class="bg-white/80 backdrop-blur-md shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-6">
-            <div class="flex justify-center items-center h-16">
-                <a href="#bio" class="nav-link px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_bio">Chi sono</a>
-                <a href="#servizi" class="nav-link px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_services">Servizi</a>
-                <a href="#portfolio" class="nav-link px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_portfolio">Portfolio</a>
-                <a href="#approfondimenti" class="nav-link px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_deepdive">Approfondimenti</a>
-                <a href="#contatti" class="nav-link px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_contact">Contatti</a>
-                <a href="contenuti.html" class="nav-link px-4 py-2 rounded-md text-sm font-medium" title="Vai alla pagina dei contenuti">Contenuti</a>
+            <div class="flex flex-wrap justify-center items-center h-16">
+                <a href="#bio" class="nav-link px-2 sm:px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_bio">Chi sono</a>
+                <a href="#servizi" class="nav-link px-2 sm:px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_services">Servizi</a>
+                <a href="#portfolio" class="nav-link px-2 sm:px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_portfolio">Portfolio</a>
+                <a href="#approfondimenti" class="nav-link px-2 sm:px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_deepdive">Approfondimenti</a>
+                <a href="#contatti" class="nav-link px-2 sm:px-4 py-2 rounded-md text-sm font-medium" data-i18n="nav_contact">Contatti</a>
+                <a href="contenuti.html" class="nav-link px-2 sm:px-4 py-2 rounded-md text-sm font-medium" title="Vai alla pagina dei contenuti">Contenuti</a>
             </div>
         </div>
     </nav>
@@ -561,7 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const counterEl = document.getElementById('visit-counter');
     fetch('https://api.countapi.xyz/hit/inggiorgiosaggiomo_sito_giorgio')
         .then(res => res.json())
-        .then(data => {
+        .then data => {
             if (counterEl && typeof data.value === 'number') {
                 counterEl.textContent = `Visite sito: ${data.value + 99}`;
             } else if (counterEl) {

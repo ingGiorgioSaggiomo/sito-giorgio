@@ -557,14 +557,20 @@ document.addEventListener('DOMContentLoaded', () => {
         el.dataset.original = el.innerHTML;
     });
 
-    // VISIT COUNTER (shared with contenuti.html)
-    const counterKey = 'visit_counter_totale';
-    let visits = parseInt(localStorage.getItem(counterKey) || '0', 10) + 1;
-    localStorage.setItem(counterKey, visits);
+    // VISIT COUNTER (globale con CountAPI, parte da 100)
     const counterEl = document.getElementById('visit-counter');
-    if (counterEl) {
-        counterEl.textContent = `Visite sito: ${visits}`;
-    }
+    fetch('https://api.countapi.xyz/hit/inggiorgiosaggiomo.github.io/sito-giorgio')
+        .then(res => res.json())
+        .then(data => {
+            if (counterEl) {
+                counterEl.textContent = `Visite sito: ${data.value + 99}`;
+            }
+        })
+        .catch(() => {
+            if (counterEl) {
+                counterEl.textContent = 'Visite sito: n/d';
+            }
+        });
 });
 </script>
 </body>

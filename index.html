@@ -557,27 +557,3 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 </body>
 </html>
-    // VISIT COUNTER (globale con CountAPI, parte da 100)
-    const counterEl = document.getElementById('visit-counter');
-    fetch('https://api.countapi.xyz/hit/inggiorgiosaggiomo_sito_giorgio')
-        .then(res => res.json())
-        .then data => {
-            if (counterEl && typeof data.value === 'number') {
-                counterEl.textContent = `Visite sito: ${data.value + 99}`;
-            } else if (counterEl) {
-                counterEl.textContent = 'Visite sito: n/d';
-            }
-        })
-        .catch(() => {
-            if (counterEl) {
-                counterEl.textContent = 'Visite sito: n/d';
-            }
-        });
-});
-</script>
-</body>
-</html>
-</html>
-</body>
-</html>
-</html>

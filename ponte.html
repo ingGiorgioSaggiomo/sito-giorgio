@@ -1,9 +1,10 @@
-<!DOCTYPE html>
+# Create the updated HTML file with safe ground spawn for the truck
+html = r"""<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bridge Saver – Cartoon FEM-lite (full)</title>
+<title>Bridge Saver – Cartoon FEM-lite (ground safe)</title>
 <style>
   :root{
     --ink:#1d1d1f; --good:#34c759; --warn:#ffcf33; --bad:#ff3b30;
@@ -229,12 +230,10 @@ ui.save.onclick   = ()=> saveProject();
 ui.load.addEventListener('change', onLoadFile);
 
 /* ============ Terreno e hit-test ============ */
-// Poligoni in coordinate CSS (ricalcolati ogni frame dal canvas size)
 function terrainPolys(){
   const w = cv.clientWidth, h = cv.clientHeight;
   const riverY = Math.floor(h*0.68), riverH = Math.floor(h*0.12);
 
-  // sinistra (pendio)
   const left = [
     {x:0, y:riverY+riverH},
     {x:0, y:riverY-140},
@@ -243,7 +242,6 @@ function terrainPolys(){
     {x:280, y:riverY},
     {x:0, y:riverY}
   ];
-  // destra (versante)
   const right = [
     {x:w, y:riverY+riverH},
     {x:w, y:riverY-150},
@@ -252,14 +250,12 @@ function terrainPolys(){
     {x:w-40,  y:riverY},
     {x:w, y:riverY}
   ];
-  // prato dietro fiume (piano campagna)
   const rear = [
     {x:0, y:riverY+riverH},
     {x:w, y:riverY+riverH},
     {x:w, y:h},
     {x:0, y:h}
   ];
-  // fiume (vietato)
   const river = [
     {x:0, y:riverY},
     {x:w, y:riverY},
@@ -268,7 +264,6 @@ function terrainPolys(){
   ];
   return {left,right,rear,river};
 }
-
 function pointInPoly(p, poly){
   let c=false; const x=p.x,y=p.y; const n=poly.length;
   for(let i=0,j=n-1;i<n;j=i++){
@@ -278,12 +273,48 @@ function pointInPoly(p, poly){
   }
   return c;
 }
-
 function isOnTerrain(x,y){
   const {left,right,rear,river} = terrainPolys();
-  // vincoli consentiti su left|right|rear ma NON su river
   if(pointInPoly({x,y}, river)) return false;
   return pointInPoly({x,y}, left) || pointInPoly({x,y}, right) || pointInPoly({x,y}, rear);
+}
+
+/* ======== Ground profile & safe spawn ======== */
+function groundYAt(x){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  const riverY = Math.floor(h*0.68), riverH = Math.floor(h*0.12);
+  const segsLeft = [
+    {x0:0,   y0:riverY-140, x1:160, y1:riverY-40},
+    {x0:160, y0:riverY-40,  x1:240, y1:riverY-10},
+    {x0:240, y0:riverY-10,  x1:280, y1:riverY}
+  ];
+  const segsRight = [
+    {x0:w-160, y0:riverY-50, x1:w-90, y1:riverY-20},
+    {x0:w-90,  y0:riverY-20, x1:w-40, y1:riverY}
+  ];
+  const rearY = riverY + riverH;
+  for(const s of segsLeft){
+    if(x>=Math.min(s.x0,s.x1) && x<=Math.max(s.x0,s.x1)){
+      const t = (x - s.x0) / (s.x1 - s.x0 + 1e-9);
+      return s.y0 + t*(s.y1 - s.y0);
+    }
+  }
+  for(const s of segsRight){
+    if(x>=Math.min(s.x0,s.x1) && x<=Math.max(s.x0,s.x1)){
+      const t = (x - s.x0) / (s.x1 - s.x0 + 1e-9);
+      return s.y0 + t*(s.y1 - s.y0);
+    }
+  }
+  if(x>280 && x<(w-40)) return rearY;
+  return rearY;
+}
+function spawnTruckOnGroundLeft(){
+  const x = 60; // dentro il pendio sinistro
+  const yGround = groundYAt(x);
+  W.truck.x = x;
+  W.truck.y = yGround - W.truck.h/2;
+  W.truck.vx = 0;
+  W.truck.vy = 0;
 }
 
 /* ============ Input pointer (mouse+touch) ============ */
@@ -501,14 +532,12 @@ function draw() {
     }
   }
 
-  // selezione asta
   if (selectFirst !== null) {
     const n = W.nodes[selectFirst];
     ctx.setLineDash([6,6]); ctx.strokeStyle='#000'; ctx.lineWidth=1.5;
     ctx.beginPath(); ctx.arc(n.x, n.y, 9, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
   }
 
-  // camioncino
   const t = W.truck;
   ctx.fillStyle = '#ff8c00';
   ctx.fillRect(t.x - t.w/2, t.y - t.h/2, t.w, t.h);
@@ -546,9 +575,7 @@ function startSimulation() {
     alert('Inserisci un vincolo sinistro e uno destro (cerniera/incastro) sulla terra ferma prima di avviare.');
     return;
   }
-  const s = W.nodes[leftSupport];
-  W.truck.x = s.x + 12;
-  W.truck.y = s.y - W.truck.h/2;
+  // Mantiene posizione a terra; solo velocità iniziale
   W.truck.vx = 40; W.truck.vy = 0;
   running = true; ui.msg.style.display = 'none'; ui.status.textContent = 'In esecuzione';
 }
@@ -558,6 +585,7 @@ function hardReset(){
   W.nodes = []; W.beams = []; W.truck = { x: 0, y: 0, vx: 0, vy: 0, w: 34, h: 18, mass: 260, onDeck: false };
   mode='fixL'; ui.modeLabel.textContent='Inserisci Vincolo Sinistro';
   ui.msg.style.display = 'block'; ui.status.textContent = 'In pausa';
+  spawnTruckOnGroundLeft(); // posiziona in sicurezza
 }
 
 /* ============ Salva/Carica JSON ============ */
@@ -579,7 +607,6 @@ function onLoadFile(ev){
     try{
       const obj = JSON.parse(reader.result);
       hardReset();
-      // ricrea geometria
       for(const n of obj.nodes||[]) addNode(n.x,n.y,!!n.fixed, n.type||'cerniera');
       for(const b of obj.beams||[]) addBeam(b.i,b.j,b.A||0.0026,MATERIAL.steel,!!b.isDeck);
       ui.msg.style.display='block';
@@ -594,8 +621,14 @@ function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 
 /* Bootstrap */
 sizeCanvas();
+spawnTruckOnGroundLeft(); // posiziona in sicurezza sulla terraferma
 ui.modeLabel.textContent='Inserisci Vincolo Sinistro';
 loop();
 </script>
 </body>
 </html>
+"""
+path = "/mnt/data/ponte_finale_ground.html"
+with open(path, "w", encoding="utf-8") as f:
+    f.write(html)
+path

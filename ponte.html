@@ -3,49 +3,125 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bridge Saver – Cartoon FEM-lite</title>
+<title>Bridge Saver – Cartoon FEM-lite (full)</title>
 <style>
   :root{
     --ink:#1d1d1f; --good:#34c759; --warn:#ffcf33; --bad:#ff3b30;
-    --sky:#bfe3ff; --panel:#ffffff;
+    --sky:#bfe3ff; --panel:#ffffff; --muted:#5f6a7a;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--sky);color:var(--ink)}
   /* Toolbar */
   #ui{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;padding:.5rem .75rem;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:10}
-  button, select{font-weight:700;border:2px solid var(--ink);background:#fff;border-radius:10px;padding:.45rem .7rem;cursor:pointer}
+  button, select{font-weight:700;border:2px solid var(--ink);background:#fff;border-radius:10px;padding:.5rem .7rem;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem}
+  button svg{width:18px;height:18px}
   button:disabled{opacity:.55;cursor:not-allowed}
-  /* Banner (sotto toolbar) */
+  .t{display:inline}
+  .i{display:none}
+  /* Banner */
   #msg{margin:.5rem auto .25rem auto;max-width:980px;background:var(--panel);
        border:2px solid var(--ink);border-radius:12px;padding:.5rem .75rem;
        font-weight:800;text-align:center}
-  /* HUD compatto */
+  /* HUD */
   #hud{display:flex;gap:.75rem;align-items:center;justify-content:space-between;max-width:980px;margin:0 auto .25rem auto;padding:0 .75rem;font-size:.9rem}
   .badge{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:.15rem .55rem;background:#fff}
-  /* Canvas wrapper */
-  #wrap{max-width:980px;margin:0 auto .75rem auto}
-  canvas{width:100%;height:560px;display:block;background:#9ad0ff}
+  /* Canvas wrapper + responsive */
+  #wrap{max-width:980px;margin:0 auto .5rem auto}
+  canvas{
+    width:100%;
+    height:calc(100svh - 56px - 64px - 46px - 20px);
+    min-height:360px;
+    display:block;
+    background:#9ad0ff;
+    touch-action:none;
+  }
+  /* Stats panel */
+  #statsWrap{max-width:980px;margin:0 auto .75rem auto;padding:0 .75rem}
+  details{border:2px solid #ccc;border-radius:10px;background:#fff}
+  summary{cursor:pointer;padding:.5rem .75rem;font-weight:800}
+  .stats{padding:.5rem .75rem .75rem .75rem;font-size:.92rem;color:#222}
+  .muted{color:var(--muted)}
+
+  @media (max-width: 640px){
+    #ui{gap:.35rem}
+    button, select{padding:.45rem .55rem; font-size:14px}
+    #hud{flex-direction:column; align-items:flex-start; gap:.35rem}
+    .badge{font-size:12px}
+  }
+  @media (max-width: 360px){
+    .t{display:none}
+    .i{display:inline}
+  }
 </style>
 </head>
 <body>
 
 <!-- Toolbar -->
-<div id="ui">
-  <button id="btnFixL" title="Inserisci vincolo sulla sponda sinistra">Vincolo Sinistro</button>
-  <button id="btnFixR" title="Inserisci vincolo sulla sponda destra">Vincolo Destro</button>
-  <label>Tipo vincolo
+<div id="ui" title="Toolbar">
+  <button id="btnFixL" title="Vincolo sinistro"><span class="i">
+    <!-- pin left -->
+    <svg viewBox="0 0 24 24"><path d="M4 3h4v18H4zM8 7h12v2H8zm0 4h10v2H8zm0 4h8v2H8z"/></svg>
+  </span><span class="t">Vincolo Sinistro</span></button>
+
+  <button id="btnFixR" title="Vincolo destro"><span class="i">
+    <!-- pin right -->
+    <svg viewBox="0 0 24 24"><path d="M16 3h4v18h-4zM2 7h14v2H2zm2 4h12v2H4zm4 4h8v2H8z"/></svg>
+  </span><span class="t">Vincolo Destro</span></button>
+
+  <label title="Tipo di vincolo"><span class="t">Tipo vincolo</span>
     <select id="supportType">
       <option value="cerniera">Cerniera</option>
       <option value="incastro">Incastro</option>
     </select>
   </label>
-  <button id="btnNode">Aggiungi Nodo</button>
-  <button id="btnBeam">Aggiungi Asta</button>
-  <button id="btnDelNode" title="Cancella nodo">Cancella Nodo</button>
-  <button id="btnUndo" title="Annulla ultima asta">Annulla</button>
-  <button id="btnRedo" title="Ripristina ultima asta annullata">Ripristina</button>
-  <button id="btnReset" title="Riavvia progetto">Reset</button>
-  <button id="btnStart">Avvia simulazione</button>
+
+  <button id="btnNode" title="Aggiungi nodo"><span class="i">
+    <!-- dot -->
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
+  </span><span class="t">Aggiungi Nodo</span></button>
+
+  <button id="btnBeam" title="Aggiungi asta"><span class="i">
+    <!-- line -->
+    <svg viewBox="0 0 24 24"><path d="M4 18L20 6" stroke="currentColor" stroke-width="3" fill="none"/></svg>
+  </span><span class="t">Aggiungi Asta</span></button>
+
+  <button id="btnDelNode" title="Cancella nodo"><span class="i">
+    <!-- delete node -->
+    <svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="3"/><path d="M13 8h8v2h-8zM13 12h8v2h-8zM13 16h8v2h-8z"/></svg>
+  </span><span class="t">Cancella Nodo</span></button>
+
+  <button id="btnUndo" title="Annulla ultima asta"><span class="i">
+    <!-- undo -->
+    <svg viewBox="0 0 24 24"><path d="M7 7v4H3M3 11a8 8 0 1 0 2.3-5.7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+  </span><span class="t">Annulla</span></button>
+
+  <button id="btnRedo" title="Ripristina asta"><span class="i">
+    <!-- redo -->
+    <svg viewBox="0 0 24 24"><path d="M17 7v4h4M21 11A8 8 0 1 1 18.7 5.3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+  </span><span class="t">Ripristina</span></button>
+
+  <button id="btnSave" title="Salva progetto (JSON)"><span class="i">
+    <!-- save -->
+    <svg viewBox="0 0 24 24"><path d="M5 21h14V7l-4-4H5z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 3v6h6V3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+  </span><span class="t">Salva</span></button>
+
+  <label for="fileLoad" title="Carica progetto" style="display:inline-flex;align-items:center;gap:.4rem;border:2px solid var(--ink);border-radius:10px;padding:.5rem .7rem;background:#fff;cursor:pointer;">
+    <span class="i">
+      <!-- load -->
+      <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+    </span><span class="t">Carica</span>
+    <input id="fileLoad" type="file" accept="application/json" style="display:none"/>
+  </label>
+
+  <button id="btnReset" title="Riavvia progetto (reset)"><span class="i">
+    <!-- reset -->
+    <svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M20 8A8 8 0 1 0 10 20" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+  </span><span class="t">Reset</span></button>
+
+  <button id="btnStart" title="Avvia simulazione"><span class="i">
+    <!-- play -->
+    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+  </span><span class="t">Avvia simulazione</span></button>
 </div>
 
 <!-- Banner -->
@@ -61,16 +137,38 @@
 
 <!-- Canvas -->
 <div id="wrap">
-  <canvas id="cv" width="980" height="560"></canvas>
+  <canvas id="cv"></canvas>
+</div>
+
+<!-- Statistiche -->
+<div id="statsWrap">
+  <details id="statsDetails">
+    <summary>Statistiche ponte</summary>
+    <div class="stats">
+      <div><strong>Allungamento max:</strong> <span id="sMax">–</span></div>
+      <div><strong>Allungamento min:</strong> <span id="sMin">–</span></div>
+      <div><strong>Aste integre:</strong> <span id="sOk">0</span> – <strong>rotte:</strong> <span id="sKo">0</span></div>
+      <div class="muted" id="sTop">Aste critiche: –</div>
+    </div>
+  </details>
 </div>
 
 <script>
-/* ===========================
-   Setup & stato globale
-   =========================== */
+/* ============ Canvas responsive ============ */
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
+function sizeCanvas(){
+  const DPR = Math.min(2, window.devicePixelRatio||1);
+  const cssW = Math.max(1, cv.clientWidth);
+  const cssH = Math.max(1, cv.clientHeight);
+  cv.width  = Math.floor(cssW * DPR);
+  cv.height = Math.floor(cssH * DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize', sizeCanvas, {passive:true});
+window.addEventListener('orientationchange', ()=>setTimeout(sizeCanvas, 50), {passive:true});
 
+/* ============ Stato ============ */
 const ui = {
   fixL: document.getElementById('btnFixL'),
   fixR: document.getElementById('btnFixR'),
@@ -80,6 +178,8 @@ const ui = {
   delNode: document.getElementById('btnDelNode'),
   undo: document.getElementById('btnUndo'),
   redo: document.getElementById('btnRedo'),
+  save: document.getElementById('btnSave'),
+  load: document.getElementById('fileLoad'),
   reset: document.getElementById('btnReset'),
   start: document.getElementById('btnStart'),
   modeLabel: document.getElementById('modeLabel'),
@@ -87,38 +187,35 @@ const ui = {
   brokenCnt: document.getElementById('brokenCnt'),
   status: document.getElementById('status'),
   msg: document.getElementById('msg'),
+  sMax: document.getElementById('sMax'),
+  sMin: document.getElementById('sMin'),
+  sOk: document.getElementById('sOk'),
+  sKo: document.getElementById('sKo'),
+  sTop: document.getElementById('sTop')
 };
 
-let mode = 'fixL';              // 'fixL' | 'fixR' | 'node' | 'beam' | 'del'
-let running = false;            // fisica ferma finché non si avvia
-let leftSupport = null;         // indice nodo vincolo sinistro
-let rightSupport = null;        // indice nodo vincolo destro
-let selectFirst = null;         // selezione primo nodo per asta
-let beamsRedo = [];             // pila redo aste
-let winAccum = 0;               // per verifica 6s stabilità
-let score = 0;
+let mode = 'fixL';              // 'fixL'|'fixR'|'node'|'beam'|'del'
+let running = false;
+let leftSupport = null, rightSupport = null;
+let selectFirst = null;
+let beamsRedo = [];
+let winAccum = 0, score = 0;
 
-const MATERIAL = {
-  steel: { E: 2.0e11, limit: 2.0e8, rho: 7850 } // semplificato
-};
+const MATERIAL = { steel: { E: 2.0e11, limit: 2.0e8, rho: 7850 } };
 
-// stato fisico
 const W = {
   g: 9.81,
   damping: 0.995,
-  nodes: [],   // {x,y,px,py,fx,fy,mass,fixed,type:'cerniera'|'incastro'}
+  nodes: [],   // {x,y,px,py,fx,fy,mass,fixed,type}
   beams: [],   // {i,j,L0,A,mat,isDeck,broken}
   truck: { x: 0, y: 0, vx: 0, vy: 0, w: 34, h: 18, mass: 260, onDeck: false }
 };
 
-// helpers
 const nodeX = i => W.nodes[i].x;
 const nodeY = i => W.nodes[i].y;
 const rnd = (n,d=2)=>Number(n).toFixed(d);
 
-/* ===========================
-   UI binding
-   =========================== */
+/* ============ UI binding ============ */
 ui.fixL.onclick   = ()=>{ mode='fixL'; ui.modeLabel.textContent='Inserisci Vincolo Sinistro'; };
 ui.fixR.onclick   = ()=>{ mode='fixR'; ui.modeLabel.textContent='Inserisci Vincolo Destro'; };
 ui.node.onclick   = ()=>{ mode='node'; ui.modeLabel.textContent='Aggiungi Nodo'; };
@@ -128,20 +225,84 @@ ui.undo.onclick   = ()=> undoBeam();
 ui.redo.onclick   = ()=> redoBeam();
 ui.reset.onclick  = ()=> hardReset();
 ui.start.onclick  = ()=> startSimulation();
+ui.save.onclick   = ()=> saveProject();
+ui.load.addEventListener('change', onLoadFile);
 
-// click sul canvas per inserire/eliminare
-cv.addEventListener('click', e => {
-  if (running && mode!=='del') return; // editing solo a fisica ferma (tranne cancella)
+/* ============ Terreno e hit-test ============ */
+// Poligoni in coordinate CSS (ricalcolati ogni frame dal canvas size)
+function terrainPolys(){
+  const w = cv.clientWidth, h = cv.clientHeight;
+  const riverY = Math.floor(h*0.68), riverH = Math.floor(h*0.12);
+
+  // sinistra (pendio)
+  const left = [
+    {x:0, y:riverY+riverH},
+    {x:0, y:riverY-140},
+    {x:160, y:riverY-40},
+    {x:240, y:riverY-10},
+    {x:280, y:riverY},
+    {x:0, y:riverY}
+  ];
+  // destra (versante)
+  const right = [
+    {x:w, y:riverY+riverH},
+    {x:w, y:riverY-150},
+    {x:w-160, y:riverY-50},
+    {x:w-90,  y:riverY-20},
+    {x:w-40,  y:riverY},
+    {x:w, y:riverY}
+  ];
+  // prato dietro fiume (piano campagna)
+  const rear = [
+    {x:0, y:riverY+riverH},
+    {x:w, y:riverY+riverH},
+    {x:w, y:h},
+    {x:0, y:h}
+  ];
+  // fiume (vietato)
+  const river = [
+    {x:0, y:riverY},
+    {x:w, y:riverY},
+    {x:w, y:riverY+riverH},
+    {x:0, y:riverY+riverH}
+  ];
+  return {left,right,rear,river};
+}
+
+function pointInPoly(p, poly){
+  let c=false; const x=p.x,y=p.y; const n=poly.length;
+  for(let i=0,j=n-1;i<n;j=i++){
+    const xi=poly[i].x, yi=poly[i].y, xj=poly[j].x, yj=poly[j].y;
+    const intersect=((yi>y)!==(yj>y)) && (x<(xj-xi)*(y-yi)/(yj-yi+1e-9)+xi);
+    if(intersect) c=!c;
+  }
+  return c;
+}
+
+function isOnTerrain(x,y){
+  const {left,right,rear,river} = terrainPolys();
+  // vincoli consentiti su left|right|rear ma NON su river
+  if(pointInPoly({x,y}, river)) return false;
+  return pointInPoly({x,y}, left) || pointInPoly({x,y}, right) || pointInPoly({x,y}, rear);
+}
+
+/* ============ Input pointer (mouse+touch) ============ */
+cv.addEventListener('pointerdown', (e) => {
+  e.preventDefault();
   const r = cv.getBoundingClientRect();
   const x = e.clientX - r.left;
   const y = e.clientY - r.top;
 
+  if (running && mode!=='del') return;
+
   if (mode === 'fixL') {
     if (leftSupport !== null) { alert('Il vincolo sinistro è già stato inserito.'); return; }
+    if (!isOnTerrain(x,y)) { alert('Posiziona il vincolo sulla terra ferma.'); return; }
     leftSupport = addNode(x, y, true, ui.type.value);
     mode = 'node'; ui.modeLabel.textContent = 'Aggiungi Nodo';
   } else if (mode === 'fixR') {
     if (rightSupport !== null) { alert('Il vincolo destro è già stato inserito.'); return; }
+    if (!isOnTerrain(x,y)) { alert('Posiziona il vincolo sulla terra ferma.'); return; }
     rightSupport = addNode(x, y, true, ui.type.value);
     mode = 'node'; ui.modeLabel.textContent = 'Aggiungi Nodo';
   } else if (mode === 'node') {
@@ -151,7 +312,7 @@ cv.addEventListener('click', e => {
     if (idx < 0) { selectFirst = null; return; }
     if (selectFirst === null) selectFirst = idx;
     else if (selectFirst !== idx) {
-      const isDeck = Math.abs(nodeY(selectFirst) - nodeY(idx)) < 4; // deck ~ orizzontale
+      const isDeck = Math.abs(nodeY(selectFirst) - nodeY(idx)) < 6;
       addBeam(selectFirst, idx, 0.0026, MATERIAL.steel, isDeck);
       selectFirst = null;
     }
@@ -159,18 +320,17 @@ cv.addEventListener('click', e => {
     const idx = pickNode(x, y);
     if (idx >= 0) deleteNode(idx);
   }
-});
+}, {passive:false});
 
-/* ===========================
-   Costruzione elementi
-   =========================== */
+/* ============ Costruzione elementi ============ */
 function addNode(x, y, fixed=false, type='cerniera') {
   if (fixed && type!=='cerniera' && type!=='incastro') type = 'cerniera';
   W.nodes.push({ x, y, px:x, py:y, fx:0, fy:0, mass: fixed? 1e9 : 1, fixed, type });
   return W.nodes.length - 1;
 }
 function pickNode(mx, my) {
-  return W.nodes.findIndex(n => Math.hypot(n.x - mx, n.y - my) < 9);
+  const R = 14;
+  return W.nodes.findIndex(n => Math.hypot(n.x - mx, n.y - my) < R);
 }
 function addBeam(i, j, A=0.0026, mat=MATERIAL.steel, isDeck=false) {
   if (i === j) return;
@@ -179,45 +339,27 @@ function addBeam(i, j, A=0.0026, mat=MATERIAL.steel, isDeck=false) {
   W.beams.push({ i, j, L0, A, mat, isDeck, broken:false });
   updateHUD();
 }
-function undoBeam() {
-  const b = W.beams.pop();
-  if (b) beamsRedo.push(b);
-  updateHUD();
-}
-function redoBeam() {
-  const b = beamsRedo.pop();
-  if (b) W.beams.push(b);
-  updateHUD();
-}
+function undoBeam() { const b = W.beams.pop(); if (b) beamsRedo.push(b); updateHUD(); }
+function redoBeam() { const b = beamsRedo.pop(); if (b) W.beams.push(b); updateHUD(); }
 function deleteNode(idx){
-  // rimuovi aste collegate
   W.beams = W.beams.filter(b => b.i!==idx && b.j!==idx)
                    .map(b => ({...b, i: b.i>idx? b.i-1 : b.i, j: b.j>idx? b.j-1 : b.j}));
-  // aggiorna vincoli
   if (leftSupport === idx) leftSupport = null;
   if (rightSupport === idx) rightSupport = null;
   if (leftSupport  > idx) leftSupport--;
   if (rightSupport > idx) rightSupport--;
-  // rimuovi nodo
   W.nodes.splice(idx,1);
   updateHUD();
 }
 
-/* ===========================
-   Fisica (attiva solo se running)
-   =========================== */
+/* ============ Fisica ============ */
 function step(dt) {
-  if (!running) return; // nessuna fisica prima di Avvia
+  if (!running) return;
 
-  // reset forze + gravità
-  for (const n of W.nodes) {
-    n.fx = 0;
-    n.fy = n.fixed ? 0 : n.mass * W.g;
-  }
+  for (const n of W.nodes) { n.fx = 0; n.fy = n.fixed ? 0 : n.mass * W.g; }
 
-  // aste assiali elastiche + rottura
-  let brokenCount = 0;
-  let totalLen = 0;
+  let brokenCount = 0, totalLen = 0, sMax=-Infinity, sMin=Infinity;
+  const strains = [];
 
   for (const b of W.beams) {
     const ni = W.nodes[b.i], nj = W.nodes[b.j];
@@ -229,58 +371,65 @@ function step(dt) {
 
     const strain = (L - b.L0) / b.L0;
     const stress = b.mat.E * strain;
+    sMax = Math.max(sMax, strain);
+    sMin = Math.min(sMin, strain);
+    strains.push({idx:b, abs:Math.abs(strain)});
+
     if (Math.abs(stress) > b.mat.limit) { b.broken = true; brokenCount++; continue; }
 
     const k = (b.mat.E * b.A) / b.L0;
-    const F = k * (L - b.L0) / L; // lungo l’asta
+    const F = k * (L - b.L0) / L;
     const Fx = F * dx, Fy = F * dy;
 
     if (!ni.fixed) { ni.fx += Fx; ni.fy += Fy; }
     if (!nj.fixed) { nj.fx -= Fx; nj.fy -= Fy; }
   }
 
-  // integrazione (Verlet smorzato)
   for (const n of W.nodes) {
-    if (n.fixed) continue; // i vincoli restano immobili
+    if (n.fixed) continue;
     const vx = (n.x - n.px) * W.damping + (n.fx / n.mass) * dt * dt;
     const vy = (n.y - n.py) * W.damping + (n.fy / n.mass) * dt * dt;
-    n.px = n.x; n.py = n.y;
-    n.x += vx; n.y += vy;
+    n.px = n.x; n.py = n.y; n.x += vx; n.y += vy;
   }
 
-  // veicolo: segue il deck; accelera/ralenta per pendenza; cade se manca deck
+  // veicolo
   const t = W.truck;
   const seg = deckSegAt(t.x);
   if (seg) {
     const { y:below, dx, dy } = seg;
     const ang = Math.atan2(dy, dx);
     const gAlong = W.g * Math.sin(ang);
-    t.vx += gAlong * dt * 50;             // fattore cartoon
+    t.vx += gAlong * dt * 50;
     t.vx = clamp(t.vx, -100, 260);
-    if (t.y + t.h/2 >= below - 2) {       // contatto
-      t.y = below - t.h/2; t.vy = 0; t.onDeck = true;
-    } else { t.onDeck=false; t.vy += W.g*dt*50; }
+    if (t.y + t.h/2 >= below - 2) { t.y = below - t.h/2; t.vy = 0; t.onDeck = true; }
+    else { t.onDeck=false; t.vy += W.g*dt*50; }
   } else { t.onDeck=false; t.vy += W.g*dt*50; }
   t.x += t.vx * dt; t.y += t.vy * dt;
 
-  // vittoria: oltre sponda destra e ponte “in piedi” per 6 s
+  // vittoria
   if (rightSupport !== null && t.x > W.nodes[rightSupport].x + 20 && brokenCount < W.beams.length) {
     winAccum += dt;
     if (winAccum >= 6) {
-      running = false;
-      ui.status.textContent = 'Vittoria';
-      calcScore();
-      setTimeout(() => alert('Missione completata! Punteggio: ' + score), 50);
+      running = false; ui.status.textContent = 'Vittoria';
+      calcScore(); setTimeout(()=>alert('Missione completata! Punteggio: '+score), 50);
     }
   } else winAccum = 0;
 
-  // HUD
+  // HUD + Stats
   ui.brokenCnt.textContent = brokenCount;
-  ui.matLen.textContent = rnd((totalLen/50), 2); // stima “metri” (scaling cartoon)
+  ui.matLen.textContent = rnd((totalLen/50), 2);
+  ui.sMax.textContent = isFinite(sMax)? rnd(sMax,4) : '–';
+  ui.sMin.textContent = isFinite(sMin)? rnd(sMin,4) : '–';
+  ui.sOk.textContent  = (W.beams.length - brokenCount);
+  ui.sKo.textContent  = brokenCount;
+  strains.sort((a,b)=>b.abs-a.abs);
+  const top = strains.slice(0,3).map(s=>{
+    const b = s.idx; return `(${b.i}-${b.j}) ε=${rnd(s.abs,4)}`;
+  }).join('  ·  ');
+  document.getElementById('sTop').textContent = top || 'Aste critiche: –';
 }
 
 function deckSegAt(x) {
-  // Ritorna il segmento di deck attivo a x (priorità ai non rotti).
   let best = null; let bestW = 1e9;
   for (const b of W.beams) {
     if (!b.isDeck || b.broken) continue;
@@ -288,7 +437,7 @@ function deckSegAt(x) {
     const minx = Math.min(ni.x, nj.x), maxx = Math.max(ni.x, nj.x);
     if (x >= minx && x <= maxx) {
       const dx = nj.x - ni.x, dy = nj.y - ni.y;
-      if (Math.abs(dx) < 1e-6) continue; // deck verticale non valido
+      if (Math.abs(dx) < 1e-6) continue;
       const r = (x - ni.x) / dx;
       const y = ni.y + r * dy;
       const cx = ni.x + r * dx;
@@ -299,43 +448,27 @@ function deckSegAt(x) {
   return best;
 }
 
-/* ===========================
-   Rendering (scenario + elementi)
-   =========================== */
+/* ============ Rendering ============ */
 function drawBackground(){
-  const w = cv.width, h = cv.height;
+  const w = cv.clientWidth, h = cv.clientHeight;
   // cielo
   ctx.fillStyle = '#9ad0ff'; ctx.fillRect(0,0,w,h);
-
-  // fiume: tracciato centrale
-  const riverY = h*0.68, riverH = h*0.12;
-  ctx.fillStyle = '#5bb0ff';
-  ctx.fillRect(0, riverY, w, riverH);
-
-  // sponda/pendio sinistro
+  // fiume
+  const riverY = Math.floor(h*0.68), riverH = Math.floor(h*0.12);
+  ctx.fillStyle = '#5bb0ff'; ctx.fillRect(0, riverY, w, riverH);
+  // sponda sinistra
   ctx.fillStyle = '#86c36b';
-  ctx.beginPath();
-  ctx.moveTo(0, riverY+riverH);
-  ctx.lineTo(0, riverY-140);
-  ctx.lineTo(160, riverY-40);
-  ctx.lineTo(240, riverY-10);
-  ctx.lineTo(280, riverY);
-  ctx.lineTo(0, riverY);
-  ctx.closePath(); ctx.fill();
-
+  ctx.beginPath(); ctx.moveTo(0, riverY+riverH);
+  ctx.lineTo(0, riverY-140); ctx.lineTo(160, riverY-40);
+  ctx.lineTo(240, riverY-10); ctx.lineTo(280, riverY);
+  ctx.lineTo(0, riverY); ctx.closePath(); ctx.fill();
   // versante destro
-  ctx.beginPath();
-  ctx.moveTo(w, riverY+riverH);
-  ctx.lineTo(w, riverY-150);
-  ctx.lineTo(w-160, riverY-50);
-  ctx.lineTo(w-90,  riverY-20);
-  ctx.lineTo(w-40,  riverY);
-  ctx.lineTo(w, riverY);
-  ctx.closePath(); ctx.fill();
-
-  // prato retrostante
-  ctx.fillStyle = '#a6d67a';
-  ctx.fillRect(0, riverY+riverH, w, h-(riverY+riverH));
+  ctx.beginPath(); ctx.moveTo(w, riverY+riverH);
+  ctx.lineTo(w, riverY-150); ctx.lineTo(w-160, riverY-50);
+  ctx.lineTo(w-90, riverY-20); ctx.lineTo(w-40, riverY);
+  ctx.lineTo(w, riverY); ctx.closePath(); ctx.fill();
+  // prato posteriore
+  ctx.fillStyle = '#a6d67a'; ctx.fillRect(0, riverY+riverH, w, h-(riverY+riverH));
 }
 
 function draw() {
@@ -345,7 +478,7 @@ function draw() {
   // aste
   for (const b of W.beams) {
     const ni = W.nodes[b.i], nj = W.nodes[b.j];
-    let stroke = '#cfcfcf'; // rotte = grigio
+    let stroke = '#cfcfcf';
     if (!b.broken) {
       const L = Math.hypot(nj.x-ni.x, nj.y-ni.y);
       const strain = Math.abs((L - b.L0) / b.L0);
@@ -361,7 +494,6 @@ function draw() {
     const n = W.nodes[i];
     ctx.fillStyle = n.fixed ? (n.type === 'incastro' ? '#000' : '#444') : '#0a66cc';
     ctx.beginPath(); ctx.arc(n.x, n.y, 5, 0, Math.PI*2); ctx.fill();
-    // simboli rapidi per cerniera/incastro
     if (n.fixed) {
       ctx.strokeStyle='#000'; ctx.lineWidth=1.2;
       if (n.type === 'cerniera') { ctx.beginPath(); ctx.moveTo(n.x-8, n.y+8); ctx.lineTo(n.x+8, n.y+8); ctx.stroke(); }
@@ -369,7 +501,7 @@ function draw() {
     }
   }
 
-  // evidenzia nodo selezionato per asta
+  // selezione asta
   if (selectFirst !== null) {
     const n = W.nodes[selectFirst];
     ctx.setLineDash([6,6]); ctx.strokeStyle='#000'; ctx.lineWidth=1.5;
@@ -385,21 +517,15 @@ function draw() {
   ctx.beginPath(); ctx.arc(t.x + t.w*0.25, t.y + t.h/2, 5, 0, Math.PI*2); ctx.fill();
 }
 
-/* ===========================
-   Loop + HUD + Punteggio
-   =========================== */
+/* ============ Loop + HUD + punteggio ============ */
 let last = performance.now();
 function loop() {
   const now = performance.now();
   const dt = Math.min(0.033, (now - last)/1000);
   last = now;
-  step(dt);
-  draw();
-  updateHUD();
+  step(dt); draw(); updateHUD();
   requestAnimationFrame(loop);
 }
-loop();
-
 function updateHUD() {
   const broken = W.beams.filter(b=>b.broken).length;
   ui.brokenCnt.textContent = broken.toString();
@@ -407,7 +533,6 @@ function updateHUD() {
   ui.matLen.textContent = rnd(L/50, 2);
   ui.status.textContent = running ? 'In esecuzione' : 'In pausa';
 }
-
 function calcScore() {
   const broken = W.beams.filter(b=>b.broken).length;
   const L = W.beams.reduce((s,b)=> s + Math.hypot(nodeX(b.j)-nodeX(b.i), nodeY(b.j)-nodeY(b.i)), 0);
@@ -415,39 +540,62 @@ function calcScore() {
   score = Math.max(0, Math.round(base - matPenalty - broken*50 + intactBonus));
 }
 
-/* ===========================
-   Avvio & Reset
-   =========================== */
+/* ============ Avvio & Reset ============ */
 function startSimulation() {
   if (leftSupport === null || rightSupport === null) {
-    alert('Inserisci un vincolo sinistro e uno destro (cerniera/incastro) prima di avviare.');
+    alert('Inserisci un vincolo sinistro e uno destro (cerniera/incastro) sulla terra ferma prima di avviare.');
     return;
   }
-  // posizionamento camion
   const s = W.nodes[leftSupport];
   W.truck.x = s.x + 12;
   W.truck.y = s.y - W.truck.h/2;
-  W.truck.vx = 40;
-  W.truck.vy = 0;
-  running = true;
-  ui.msg.style.display = 'none';
-  ui.status.textContent = 'In esecuzione';
+  W.truck.vx = 40; W.truck.vy = 0;
+  running = true; ui.msg.style.display = 'none'; ui.status.textContent = 'In esecuzione';
 }
-
 function hardReset(){
-  // stato base
   running = false; winAccum = 0; score = 0;
   leftSupport = null; rightSupport = null; selectFirst = null; beamsRedo = [];
   W.nodes = []; W.beams = []; W.truck = { x: 0, y: 0, vx: 0, vy: 0, w: 34, h: 18, mass: 260, onDeck: false };
   mode='fixL'; ui.modeLabel.textContent='Inserisci Vincolo Sinistro';
-  ui.msg.style.display = 'block';
-  ui.status.textContent = 'In pausa';
+  ui.msg.style.display = 'block'; ui.status.textContent = 'In pausa';
 }
 
-/* ===========================
-   Utilità
-   =========================== */
+/* ============ Salva/Carica JSON ============ */
+function saveProject(){
+  const data = {
+    nodes: W.nodes.map(n=>({x:n.x,y:n.y,fixed:n.fixed,type:n.type})),
+    beams: W.beams.map(b=>({i:b.i,j:b.j,L0:b.L0,A:b.A,isDeck:b.isDeck}))
+  };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ponte_project.json';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+function onLoadFile(ev){
+  const f = ev.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const obj = JSON.parse(reader.result);
+      hardReset();
+      // ricrea geometria
+      for(const n of obj.nodes||[]) addNode(n.x,n.y,!!n.fixed, n.type||'cerniera');
+      for(const b of obj.beams||[]) addBeam(b.i,b.j,b.A||0.0026,MATERIAL.steel,!!b.isDeck);
+      ui.msg.style.display='block';
+    }catch(err){ alert('File non valido: '+err.message); }
+    ev.target.value = '';
+  };
+  reader.readAsText(f);
+}
+
+/* ============ Utility ============ */
 function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+/* Bootstrap */
+sizeCanvas();
+ui.modeLabel.textContent='Inserisci Vincolo Sinistro';
+loop();
 </script>
 </body>
 </html>

@@ -1,31 +1,40 @@
-# Create the updated HTML file with safe ground spawn for the truck
+# Create the updated HTML file with "deck" beams and a dismissible help panel.
 html = r"""<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bridge Saver – Cartoon FEM-lite (ground safe)</title>
+<title>Bridge Saver – Cartoon FEM-lite (deck & help)</title>
 <style>
   :root{
     --ink:#1d1d1f; --good:#34c759; --warn:#ffcf33; --bad:#ff3b30;
-    --sky:#bfe3ff; --panel:#ffffff; --muted:#5f6a7a;
+    --sky:#bfe3ff; --panel:#ffffff; --muted:#5f6a7a; --deck:#6b4e2e;
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--sky);color:var(--ink)}
+
   /* Toolbar */
-  #ui{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;padding:.5rem .75rem;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:10}
+  #ui{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;padding:.5rem .75rem;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:20}
   button, select{font-weight:700;border:2px solid var(--ink);background:#fff;border-radius:10px;padding:.5rem .7rem;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem}
   button svg{width:18px;height:18px}
   button:disabled{opacity:.55;cursor:not-allowed}
   .t{display:inline}
   .i{display:none}
-  /* Banner */
+
+  /* Help (sotto toolbar, non copre i pulsanti) */
+  #help{max-width:980px;margin:.5rem auto 0 auto;background:var(--panel);
+        border:2px solid var(--ink);border-radius:12px;padding:.75rem .9rem;line-height:1.4}
+  #help h2{margin:.2rem 0 .4rem 0;font-size:1.1rem}
+  #help ul{margin:.2rem 0 .6rem 1.1rem}
+  #btnHelpClose{border-color:#0a66cc}
   #msg{margin:.5rem auto .25rem auto;max-width:980px;background:var(--panel);
        border:2px solid var(--ink);border-radius:12px;padding:.5rem .75rem;
        font-weight:800;text-align:center}
+
   /* HUD */
   #hud{display:flex;gap:.75rem;align-items:center;justify-content:space-between;max-width:980px;margin:0 auto .25rem auto;padding:0 .75rem;font-size:.9rem}
   .badge{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:.15rem .55rem;background:#fff}
+
   /* Canvas wrapper + responsive */
   #wrap{max-width:980px;margin:0 auto .5rem auto}
   canvas{
@@ -36,6 +45,7 @@ html = r"""<!DOCTYPE html>
     background:#9ad0ff;
     touch-action:none;
   }
+
   /* Stats panel */
   #statsWrap{max-width:980px;margin:0 auto .75rem auto;padding:0 .75rem}
   details{border:2px solid #ccc;border-radius:10px;background:#fff}
@@ -60,12 +70,10 @@ html = r"""<!DOCTYPE html>
 <!-- Toolbar -->
 <div id="ui" title="Toolbar">
   <button id="btnFixL" title="Vincolo sinistro"><span class="i">
-    <!-- pin left -->
     <svg viewBox="0 0 24 24"><path d="M4 3h4v18H4zM8 7h12v2H8zm0 4h10v2H8zm0 4h8v2H8z"/></svg>
   </span><span class="t">Vincolo Sinistro</span></button>
 
   <button id="btnFixR" title="Vincolo destro"><span class="i">
-    <!-- pin right -->
     <svg viewBox="0 0 24 24"><path d="M16 3h4v18h-4zM2 7h14v2H2zm2 4h12v2H4zm4 4h8v2H8z"/></svg>
   </span><span class="t">Vincolo Destro</span></button>
 
@@ -77,52 +85,61 @@ html = r"""<!DOCTYPE html>
   </label>
 
   <button id="btnNode" title="Aggiungi nodo"><span class="i">
-    <!-- dot -->
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
   </span><span class="t">Aggiungi Nodo</span></button>
 
-  <button id="btnBeam" title="Aggiungi asta"><span class="i">
-    <!-- line -->
+  <button id="btnBeam" title="Aggiungi asta strutturale"><span class="i">
     <svg viewBox="0 0 24 24"><path d="M4 18L20 6" stroke="currentColor" stroke-width="3" fill="none"/></svg>
-  </span><span class="t">Aggiungi Asta</span></button>
+  </span><span class="t">Asta</span></button>
+
+  <button id="btnDeck" title="Aggiungi piano di percorrenza (orizzontale)"><span class="i">
+    <svg viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="4" /></svg>
+  </span><span class="t">Piano di percorrenza</span></button>
 
   <button id="btnDelNode" title="Cancella nodo"><span class="i">
-    <!-- delete node -->
-    <svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="3"/><path d="M13 8h8v2h-8zM13 12h8v2h-8zM13 16h8v2h-8z"/></svg>
+    <svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="3"/><path d="M13 8h8v2H13zM13 12h8v2H13zM13 16h8v2H13z"/></svg>
   </span><span class="t">Cancella Nodo</span></button>
 
   <button id="btnUndo" title="Annulla ultima asta"><span class="i">
-    <!-- undo -->
     <svg viewBox="0 0 24 24"><path d="M7 7v4H3M3 11a8 8 0 1 0 2.3-5.7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
   </span><span class="t">Annulla</span></button>
 
   <button id="btnRedo" title="Ripristina asta"><span class="i">
-    <!-- redo -->
     <svg viewBox="0 0 24 24"><path d="M17 7v4h4M21 11A8 8 0 1 1 18.7 5.3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
   </span><span class="t">Ripristina</span></button>
 
   <button id="btnSave" title="Salva progetto (JSON)"><span class="i">
-    <!-- save -->
     <svg viewBox="0 0 24 24"><path d="M5 21h14V7l-4-4H5z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 3v6h6V3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
   </span><span class="t">Salva</span></button>
 
   <label for="fileLoad" title="Carica progetto" style="display:inline-flex;align-items:center;gap:.4rem;border:2px solid var(--ink);border-radius:10px;padding:.5rem .7rem;background:#fff;cursor:pointer;">
     <span class="i">
-      <!-- load -->
       <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2" fill="none"/></svg>
     </span><span class="t">Carica</span>
     <input id="fileLoad" type="file" accept="application/json" style="display:none"/>
   </label>
 
   <button id="btnReset" title="Riavvia progetto (reset)"><span class="i">
-    <!-- reset -->
     <svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M20 8A8 8 0 1 0 10 20" fill="none" stroke="currentColor" stroke-width="2"/></svg>
   </span><span class="t">Reset</span></button>
 
   <button id="btnStart" title="Avvia simulazione"><span class="i">
-    <!-- play -->
     <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
   </span><span class="t">Avvia simulazione</span></button>
+</div>
+
+<!-- Help -->
+<div id="help">
+  <h2>Come si gioca</h2>
+  <ul>
+    <li><b>Obiettivo</b>: fai attraversare il camion sul ponte senza crolli per almeno 6 secondi, usando il minimo materiale.</li>
+    <li><b>Vincoli</b>: inserisci un vincolo sinistro e uno destro (cerniera/incastro) <u>sulla terraferma</u>.</li>
+    <li><b>Nodi & Aste</b>: aggiungi nodi e collega con <b>aste strutturali</b> per irrigidire la trave reticolare.</li>
+    <li><b>Piano di percorrenza</b>: inserisci <b>aste speciali orizzontali</b> (piano) dove il camion deve passare. Non sono attraversabili.</li>
+    <li><b>Avvia</b>: premi “Avvia simulazione”. Il camion accelera/ralenta in base alla pendenza del piano.</li>
+    <li><b>Strumenti</b>: Annulla/Ripristina aste, Cancella nodo, Salva/Carica progetto (JSON), Reset per ricominciare.</li>
+  </ul>
+  <button id="btnHelpClose">Ho capito</button>
 </div>
 
 <!-- Banner -->
@@ -176,6 +193,7 @@ const ui = {
   type: document.getElementById('supportType'),
   node: document.getElementById('btnNode'),
   beam: document.getElementById('btnBeam'),
+  deck: document.getElementById('btnDeck'),
   delNode: document.getElementById('btnDelNode'),
   undo: document.getElementById('btnUndo'),
   redo: document.getElementById('btnRedo'),
@@ -192,15 +210,18 @@ const ui = {
   sMin: document.getElementById('sMin'),
   sOk: document.getElementById('sOk'),
   sKo: document.getElementById('sKo'),
-  sTop: document.getElementById('sTop')
+  sTop: document.getElementById('sTop'),
+  help: document.getElementById('help'),
+  helpClose: document.getElementById('btnHelpClose')
 };
 
-let mode = 'fixL';              // 'fixL'|'fixR'|'node'|'beam'|'del'
+let mode = 'fixL';              // 'fixL'|'fixR'|'node'|'beam'|'deck'|'del'
 let running = false;
 let leftSupport = null, rightSupport = null;
 let selectFirst = null;
 let beamsRedo = [];
 let winAccum = 0, score = 0;
+let showHelp = true; // mostra il pannello al primo avvio e dopo reset, finché non chiuso
 
 const MATERIAL = { steel: { E: 2.0e11, limit: 2.0e8, rho: 7850 } };
 
@@ -208,7 +229,7 @@ const W = {
   g: 9.81,
   damping: 0.995,
   nodes: [],   // {x,y,px,py,fx,fy,mass,fixed,type}
-  beams: [],   // {i,j,L0,A,mat,isDeck,broken}
+  beams: [],   // {i,j,L0,A,mat,type:'struct'|'deck',broken}
   truck: { x: 0, y: 0, vx: 0, vy: 0, w: 34, h: 18, mass: 260, onDeck: false }
 };
 
@@ -221,6 +242,7 @@ ui.fixL.onclick   = ()=>{ mode='fixL'; ui.modeLabel.textContent='Inserisci Vinco
 ui.fixR.onclick   = ()=>{ mode='fixR'; ui.modeLabel.textContent='Inserisci Vincolo Destro'; };
 ui.node.onclick   = ()=>{ mode='node'; ui.modeLabel.textContent='Aggiungi Nodo'; };
 ui.beam.onclick   = ()=>{ mode='beam'; ui.modeLabel.textContent='Aggiungi Asta'; };
+ui.deck.onclick   = ()=>{ mode='deck'; ui.modeLabel.textContent='Aggiungi Piano di percorrenza'; };
 ui.delNode.onclick= ()=>{ mode='del';  ui.modeLabel.textContent='Cancella Nodo'; };
 ui.undo.onclick   = ()=> undoBeam();
 ui.redo.onclick   = ()=> redoBeam();
@@ -228,6 +250,7 @@ ui.reset.onclick  = ()=> hardReset();
 ui.start.onclick  = ()=> startSimulation();
 ui.save.onclick   = ()=> saveProject();
 ui.load.addEventListener('change', onLoadFile);
+ui.helpClose.onclick = ()=>{ ui.help.style.display='none'; showHelp=false; };
 
 /* ============ Terreno e hit-test ============ */
 function terrainPolys(){
@@ -309,7 +332,7 @@ function groundYAt(x){
   return rearY;
 }
 function spawnTruckOnGroundLeft(){
-  const x = 60; // dentro il pendio sinistro
+  const x = 60;
   const yGround = groundYAt(x);
   W.truck.x = x;
   W.truck.y = yGround - W.truck.h/2;
@@ -338,13 +361,20 @@ cv.addEventListener('pointerdown', (e) => {
     mode = 'node'; ui.modeLabel.textContent = 'Aggiungi Nodo';
   } else if (mode === 'node') {
     addNode(x, y, false);
-  } else if (mode === 'beam') {
+  } else if (mode === 'beam' || mode === 'deck') {
     const idx = pickNode(x, y);
     if (idx < 0) { selectFirst = null; return; }
     if (selectFirst === null) selectFirst = idx;
     else if (selectFirst !== idx) {
-      const isDeck = Math.abs(nodeY(selectFirst) - nodeY(idx)) < 6;
-      addBeam(selectFirst, idx, 0.0026, MATERIAL.steel, isDeck);
+      const i = selectFirst, j = idx;
+      const dy = Math.abs(nodeY(i) - nodeY(j));
+      if (mode === 'deck') {
+        const tol = 8; // deve essere quasi orizzontale
+        if (dy > tol) { alert('Il piano di percorrenza deve essere orizzontale (tolleranza ±8px).'); selectFirst = null; return; }
+        addBeam(i, j, 0.005, MATERIAL.steel, 'deck'); // sezione un po’ più grande
+      } else {
+        addBeam(i, j, 0.0026, MATERIAL.steel, 'struct');
+      }
       selectFirst = null;
     }
   } else if (mode === 'del') {
@@ -363,11 +393,11 @@ function pickNode(mx, my) {
   const R = 14;
   return W.nodes.findIndex(n => Math.hypot(n.x - mx, n.y - my) < R);
 }
-function addBeam(i, j, A=0.0026, mat=MATERIAL.steel, isDeck=false) {
+function addBeam(i, j, A, mat, type='struct') {
   if (i === j) return;
   if (W.beams.some(b => (b.i===i && b.j===j) || (b.i===j && b.j===i))) return;
   const L0 = Math.hypot(nodeX(j) - nodeX(i), nodeY(j) - nodeY(i));
-  W.beams.push({ i, j, L0, A, mat, isDeck, broken:false });
+  W.beams.push({ i, j, L0, A, mat, type, broken:false });
   updateHUD();
 }
 function undoBeam() { const b = W.beams.pop(); if (b) beamsRedo.push(b); updateHUD(); }
@@ -425,6 +455,10 @@ function step(dt) {
 
   // veicolo
   const t = W.truck;
+  // 1) gravità base
+  t.vy += W.g * dt * 50;
+
+  // 2) interazione con piano di percorrenza (non attraversabile)
   const seg = deckSegAt(t.x);
   if (seg) {
     const { y:below, dx, dy } = seg;
@@ -432,10 +466,16 @@ function step(dt) {
     const gAlong = W.g * Math.sin(ang);
     t.vx += gAlong * dt * 50;
     t.vx = clamp(t.vx, -100, 260);
-    if (t.y + t.h/2 >= below - 2) { t.y = below - t.h/2; t.vy = 0; t.onDeck = true; }
-    else { t.onDeck=false; t.vy += W.g*dt*50; }
-  } else { t.onDeck=false; t.vy += W.g*dt*50; }
-  t.x += t.vx * dt; t.y += t.vy * dt;
+    // collisione: se entra nel deck o lo supera verso il basso, appoggia
+    if (t.y + t.h/2 >= below - 1) {
+      t.y = below - t.h/2; t.vy = 0; t.onDeck = true;
+    }
+  } else {
+    t.onDeck = false;
+  }
+
+  t.x += t.vx * dt;
+  t.y += t.vy * dt;
 
   // vittoria
   if (rightSupport !== null && t.x > W.nodes[rightSupport].x + 20 && brokenCount < W.beams.length) {
@@ -463,7 +503,7 @@ function step(dt) {
 function deckSegAt(x) {
   let best = null; let bestW = 1e9;
   for (const b of W.beams) {
-    if (!b.isDeck || b.broken) continue;
+    if (b.type!=='deck' || b.broken) continue;
     const ni = W.nodes[b.i], nj = W.nodes[b.j];
     const minx = Math.min(ni.x, nj.x), maxx = Math.max(ni.x, nj.x);
     if (x >= minx && x <= maxx) {
@@ -515,8 +555,9 @@ function draw() {
       const strain = Math.abs((L - b.L0) / b.L0);
       stroke = (strain < 0.01) ? '#34c759' : (strain < 0.03 ? '#ffcf33' : '#ff3b30');
     }
+    if (b.type === 'deck') stroke = '#6b4e2e'; // colore dedicato al deck
     ctx.strokeStyle = stroke;
-    ctx.lineWidth = b.isDeck ? 3 : 2;
+    ctx.lineWidth = b.type === 'deck' ? 4 : 2;
     ctx.beginPath(); ctx.moveTo(ni.x, ni.y); ctx.lineTo(nj.x, nj.y); ctx.stroke();
   }
 
@@ -538,6 +579,7 @@ function draw() {
     ctx.beginPath(); ctx.arc(n.x, n.y, 9, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
   }
 
+  // camioncino
   const t = W.truck;
   ctx.fillStyle = '#ff8c00';
   ctx.fillRect(t.x - t.w/2, t.y - t.h/2, t.w, t.h);
@@ -575,7 +617,7 @@ function startSimulation() {
     alert('Inserisci un vincolo sinistro e uno destro (cerniera/incastro) sulla terra ferma prima di avviare.');
     return;
   }
-  // Mantiene posizione a terra; solo velocità iniziale
+  // Mantieni posizione a terra; solo velocità iniziale
   W.truck.vx = 40; W.truck.vy = 0;
   running = true; ui.msg.style.display = 'none'; ui.status.textContent = 'In esecuzione';
 }
@@ -585,14 +627,15 @@ function hardReset(){
   W.nodes = []; W.beams = []; W.truck = { x: 0, y: 0, vx: 0, vy: 0, w: 34, h: 18, mass: 260, onDeck: false };
   mode='fixL'; ui.modeLabel.textContent='Inserisci Vincolo Sinistro';
   ui.msg.style.display = 'block'; ui.status.textContent = 'In pausa';
-  spawnTruckOnGroundLeft(); // posiziona in sicurezza
+  ui.help.style.display = showHelp ? 'block' : 'none'; // mostra solo alla prima volta dopo reset
+  spawnTruckOnGroundLeft();
 }
 
 /* ============ Salva/Carica JSON ============ */
 function saveProject(){
   const data = {
     nodes: W.nodes.map(n=>({x:n.x,y:n.y,fixed:n.fixed,type:n.type})),
-    beams: W.beams.map(b=>({i:b.i,j:b.j,L0:b.L0,A:b.A,isDeck:b.isDeck}))
+    beams: W.beams.map(b=>({i:b.i,j:b.j,L0:b.L0,A:b.A,type:b.type}))
   };
   const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
   const a = document.createElement('a');
@@ -607,8 +650,10 @@ function onLoadFile(ev){
     try{
       const obj = JSON.parse(reader.result);
       hardReset();
+      showHelp = false; // se stai caricando un progetto, non bloccare con l'help
+      ui.help.style.display = 'none';
       for(const n of obj.nodes||[]) addNode(n.x,n.y,!!n.fixed, n.type||'cerniera');
-      for(const b of obj.beams||[]) addBeam(b.i,b.j,b.A||0.0026,MATERIAL.steel,!!b.isDeck);
+      for(const b of obj.beams||[]) addBeam(b.i,b.j,b.A||0.0026,MATERIAL.steel,b.type||'struct');
       ui.msg.style.display='block';
     }catch(err){ alert('File non valido: '+err.message); }
     ev.target.value = '';
@@ -621,14 +666,15 @@ function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 
 /* Bootstrap */
 sizeCanvas();
-spawnTruckOnGroundLeft(); // posiziona in sicurezza sulla terraferma
+spawnTruckOnGroundLeft();
 ui.modeLabel.textContent='Inserisci Vincolo Sinistro';
-loop();
+ui.help.style.display = showHelp ? 'block' : 'none';
+(function loopStart(){ requestAnimationFrame(loop); })();
 </script>
 </body>
 </html>
 """
-path = "/mnt/data/ponte_finale_ground.html"
+path = "/mnt/data/ponte_deck_help.html"
 with open(path, "w", encoding="utf-8") as f:
     f.write(html)
 path

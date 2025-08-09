@@ -30,6 +30,26 @@
         #lang-switch { position: fixed; top: 20px; right: 30px; z-index: 1000; }
         /* Modale Lightbox */
         #lightbox { background: rgba(0,0,0,0.8);}
+        /* Evidenzia Gioco del ponte */
+        .gioco-ponte-btn {
+            border: 1.5px solid #bdbdbd;
+            box-shadow: 0 0 0 1.5px rgba(189,189,189,0.10);
+            background: #fff;
+            position: relative;
+            z-index: 2;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .gioco-ponte-btn:hover, .gioco-ponte-btn:focus {
+            border-color: #9e9e9e;
+            box-shadow: 0 0 0 3px rgba(189,189,189,0.18);
+        }
+        @media (max-width: 640px) {
+            .gioco-ponte-btn {
+                border-width: 1.5px;
+                font-size: 1.1rem;
+                padding: 0.7rem 1.2rem;
+            }
+        }
     </style>
 </head>
 <body class="text-gray-800">
@@ -61,7 +81,8 @@
     <!-- Pulsante gioco ponte -->
     <div class="w-full flex justify-center mt-4 mb-2">
         <a href="ponte.html" target="_blank" rel="noopener"
-           class="nav-link px-2 sm:px-4 py-2 rounded-md text-sm font-medium">
+           class="nav-link gioco-ponte-btn px-2 sm:px-4 py-2 rounded-md text-sm font-medium"
+           style="box-sizing:border-box;">
             Gioco del ponte
         </a>
     </div>

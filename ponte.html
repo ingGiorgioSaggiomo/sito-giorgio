@@ -1,680 +1,683 @@
-# Create the updated HTML file with "deck" beams and a dismissible help panel.
-html = r"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Bridge Saver – Cartoon FEM-lite (deck & help)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+<title>Salva il Ponte – cartoon + verifica strutturale</title>
 <style>
   :root{
-    --ink:#1d1d1f; --good:#34c759; --warn:#ffcf33; --bad:#ff3b30;
-    --sky:#bfe3ff; --panel:#ffffff; --muted:#5f6a7a; --deck:#6b4e2e;
+    --ink:#121212; --panel:#ffffff; --sky:#9ad0ff; --grass:#7fc96b; --sea:#3aa0ff;
+    --deck:#8b5a2b; --deckTilt:#5f3e1d; --good:#34c759; --warn:#ffcf33; --bad:#ff3b30; --muted:#98a1a8;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;background:var(--sky);color:var(--ink)}
-
-  /* Toolbar */
-  #ui{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;padding:.5rem .75rem;background:#fff;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:20}
-  button, select{font-weight:700;border:2px solid var(--ink);background:#fff;border-radius:10px;padding:.5rem .7rem;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem}
-  button svg{width:18px;height:18px}
-  button:disabled{opacity:.55;cursor:not-allowed}
-  .t{display:inline}
-  .i{display:none}
-
-  /* Help (sotto toolbar, non copre i pulsanti) */
-  #help{max-width:980px;margin:.5rem auto 0 auto;background:var(--panel);
-        border:2px solid var(--ink);border-radius:12px;padding:.75rem .9rem;line-height:1.4}
-  #help h2{margin:.2rem 0 .4rem 0;font-size:1.1rem}
-  #help ul{margin:.2rem 0 .6rem 1.1rem}
-  #btnHelpClose{border-color:#0a66cc}
-  #msg{margin:.5rem auto .25rem auto;max-width:980px;background:var(--panel);
-       border:2px solid var(--ink);border-radius:12px;padding:.5rem .75rem;
-       font-weight:800;text-align:center}
-
+  html,body{margin:0;height:100%;background:var(--sky);font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;touch-action:none}
   /* HUD */
-  #hud{display:flex;gap:.75rem;align-items:center;justify-content:space-between;max-width:980px;margin:0 auto .25rem auto;padding:0 .75rem;font-size:.9rem}
-  .badge{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:.15rem .55rem;background:#fff}
-
-  /* Canvas wrapper + responsive */
-  #wrap{max-width:980px;margin:0 auto .5rem auto}
-  canvas{
-    width:100%;
-    height:calc(100svh - 56px - 64px - 46px - 20px);
-    min-height:360px;
-    display:block;
-    background:#9ad0ff;
-    touch-action:none;
-  }
-
-  /* Stats panel */
-  #statsWrap{max-width:980px;margin:0 auto .75rem auto;padding:0 .75rem}
-  details{border:2px solid #ccc;border-radius:10px;background:#fff}
-  summary{cursor:pointer;padding:.5rem .75rem;font-weight:800}
-  .stats{padding:.5rem .75rem .75rem .75rem;font-size:.92rem;color:#222}
-  .muted{color:var(--muted)}
-
-  @media (max-width: 640px){
-    #ui{gap:.35rem}
-    button, select{padding:.45rem .55rem; font-size:14px}
-    #hud{flex-direction:column; align-items:flex-start; gap:.35rem}
-    .badge{font-size:12px}
-  }
-  @media (max-width: 360px){
-    .t{display:none}
-    .i{display:inline}
-  }
+  #hudTop{position:fixed;inset:0 0 auto 0;display:flex;gap:.5rem;align-items:center;justify-content:space-between;padding:.5rem .6rem;z-index:5}
+  #timer{font-size:2rem;font-weight:900;color:#ffb300;-webkit-text-stroke:2px #000;text-shadow:0 0 4px rgba(0,0,0,.25)}
+  #toolbar{display:flex;gap:.4rem;flex-wrap:wrap}
+  button,select{border:2px solid #000;border-radius:12px;background:#fff;font-weight:800;padding:.45rem .6rem;cursor:pointer}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  /* Canvas */
+  #canvas{position:fixed;inset:0;width:100%;height:100%;display:block;background:var(--sky)}
+  /* Banner ARRIVO (decorativo) */
+  #goal{position:fixed;right:14px;bottom:22vh;transform:translateY(50%);z-index:3;font-weight:900;background:#fff;border:3px solid #000;border-radius:10px;padding:.25rem .5rem}
+  /* Pannello guida */
+  #help{position:fixed;inset:0;background:rgba(255,255,255,.96);z-index:10;display:flex;align-items:center;justify-content:center}
+  #card{max-width:min(980px,92vw);border:4px solid #000;border-radius:16px;padding:1rem;background:#fff}
+  #card h1{margin:.25rem 0 .5rem 0}
+  #card ul{margin:.25rem 0 .75rem 1.1rem}
+  #mini{width:min(760px,86vw);height:240px;border:3px solid #000;border-radius:12px;background:#eef;display:block;margin:.5rem auto}
+  #closeHelp{display:block;margin:.5rem auto 0 auto}
+  /* Badge modalità + stato */
+  #mode{position:fixed;left:8px;bottom:8px;background:#fff;border:2px solid #000;border-radius:999px;padding:.25rem .6rem;font-weight:900;z-index:4}
+  #badge{position:fixed;right:8px;bottom:8px;background:#fff;border:2px solid #000;border-radius:8px;padding:.25rem .5rem;font-weight:900;z-index:4}
 </style>
 </head>
 <body>
 
-<!-- Toolbar -->
-<div id="ui" title="Toolbar">
-  <button id="btnFixL" title="Vincolo sinistro"><span class="i">
-    <svg viewBox="0 0 24 24"><path d="M4 3h4v18H4zM8 7h12v2H8zm0 4h10v2H8zm0 4h8v2H8z"/></svg>
-  </span><span class="t">Vincolo Sinistro</span></button>
-
-  <button id="btnFixR" title="Vincolo destro"><span class="i">
-    <svg viewBox="0 0 24 24"><path d="M16 3h4v18h-4zM2 7h14v2H2zm2 4h12v2H4zm4 4h8v2H8z"/></svg>
-  </span><span class="t">Vincolo Destro</span></button>
-
-  <label title="Tipo di vincolo"><span class="t">Tipo vincolo</span>
-    <select id="supportType">
-      <option value="cerniera">Cerniera</option>
-      <option value="incastro">Incastro</option>
-    </select>
-  </label>
-
-  <button id="btnNode" title="Aggiungi nodo"><span class="i">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/></svg>
-  </span><span class="t">Aggiungi Nodo</span></button>
-
-  <button id="btnBeam" title="Aggiungi asta strutturale"><span class="i">
-    <svg viewBox="0 0 24 24"><path d="M4 18L20 6" stroke="currentColor" stroke-width="3" fill="none"/></svg>
-  </span><span class="t">Asta</span></button>
-
-  <button id="btnDeck" title="Aggiungi piano di percorrenza (orizzontale)"><span class="i">
-    <svg viewBox="0 0 24 24"><rect x="3" y="10" width="18" height="4" /></svg>
-  </span><span class="t">Piano di percorrenza</span></button>
-
-  <button id="btnDelNode" title="Cancella nodo"><span class="i">
-    <svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="3"/><path d="M13 8h8v2H13zM13 12h8v2H13zM13 16h8v2H13z"/></svg>
-  </span><span class="t">Cancella Nodo</span></button>
-
-  <button id="btnUndo" title="Annulla ultima asta"><span class="i">
-    <svg viewBox="0 0 24 24"><path d="M7 7v4H3M3 11a8 8 0 1 0 2.3-5.7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-  </span><span class="t">Annulla</span></button>
-
-  <button id="btnRedo" title="Ripristina asta"><span class="i">
-    <svg viewBox="0 0 24 24"><path d="M17 7v4h4M21 11A8 8 0 1 1 18.7 5.3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-  </span><span class="t">Ripristina</span></button>
-
-  <button id="btnSave" title="Salva progetto (JSON)"><span class="i">
-    <svg viewBox="0 0 24 24"><path d="M5 21h14V7l-4-4H5z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 3v6h6V3" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-  </span><span class="t">Salva</span></button>
-
-  <label for="fileLoad" title="Carica progetto" style="display:inline-flex;align-items:center;gap:.4rem;border:2px solid var(--ink);border-radius:10px;padding:.5rem .7rem;background:#fff;cursor:pointer;">
-    <span class="i">
-      <svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14" stroke="currentColor" stroke-width="2" fill="none"/></svg>
-    </span><span class="t">Carica</span>
-    <input id="fileLoad" type="file" accept="application/json" style="display:none"/>
-  </label>
-
-  <button id="btnReset" title="Riavvia progetto (reset)"><span class="i">
-    <svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M20 8A8 8 0 1 0 10 20" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-  </span><span class="t">Reset</span></button>
-
-  <button id="btnStart" title="Avvia simulazione"><span class="i">
-    <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-  </span><span class="t">Avvia simulazione</span></button>
+<!-- HUD superiore -->
+<div id="hudTop" aria-live="polite">
+  <div id="timer">0.0s</div>
+  <div id="toolbar">
+    <button id="btnFixL" title="Inserisci vincolo sinistro sulla terraferma">Vincolo SX</button>
+    <button id="btnFixR" title="Inserisci vincolo destro sulla terraferma">Vincolo DX</button>
+    <label>Tipo
+      <select id="supportType" title="Tipo vincolo (grafico nel modello truss)">
+        <option value="cerniera">Cerniera</option>
+        <option value="incastro">Incastro</option>
+      </select>
+    </label>
+    <button id="btnNode" title="Aggiungi nodo libero">Nodo</button>
+    <button id="btnBeam" title="Aggiungi asta strutturale">Asta</button>
+    <button id="btnDeck" title="Aggiungi piano di percorrenza (±10% pendenza, ≥3 segmenti)">Piano</button>
+    <button id="btnDelNode" title="Cancella nodo">Cancella nodo</button>
+    <button id="btnUndo" title="Annulla ultima asta">Annulla</button>
+    <button id="btnRedo" title="Ripristina asta">Ripristina</button>
+    <button id="btnSea" title="Attiva/Disattiva mare animato">Mare: ON</button>
+    <button id="btnSound" title="Attiva/Disattiva suono splash">Splash: ON</button>
+    <button id="btnStart" title="Verifica e avvia simulazione">Avvia</button>
+    <button id="btnReset" title="Reset totale">Reset</button>
+  </div>
 </div>
 
-<!-- Help -->
-<div id="help">
-  <h2>Come si gioca</h2>
-  <ul>
-    <li><b>Obiettivo</b>: fai attraversare il camion sul ponte senza crolli per almeno 6 secondi, usando il minimo materiale.</li>
-    <li><b>Vincoli</b>: inserisci un vincolo sinistro e uno destro (cerniera/incastro) <u>sulla terraferma</u>.</li>
-    <li><b>Nodi & Aste</b>: aggiungi nodi e collega con <b>aste strutturali</b> per irrigidire la trave reticolare.</li>
-    <li><b>Piano di percorrenza</b>: inserisci <b>aste speciali orizzontali</b> (piano) dove il camion deve passare. Non sono attraversabili.</li>
-    <li><b>Avvia</b>: premi “Avvia simulazione”. Il camion accelera/ralenta in base alla pendenza del piano.</li>
-    <li><b>Strumenti</b>: Annulla/Ripristina aste, Cancella nodo, Salva/Carica progetto (JSON), Reset per ricominciare.</li>
-  </ul>
-  <button id="btnHelpClose">Ho capito</button>
-</div>
-
-<!-- Banner -->
-<div id="msg">Prima di partire progetta il ponte, ingegnere</div>
-
-<!-- HUD -->
-<div id="hud">
-  <div>Modalità: <span class="badge" id="modeLabel">Inserisci Vincolo Sinistro</span></div>
-  <div>Materiale usato: <span id="matLen">0.00</span> m</div>
-  <div>Aste rotte: <span id="brokenCnt">0</span></div>
-  <div>Stato: <span id="status">In pausa</span></div>
-</div>
+<!-- Banner “ARRIVO” (decorativo; la logica usa il vincolo DX) -->
+<div id="goal">ARRIVO ⛳</div>
 
 <!-- Canvas -->
-<div id="wrap">
-  <canvas id="cv"></canvas>
-</div>
+<canvas id="canvas"></canvas>
 
-<!-- Statistiche -->
-<div id="statsWrap">
-  <details id="statsDetails">
-    <summary>Statistiche ponte</summary>
-    <div class="stats">
-      <div><strong>Allungamento max:</strong> <span id="sMax">–</span></div>
-      <div><strong>Allungamento min:</strong> <span id="sMin">–</span></div>
-      <div><strong>Aste integre:</strong> <span id="sOk">0</span> – <strong>rotte:</strong> <span id="sKo">0</span></div>
-      <div class="muted" id="sTop">Aste critiche: –</div>
-    </div>
-  </details>
+<!-- Badge -->
+<div id="mode">Modalità: Vincolo SX</div>
+<div id="badge">Stato: In costruzione</div>
+
+<!-- Pannello guida iniziale -->
+<div id="help">
+  <div id="card">
+    <h1>Salva il Ponte – Istruzioni rapide</h1>
+    <ul>
+      <li><b>Obiettivo:</b> porta il camion alla sponda destra. Vittoria al contatto con il versante DX.</li>
+      <li><b>Vincoli:</b> 1 SX e 1 DX (posizionabili solo su <u>terraferma</u>).</li>
+      <li><b>Piano:</b> almeno <b>3 segmenti</b> “Piano” (±10% pendenza) in continuità da SX a DX.</li>
+      <li><b>Traliccio:</b> stabilizza il piano con <b>aste</b> (solo assiali). Se compaiono <b>cinematismi</b> la struttura crolla.</li>
+      <li><b>Fisica:</b> gravità verso il basso, rottura aste per superamento tensione.</li>
+      <li><b>Punteggio:</b> dipende dal <b>tempo</b> (cronometro in alto a destra).</li>
+    </ul>
+    <canvas id="mini"></canvas>
+    <button id="closeHelp"><b>Ho capito</b></button>
+  </div>
 </div>
 
 <script>
-/* ============ Canvas responsive ============ */
-const cv = document.getElementById('cv');
+/* ===== 1) CANVAS & DIMENSIONI ===== */
+const cv = document.getElementById('canvas');
 const ctx = cv.getContext('2d');
-function sizeCanvas(){
+function fitCanvas(){
   const DPR = Math.min(2, window.devicePixelRatio||1);
-  const cssW = Math.max(1, cv.clientWidth);
-  const cssH = Math.max(1, cv.clientHeight);
-  cv.width  = Math.floor(cssW * DPR);
-  cv.height = Math.floor(cssH * DPR);
+  cv.width  = Math.floor(cv.clientWidth * DPR);
+  cv.height = Math.floor(cv.clientHeight * DPR);
   ctx.setTransform(DPR,0,0,DPR,0,0);
 }
-window.addEventListener('resize', sizeCanvas, {passive:true});
-window.addEventListener('orientationchange', ()=>setTimeout(sizeCanvas, 50), {passive:true});
+function ensureCanvasSize(){
+  cv.style.width = '100vw';
+  cv.style.height = '100vh';
+  fitCanvas();
+}
+ensureCanvasSize();
+addEventListener('resize', ensureCanvasSize, {passive:true});
+addEventListener('orientationchange', ()=>setTimeout(ensureCanvasSize,80), {passive:true});
 
-/* ============ Stato ============ */
-const ui = {
-  fixL: document.getElementById('btnFixL'),
-  fixR: document.getElementById('btnFixR'),
-  type: document.getElementById('supportType'),
-  node: document.getElementById('btnNode'),
-  beam: document.getElementById('btnBeam'),
-  deck: document.getElementById('btnDeck'),
-  delNode: document.getElementById('btnDelNode'),
-  undo: document.getElementById('btnUndo'),
-  redo: document.getElementById('btnRedo'),
-  save: document.getElementById('btnSave'),
-  load: document.getElementById('fileLoad'),
-  reset: document.getElementById('btnReset'),
-  start: document.getElementById('btnStart'),
-  modeLabel: document.getElementById('modeLabel'),
-  matLen: document.getElementById('matLen'),
-  brokenCnt: document.getElementById('brokenCnt'),
-  status: document.getElementById('status'),
-  msg: document.getElementById('msg'),
-  sMax: document.getElementById('sMax'),
-  sMin: document.getElementById('sMin'),
-  sOk: document.getElementById('sOk'),
-  sKo: document.getElementById('sKo'),
-  sTop: document.getElementById('sTop'),
-  help: document.getElementById('help'),
-  helpClose: document.getElementById('btnHelpClose')
-};
-
-let mode = 'fixL';              // 'fixL'|'fixR'|'node'|'beam'|'deck'|'del'
+/* ===== 2) STATO GLOBALE ===== */
 let running = false;
+let seaAnimated = true;
+let soundEnabled = true;
+let showHelp = true;
+
+let mode = 'fixL';             // 'fixL' | 'fixR' | 'node' | 'beam' | 'deck' | 'del'
+let selectFirst = null;        // primo nodo selezionato per asta/piano
 let leftSupport = null, rightSupport = null;
-let selectFirst = null;
 let beamsRedo = [];
-let winAccum = 0, score = 0;
-let showHelp = true; // mostra il pannello al primo avvio e dopo reset, finché non chiuso
+let score = 0;
 
-const MATERIAL = { steel: { E: 2.0e11, limit: 2.0e8, rho: 7850 } };
-
+const MATERIALS = { steel: { E: 2.0e11, limit: 2.0e8, rho: 7850 } };
 const W = {
   g: 9.81,
   damping: 0.995,
-  nodes: [],   // {x,y,px,py,fx,fy,mass,fixed,type}
-  beams: [],   // {i,j,L0,A,mat,type:'struct'|'deck',broken}
-  truck: { x: 0, y: 0, vx: 0, vy: 0, w: 34, h: 18, mass: 260, onDeck: false }
+  nodes: [],   // {x,y,px,py,fx,fy,mass,fixed,type,vx,vy}
+  beams: [],   // {i,j,L0,A,mat,type:'struct'|'deck',broken,tilted:boolean}
+  seaPhase: 0
+};
+let truck = null;
+let timeStart = 0;
+const timerEl = document.getElementById('timer');
+const badgeEl = document.getElementById('badge');
+function setTimer(sec){ timerEl.textContent = (Math.max(0,sec)).toFixed(1)+'s'; }
+function setBadge(t){ badgeEl.textContent = t; }
+
+/* ===== 3) RIFERIMENTI UI ===== */
+const ui = {
+  fixL:  document.getElementById('btnFixL'),
+  fixR:  document.getElementById('btnFixR'),
+  type:  document.getElementById('supportType'),
+  node:  document.getElementById('btnNode'),
+  beam:  document.getElementById('btnBeam'),
+  deck:  document.getElementById('btnDeck'),
+  del:   document.getElementById('btnDelNode'),
+  undo:  document.getElementById('btnUndo'),
+  redo:  document.getElementById('btnRedo'),
+  sea:   document.getElementById('btnSea'),
+  sound: document.getElementById('btnSound'),
+  start: document.getElementById('btnStart'),
+  reset: document.getElementById('btnReset'),
+  mode:  document.getElementById('mode'),
+  help:  document.getElementById('help'),
+  closeHelp: document.getElementById('closeHelp')
 };
 
-const nodeX = i => W.nodes[i].x;
-const nodeY = i => W.nodes[i].y;
-const rnd = (n,d=2)=>Number(n).toFixed(d);
-
-/* ============ UI binding ============ */
-ui.fixL.onclick   = ()=>{ mode='fixL'; ui.modeLabel.textContent='Inserisci Vincolo Sinistro'; };
-ui.fixR.onclick   = ()=>{ mode='fixR'; ui.modeLabel.textContent='Inserisci Vincolo Destro'; };
-ui.node.onclick   = ()=>{ mode='node'; ui.modeLabel.textContent='Aggiungi Nodo'; };
-ui.beam.onclick   = ()=>{ mode='beam'; ui.modeLabel.textContent='Aggiungi Asta'; };
-ui.deck.onclick   = ()=>{ mode='deck'; ui.modeLabel.textContent='Aggiungi Piano di percorrenza'; };
-ui.delNode.onclick= ()=>{ mode='del';  ui.modeLabel.textContent='Cancella Nodo'; };
-ui.undo.onclick   = ()=> undoBeam();
-ui.redo.onclick   = ()=> redoBeam();
-ui.reset.onclick  = ()=> hardReset();
-ui.start.onclick  = ()=> startSimulation();
-ui.save.onclick   = ()=> saveProject();
-ui.load.addEventListener('change', onLoadFile);
-ui.helpClose.onclick = ()=>{ ui.help.style.display='none'; showHelp=false; };
-
-/* ============ Terreno e hit-test ============ */
-function terrainPolys(){
-  const w = cv.clientWidth, h = cv.clientHeight;
-  const riverY = Math.floor(h*0.68), riverH = Math.floor(h*0.12);
-
-  const left = [
-    {x:0, y:riverY+riverH},
-    {x:0, y:riverY-140},
-    {x:160, y:riverY-40},
-    {x:240, y:riverY-10},
-    {x:280, y:riverY},
-    {x:0, y:riverY}
+/* ===== 4) GEOMETRIA SCENICA (pendii + mare) ===== */
+function geo(){
+  const w=cv.clientWidth, h=cv.clientHeight;
+  const waterTop = Math.floor(h*0.70);
+  const waterH   = Math.floor(h*0.18);
+  const leftSlope = [
+    {x:0, y:waterTop+waterH},
+    {x:0, y:waterTop-160},
+    {x:160, y:waterTop-60},
+    {x:240, y:waterTop-20},
+    {x:280, y:waterTop},
+    {x:0, y:waterTop}
   ];
-  const right = [
-    {x:w, y:riverY+riverH},
-    {x:w, y:riverY-150},
-    {x:w-160, y:riverY-50},
-    {x:w-90,  y:riverY-20},
-    {x:w-40,  y:riverY},
-    {x:w, y:riverY}
+  const rightSlope = [
+    {x:w, y:waterTop+waterH},
+    {x:w, y:waterTop-170},
+    {x:w-160, y:waterTop-60},
+    {x:w-90,  y:waterTop-25},
+    {x:w-40,  y:waterTop},
+    {x:w, y:waterTop}
   ];
-  const rear = [
-    {x:0, y:riverY+riverH},
-    {x:w, y:riverY+riverH},
-    {x:w, y:h},
-    {x:0, y:h}
-  ];
-  const river = [
-    {x:0, y:riverY},
-    {x:w, y:riverY},
-    {x:w, y:riverY+riverH},
-    {x:0, y:riverY+riverH}
-  ];
-  return {left,right,rear,river};
+  return {w,h, waterTop, waterH, leftSlope, rightSlope};
 }
-function pointInPoly(p, poly){
-  let c=false; const x=p.x,y=p.y; const n=poly.length;
-  for(let i=0,j=n-1;i<n;j=i++){
+function pointInPoly(px,py, poly){
+  let c=false; for(let i=0,j=poly.length-1;i<poly.length;j=i++){
     const xi=poly[i].x, yi=poly[i].y, xj=poly[j].x, yj=poly[j].y;
-    const intersect=((yi>y)!==(yj>y)) && (x<(xj-xi)*(y-yi)/(yj-yi+1e-9)+xi);
-    if(intersect) c=!c;
-  }
-  return c;
+    const intersect=((yi>py)!==(yj>py)) && (px < (xj-xi)*(py-yi)/(yj-yi+1e-9)+xi);
+    if (intersect) c=!c;
+  } return c;
 }
-function isOnTerrain(x,y){
-  const {left,right,rear,river} = terrainPolys();
-  if(pointInPoly({x,y}, river)) return false;
-  return pointInPoly({x,y}, left) || pointInPoly({x,y}, right) || pointInPoly({x,y}, rear);
+function onTerrain(x,y){
+  const g=geo();
+  return pointInPoly(x,y,g.leftSlope) || pointInPoly(x,y,g.rightSlope);
 }
-
-/* ======== Ground profile & safe spawn ======== */
 function groundYAt(x){
-  const w = cv.clientWidth, h = cv.clientHeight;
-  const riverY = Math.floor(h*0.68), riverH = Math.floor(h*0.12);
-  const segsLeft = [
-    {x0:0,   y0:riverY-140, x1:160, y1:riverY-40},
-    {x0:160, y0:riverY-40,  x1:240, y1:riverY-10},
-    {x0:240, y0:riverY-10,  x1:280, y1:riverY}
+  const {w,waterTop} = geo();
+  const leftSegs = [
+    {x0:0,   y0:waterTop-160, x1:160, y1:waterTop-60},
+    {x0:160, y0:waterTop-60,  x1:240, y1:waterTop-20},
+    {x0:240, y0:waterTop-20,  x1:280, y1:waterTop}
   ];
-  const segsRight = [
-    {x0:w-160, y0:riverY-50, x1:w-90, y1:riverY-20},
-    {x0:w-90,  y0:riverY-20, x1:w-40, y1:riverY}
+  const rightSegs = [
+    {x0:w-160, y0:waterTop-60, x1:w-90, y1:waterTop-25},
+    {x0:w-90,  y0:waterTop-25, x1:w-40, y1:waterTop}
   ];
-  const rearY = riverY + riverH;
-  for(const s of segsLeft){
+  for(const s of leftSegs){
     if(x>=Math.min(s.x0,s.x1) && x<=Math.max(s.x0,s.x1)){
-      const t = (x - s.x0) / (s.x1 - s.x0 + 1e-9);
-      return s.y0 + t*(s.y1 - s.y0);
+      const t=(x-s.x0)/(s.x1-s.x0+1e-9); return s.y0+t*(s.y1-s.y0);
     }
   }
-  for(const s of segsRight){
+  for(const s of rightSegs){
     if(x>=Math.min(s.x0,s.x1) && x<=Math.max(s.x0,s.x1)){
-      const t = (x - s.x0) / (s.x1 - s.x0 + 1e-9);
-      return s.y0 + t*(s.y1 - s.y0);
+      const t=(x-s.x0)/(s.x1-s.x0+1e-9); return s.y0+t*(s.y1-s.y0);
     }
   }
-  if(x>280 && x<(w-40)) return rearY;
-  return rearY;
-}
-function spawnTruckOnGroundLeft(){
-  const x = 60;
-  const yGround = groundYAt(x);
-  W.truck.x = x;
-  W.truck.y = yGround - W.truck.h/2;
-  W.truck.vx = 0;
-  W.truck.vy = 0;
+  return Infinity;
 }
 
-/* ============ Input pointer (mouse+touch) ============ */
-cv.addEventListener('pointerdown', (e) => {
-  e.preventDefault();
-  const r = cv.getBoundingClientRect();
-  const x = e.clientX - r.left;
-  const y = e.clientY - r.top;
+/* ===== 5) COSTRUZIONE: nodi, aste, piano ===== */
+function addNode(x,y,fixed=false,type='cerniera'){
+  W.nodes.push({x,y,px:x,py:y,fx:0,fy:0,mass:fixed?1e9:1,fixed,type,vx:0,vy:0});
+  return W.nodes.length-1;
+}
+function delNode(idx){
+  W.beams = W.beams.filter(b=>b.i!==idx && b.j!==idx)
+                   .map(b=>({...b,i:b.i>idx?b.i-1:b.i, j:b.j>idx?b.j-1:b.j}));
+  if (leftSupport===idx) leftSupport=null;
+  if (rightSupport===idx) rightSupport=null;
+  if (leftSupport>idx) leftSupport--;
+  if (rightSupport>idx) rightSupport--;
+  W.nodes.splice(idx,1);
+}
+function pickNode(x,y, R=14){
+  let sel=-1, best=1e9;
+  for (let i=0;i<W.nodes.length;i++){
+    const n=W.nodes[i]; const d=Math.hypot(n.x-x,n.y-y);
+    if (d<R && d<best){ sel=i; best=d; }
+  }
+  return sel;
+}
+function addBeam(i,j,A,mat,type){
+  if (i===j) return;
+  if (W.beams.some(b => (b.i===i&&b.j===j)||(b.i===j&&b.j===i))) return;
+  const xi=W.nodes[i].x, yi=W.nodes[i].y, xj=W.nodes[j].x, yj=W.nodes[j].y;
+  const L0 = Math.hypot(xj-xi, yj-yi);
+  const dx = xj-xi, dy=yj-yi;
+  let tilted=false;
+  if (type==='deck'){
+    const ax = Math.abs(dx); const ay=Math.abs(dy);
+    if (ax<1e-6) return;
+    const slope = ay/ax;
+    if (slope>0.1) return;  // ±10%
+    tilted = slope>0.01;
+  }
+  W.beams.push({i,j,L0,A,mat,type,broken:false,tilted});
+}
+function undo(){ const b = W.beams.pop(); if (b) beamsRedo.push(b); }
+function redo(){ const b = beamsRedo.pop(); if (b) W.beams.push(b); }
+function deckConnected(){
+  const N=W.nodes.length;
+  const adj = Array.from({length:N},()=>[]);
+  for (const b of W.beams) if (b.type==='deck' && !b.broken){ adj[b.i].push(b.j); adj[b.j].push(b.i); }
+  if (leftSupport===null || rightSupport===null) return false;
+  const seen=new Set([leftSupport]); const q=[leftSupport];
+  while(q.length){
+    const u=q.shift(); if (u===rightSupport) return true;
+    for (const v of adj[u]) if (!seen.has(v)){ seen.add(v); q.push(v); }
+  }
+  return false;
+}
+function deckCount(){ return W.beams.filter(b=>b.type==='deck').length; }
 
+/* ===== 6) INPUT & TOOLBAR (pointer events) ===== */
+cv.addEventListener('pointerdown', e=>{
+  const r=cv.getBoundingClientRect();
+  const x=e.clientX-r.left, y=e.clientY-r.top;
   if (running && mode!=='del') return;
 
-  if (mode === 'fixL') {
-    if (leftSupport !== null) { alert('Il vincolo sinistro è già stato inserito.'); return; }
-    if (!isOnTerrain(x,y)) { alert('Posiziona il vincolo sulla terra ferma.'); return; }
-    leftSupport = addNode(x, y, true, ui.type.value);
-    mode = 'node'; ui.modeLabel.textContent = 'Aggiungi Nodo';
-  } else if (mode === 'fixR') {
-    if (rightSupport !== null) { alert('Il vincolo destro è già stato inserito.'); return; }
-    if (!isOnTerrain(x,y)) { alert('Posiziona il vincolo sulla terra ferma.'); return; }
-    rightSupport = addNode(x, y, true, ui.type.value);
-    mode = 'node'; ui.modeLabel.textContent = 'Aggiungi Nodo';
-  } else if (mode === 'node') {
-    addNode(x, y, false);
-  } else if (mode === 'beam' || mode === 'deck') {
-    const idx = pickNode(x, y);
-    if (idx < 0) { selectFirst = null; return; }
-    if (selectFirst === null) selectFirst = idx;
-    else if (selectFirst !== idx) {
-      const i = selectFirst, j = idx;
-      const dy = Math.abs(nodeY(i) - nodeY(j));
-      if (mode === 'deck') {
-        const tol = 8; // deve essere quasi orizzontale
-        if (dy > tol) { alert('Il piano di percorrenza deve essere orizzontale (tolleranza ±8px).'); selectFirst = null; return; }
-        addBeam(i, j, 0.005, MATERIAL.steel, 'deck'); // sezione un po’ più grande
-      } else {
-        addBeam(i, j, 0.0026, MATERIAL.steel, 'struct');
-      }
-      selectFirst = null;
+  if (mode==='fixL'){
+    if (leftSupport!==null) return alert('Vincolo sinistro già inserito.');
+    if (!onTerrain(x,y))   return alert('Posiziona il vincolo sulla terraferma.');
+    leftSupport = addNode(x,y,true,ui.type.value);
+    mode='node'; ui.mode.textContent='Modalità: Nodo';
+  } else if (mode==='fixR'){
+    if (rightSupport!==null) return alert('Vincolo destro già inserito.');
+    if (!onTerrain(x,y))     return alert('Posiziona il vincolo sulla terraferma.');
+    rightSupport = addNode(x,y,true,ui.type.value);
+    mode='node'; ui.mode.textContent='Modalità: Nodo';
+  } else if (mode==='node'){
+    addNode(x,y,false);
+  } else if (mode==='beam' || mode==='deck'){
+    const idx=pickNode(x,y);
+    if (idx<0){ selectFirst=null; return; }
+    if (selectFirst===null) selectFirst=idx;
+    else if (selectFirst!==idx){
+      const i=selectFirst, j=idx;
+      if (mode==='deck') addBeam(i,j,0.005,MATERIALS.steel,'deck');
+      else               addBeam(i,j,0.0026,MATERIALS.steel,'struct');
+      selectFirst=null;
     }
-  } else if (mode === 'del') {
-    const idx = pickNode(x, y);
-    if (idx >= 0) deleteNode(idx);
+  } else if (mode==='del'){
+    const idx=pickNode(x,y);
+    if (idx>=0) delNode(idx);
   }
-}, {passive:false});
-
-/* ============ Costruzione elementi ============ */
-function addNode(x, y, fixed=false, type='cerniera') {
-  if (fixed && type!=='cerniera' && type!=='incastro') type = 'cerniera';
-  W.nodes.push({ x, y, px:x, py:y, fx:0, fy:0, mass: fixed? 1e9 : 1, fixed, type });
-  return W.nodes.length - 1;
-}
-function pickNode(mx, my) {
-  const R = 14;
-  return W.nodes.findIndex(n => Math.hypot(n.x - mx, n.y - my) < R);
-}
-function addBeam(i, j, A, mat, type='struct') {
-  if (i === j) return;
-  if (W.beams.some(b => (b.i===i && b.j===j) || (b.i===j && b.j===i))) return;
-  const L0 = Math.hypot(nodeX(j) - nodeX(i), nodeY(j) - nodeY(i));
-  W.beams.push({ i, j, L0, A, mat, type, broken:false });
-  updateHUD();
-}
-function undoBeam() { const b = W.beams.pop(); if (b) beamsRedo.push(b); updateHUD(); }
-function redoBeam() { const b = beamsRedo.pop(); if (b) W.beams.push(b); updateHUD(); }
-function deleteNode(idx){
-  W.beams = W.beams.filter(b => b.i!==idx && b.j!==idx)
-                   .map(b => ({...b, i: b.i>idx? b.i-1 : b.i, j: b.j>idx? b.j-1 : b.j}));
-  if (leftSupport === idx) leftSupport = null;
-  if (rightSupport === idx) rightSupport = null;
-  if (leftSupport  > idx) leftSupport--;
-  if (rightSupport > idx) rightSupport--;
-  W.nodes.splice(idx,1);
-  updateHUD();
-}
-
-/* ============ Fisica ============ */
-function step(dt) {
+});
+ui.fixL.onclick = ()=>{mode='fixL'; ui.mode.textContent='Modalità: Vincolo SX';};
+ui.fixR.onclick = ()=>{mode='fixR'; ui.mode.textContent='Modalità: Vincolo DX';};
+ui.node.onclick = ()=>{mode='node'; ui.mode.textContent='Modalità: Nodo';};
+ui.beam.onclick = ()=>{mode='beam'; ui.mode.textContent='Modalità: Asta';};
+ui.deck.onclick = ()=>{mode='deck'; ui.mode.textContent='Modalità: Piano (±10%)';};
+ui.del.onclick  = ()=>{mode='del';  ui.mode.textContent='Modalità: Cancella nodo';};
+ui.undo.onclick = ()=> undo();
+ui.redo.onclick = ()=> redo();
+ui.sea.onclick  = ()=>{ seaAnimated=!seaAnimated; ui.sea.textContent='Mare: '+(seaAnimated?'ON':'OFF'); };
+ui.sound.onclick= ()=>{ soundEnabled=!soundEnabled; ui.sound.textContent='Splash: '+(soundEnabled?'ON':'OFF'); };
+ui.reset.onclick= ()=> hardReset();
+ui.start.onclick= ()=> startSimulation();
+ui.closeHelp.onclick = ()=>{ ui.help.style.display='none'; showHelp=false; };
+/* ===== 7) FISICA (truss assiale semplificata) + CAMION ===== */
+function step(dt){
   if (!running) return;
 
-  for (const n of W.nodes) { n.fx = 0; n.fy = n.fixed ? 0 : n.mass * W.g; }
+  // azzera forze + gravità
+  for (const n of W.nodes){ n.fx=0; n.fy = n.fixed?0:n.mass*W.g; }
 
-  let brokenCount = 0, totalLen = 0, sMax=-Infinity, sMin=Infinity;
-  const strains = [];
-
-  for (const b of W.beams) {
-    const ni = W.nodes[b.i], nj = W.nodes[b.j];
-    const dx = nj.x - ni.x, dy = nj.y - ni.y;
-    const L = Math.hypot(dx, dy) || 1e-6;
-    totalLen += L;
-
-    if (b.broken) { brokenCount++; continue; }
-
-    const strain = (L - b.L0) / b.L0;
-    const stress = b.mat.E * strain;
-    sMax = Math.max(sMax, strain);
-    sMin = Math.min(sMin, strain);
-    strains.push({idx:b, abs:Math.abs(strain)});
-
-    if (Math.abs(stress) > b.mat.limit) { b.broken = true; brokenCount++; continue; }
-
-    const k = (b.mat.E * b.A) / b.L0;
-    const F = k * (L - b.L0) / L;
-    const Fx = F * dx, Fy = F * dy;
-
-    if (!ni.fixed) { ni.fx += Fx; ni.fy += Fy; }
-    if (!nj.fixed) { nj.fx -= Fx; nj.fy -= Fy; }
+  // aste elastiche + rottura per limite
+  for (const b of W.beams){
+    const ni=W.nodes[b.i], nj=W.nodes[b.j];
+    const dx=nj.x-ni.x, dy=nj.y-ni.y;
+    const L=Math.hypot(dx,dy)||1e-6;
+    if (b.broken) continue;
+    const strain=(L-b.L0)/b.L0;
+    const stress=b.mat.E*strain;
+    if (Math.abs(stress)>b.mat.limit){ b.broken=true; continue; }
+    const k=(b.mat.E*b.A)/b.L0;
+    const F=k*(L-b.L0)/L;
+    const Fx=F*dx, Fy=F*dy;
+    if (!ni.fixed){ ni.fx += Fx; ni.fy += Fy; }
+    if (!nj.fixed){ nj.fx -= Fx; nj.fy -= Fy; }
   }
 
-  for (const n of W.nodes) {
+  // integrazione (verlet smorzato)
+  for (const n of W.nodes){
     if (n.fixed) continue;
-    const vx = (n.x - n.px) * W.damping + (n.fx / n.mass) * dt * dt;
-    const vy = (n.y - n.py) * W.damping + (n.fy / n.mass) * dt * dt;
-    n.px = n.x; n.py = n.y; n.x += vx; n.y += vy;
+    const vx=(n.x-n.px)*W.damping + (n.fx/n.mass)*dt*dt;
+    const vy=(n.y-n.py)*W.damping + (n.fy/n.mass)*dt*dt;
+    n.px=n.x; n.py=n.y; n.x+=vx; n.y+=vy;
   }
 
-  // veicolo
-  const t = W.truck;
-  // 1) gravità base
-  t.vy += W.g * dt * 50;
+  // camion
+  const t=truck;
+  t.vy += W.g*dt*50; // gravità “cartoon”
+  const seg=deckSegAt(t.x);
+  if (seg){
+    const {y:below, dx, dy} = seg;
+    const ang = Math.atan2(dy,dx);
+    const gAlong = W.g*Math.sin(ang);
+    t.vx += gAlong*dt*50;
+    if (t.y + t.h/2 >= below - 1){ t.y=below - t.h/2; t.vy=0; t.onDeck=true; }
+    else t.onDeck=false;
+    t.vx = clamp(t.vx, -160, 280);
+  } else t.onDeck=false;
+  t.x += t.vx*dt; t.y += t.vy*dt;
 
-  // 2) interazione con piano di percorrenza (non attraversabile)
-  const seg = deckSegAt(t.x);
-  if (seg) {
-    const { y:below, dx, dy } = seg;
-    const ang = Math.atan2(dy, dx);
-    const gAlong = W.g * Math.sin(ang);
-    t.vx += gAlong * dt * 50;
-    t.vx = clamp(t.vx, -100, 260);
-    // collisione: se entra nel deck o lo supera verso il basso, appoggia
-    if (t.y + t.h/2 >= below - 1) {
-      t.y = below - t.h/2; t.vy = 0; t.onDeck = true;
+  // vittoria: x oltre vincolo destro
+  if (rightSupport!==null){
+    const rx = W.nodes[rightSupport].x;
+    if (t.x >= rx){
+      running=false;
+      const elapsed=(performance.now()-timeStart)/1000;
+      score = Math.max(0, Math.round(1000 - 10*elapsed));
+      setTimer(elapsed);
+      setBadge('Stato: Vittoria');
+      setTimeout(()=>alert('Vittoria! Tempo: '+elapsed.toFixed(1)+'s · Punteggio: '+score),60);
     }
-  } else {
-    t.onDeck = false;
   }
 
-  t.x += t.vx * dt;
-  t.y += t.vy * dt;
+  // sconfitta: camion in mare
+  const {waterTop} = geo();
+  if (t.y - t.h/2 > waterTop + 6){
+    triggerDefeat('Il camion è caduto in mare. Punteggio azzerato.');
+  }
 
-  // vittoria
-  if (rightSupport !== null && t.x > W.nodes[rightSupport].x + 20 && brokenCount < W.beams.length) {
-    winAccum += dt;
-    if (winAccum >= 6) {
-      running = false; ui.status.textContent = 'Vittoria';
-      calcScore(); setTimeout(()=>alert('Missione completata! Punteggio: '+score), 50);
-    }
-  } else winAccum = 0;
+  // se, dopo rotture, la struttura diventa labile → crollo dinamico
+  const chk = checkDeterminacy();
+  if (!chk.stable){
+    for (const b of W.beams) b.broken = true;
+    setBadge('Stato: Crollo (meccanismo)');
+  }
 
-  // HUD + Stats
-  ui.brokenCnt.textContent = brokenCount;
-  ui.matLen.textContent = rnd((totalLen/50), 2);
-  ui.sMax.textContent = isFinite(sMax)? rnd(sMax,4) : '–';
-  ui.sMin.textContent = isFinite(sMin)? rnd(sMin,4) : '–';
-  ui.sOk.textContent  = (W.beams.length - brokenCount);
-  ui.sKo.textContent  = brokenCount;
-  strains.sort((a,b)=>b.abs-a.abs);
-  const top = strains.slice(0,3).map(s=>{
-    const b = s.idx; return `(${b.i}-${b.j}) ε=${rnd(s.abs,4)}`;
-  }).join('  ·  ');
-  document.getElementById('sTop').textContent = top || 'Aste critiche: –';
+  // cronometro
+  setTimer((performance.now()-timeStart)/1000);
 }
-
-function deckSegAt(x) {
-  let best = null; let bestW = 1e9;
-  for (const b of W.beams) {
+function triggerDefeat(msg){
+  running=false; score=0;
+  startSplash(truck.x, geo().waterTop+20);
+  if (soundEnabled) playSplash();
+  setBadge('Stato: Sconfitta');
+  setTimeout(()=>alert('Sconfitta: '+msg),80);
+  setTimeout(()=> hardReset(), 420);
+}
+// segmento di “piano” attivo a x
+function deckSegAt(x){
+  let best=null, bestW=1e9;
+  for (const b of W.beams){
     if (b.type!=='deck' || b.broken) continue;
-    const ni = W.nodes[b.i], nj = W.nodes[b.j];
-    const minx = Math.min(ni.x, nj.x), maxx = Math.max(ni.x, nj.x);
-    if (x >= minx && x <= maxx) {
-      const dx = nj.x - ni.x, dy = nj.y - ni.y;
-      if (Math.abs(dx) < 1e-6) continue;
-      const r = (x - ni.x) / dx;
-      const y = ni.y + r * dy;
-      const cx = ni.x + r * dx;
-      const w = Math.abs(x - cx);
-      if (w < bestW) { best = { y, dx, dy }; bestW = w; }
+    const ni=W.nodes[b.i], nj=W.nodes[b.j];
+    const minx=Math.min(ni.x,nj.x), maxx=Math.max(ni.x,nj.x);
+    if (x>=minx && x<=maxx){
+      const dx=nj.x-ni.x, dy=nj.y-ni.y;
+      if (Math.abs(dx)<1e-6) continue;
+      const r=(x-ni.x)/dx;
+      const y=ni.y+r*dy;
+      const cx=ni.x+r*dx; const w=Math.abs(x-cx);
+      if (w<bestW){ best={y,dx,dy}; bestW=w; }
     }
   }
   return best;
 }
 
-/* ============ Rendering ============ */
-function drawBackground(){
-  const w = cv.clientWidth, h = cv.clientHeight;
-  // cielo
-  ctx.fillStyle = '#9ad0ff'; ctx.fillRect(0,0,w,h);
-  // fiume
-  const riverY = Math.floor(h*0.68), riverH = Math.floor(h*0.12);
-  ctx.fillStyle = '#5bb0ff'; ctx.fillRect(0, riverY, w, riverH);
-  // sponda sinistra
-  ctx.fillStyle = '#86c36b';
-  ctx.beginPath(); ctx.moveTo(0, riverY+riverH);
-  ctx.lineTo(0, riverY-140); ctx.lineTo(160, riverY-40);
-  ctx.lineTo(240, riverY-10); ctx.lineTo(280, riverY);
-  ctx.lineTo(0, riverY); ctx.closePath(); ctx.fill();
-  // versante destro
-  ctx.beginPath(); ctx.moveTo(w, riverY+riverH);
-  ctx.lineTo(w, riverY-150); ctx.lineTo(w-160, riverY-50);
-  ctx.lineTo(w-90, riverY-20); ctx.lineTo(w-40, riverY);
-  ctx.lineTo(w, riverY); ctx.closePath(); ctx.fill();
-  // prato posteriore
-  ctx.fillStyle = '#a6d67a'; ctx.fillRect(0, riverY+riverH, w, h-(riverY+riverH));
+/* ===== 8) ANALISI STRUTTURALE (rank K_ff) ===== */
+function checkDeterminacy(){
+  const n = W.nodes.length;
+  let r = 0;
+  for (const nd of W.nodes) if (nd.fixed) r += 2; // nel truss: blocco ux,uy
+  const m = W.beams.filter(b=>!b.broken).length;
+
+  // mappa DOF liberi
+  const dofMap = new Map(); let idx=0;
+  for (let i=0;i<n;i++){
+    const nd=W.nodes[i];
+    if (!nd.fixed){ dofMap.set(i*2+0, idx++); dofMap.set(i*2+1, idx++); }
+  }
+  const dofFree = idx;
+  if (dofFree===0) return {stable:true,isostatic:false,hyperstatic:true,mechanism:false,rank:0,dofFree,m,n,r};
+
+  // assemblea K_ff (aste assiali EA/L0)
+  const K = Array.from({length:dofFree}, ()=> new Float64Array(dofFree));
+  for (const b of W.beams){
+    if (b.broken) continue;
+    const i=b.i, j=b.j;
+    const xi=W.nodes[i].x, yi=W.nodes[i].y, xj=W.nodes[j].x, yj=W.nodes[j].y;
+    let L = Math.hypot(xj-xi, yj-yi); if (L<1e-9) continue;
+    const c=(xj-xi)/L, s=(yj-yi)/L;
+    const k = (b.mat.E*b.A)/Math.max(b.L0,1e-6);
+    const kxx =  c*c, kxy =  c*s, kyx =  s*c, kyy =  s*s;
+
+    const iUx = dofMap.get(i*2+0), iUy = dofMap.get(i*2+1);
+    const jUx = dofMap.get(j*2+0), jUy = dofMap.get(j*2+1);
+    function add(a,b,val){ if (a!==undefined && b!==undefined) K[a][b] += val; }
+
+    // blocchi 4x4
+    add(iUx,iUx, k*kxx); add(iUx,iUy, k*kxy);
+    add(iUy,iUx, k*kyx); add(iUy,iUy, k*kyy);
+    add(iUx,jUx,-k*kxx); add(iUx,jUy,-k*kxy);
+    add(iUy,jUx,-k*kyx); add(iUy,jUy,-k*kyy);
+    add(jUx,iUx,-k*kxx); add(jUx,iUy,-k*kxy);
+    add(jUy,iUx,-k*kyx); add(jUy,iUy,-k*kyy);
+    add(jUx,jUx, k*kxx); add(jUx,jUy, k*kxy);
+    add(jUy,jUx, k*kyx); add(jUy,jUy, k*kyy);
+  }
+
+  const rank = matrixRank(K, 1e-8);
+  const stable = (rank >= dofFree);
+  const isostatic  = stable && (m + r === 2*n);
+  const hyperstatic= stable && (m + r >  2*n);
+  const mechanism  = !stable;
+
+  if (!running){
+    if (mechanism) setBadge('Stato: Labile (meccanismo)');
+    else if (isostatic) setBadge('Stato: Isostatico');
+    else if (hyperstatic) setBadge('Stato: Iperstatico');
+    else setBadge('Stato: Stabile');
+  }
+  return {stable,isostatic,hyperstatic,mechanism,rank,dofFree,m,n,r};
+}
+function matrixRank(M, eps=1e-10){
+  const n = M.length; if (!n) return 0;
+  const A = Array.from({length:n}, (_,i)=> Float64Array.from(M[i]));
+  let r=0;
+  for (let c=0, r0=0; c<n && r0<n; c++){
+    let p=r0, pv=Math.abs(A[p][c]);
+    for (let i=r0+1;i<n;i++){ const v=Math.abs(A[i][c]); if (v>pv){ pv=v; p=i; } }
+    if (pv <= eps) continue;
+    if (p!==r0){ const tmp=A[p]; A[p]=A[r0]; A[r0]=tmp; }
+    const piv = A[r0][c];
+    for (let i=r0+1;i<n;i++){
+      const f = A[i][c]/piv;
+      if (Math.abs(f)<=eps) continue;
+      for (let j=c;j<n;j++) A[i][j] -= f*A[r0][j];
+    }
+    r++; r0++;
+  }
+  return r;
 }
 
-function draw() {
-  ctx.clearRect(0,0,cv.width,cv.height);
-  drawBackground();
-
-  // aste
-  for (const b of W.beams) {
-    const ni = W.nodes[b.i], nj = W.nodes[b.j];
-    let stroke = '#cfcfcf';
-    if (!b.broken) {
-      const L = Math.hypot(nj.x-ni.x, nj.y-ni.y);
-      const strain = Math.abs((L - b.L0) / b.L0);
-      stroke = (strain < 0.01) ? '#34c759' : (strain < 0.03 ? '#ffcf33' : '#ff3b30');
+/* ===== 9) RENDER (pendii, mare, aste, nodi, camion, splash) ===== */
+function drawBackground(){
+  const {w,h,waterTop,waterH,leftSlope,rightSlope}=geo();
+  // terra sinistra
+  ctx.fillStyle= '#69bb53';
+  ctx.beginPath(); ctx.moveTo(leftSlope[0].x,leftSlope[0].y);
+  for(const p of leftSlope) ctx.lineTo(p.x,p.y);
+  ctx.closePath(); ctx.fill();
+  // stradina sinistra
+  ctx.strokeStyle='#ffffff'; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.moveTo(0,waterTop-110); ctx.lineTo(180,waterTop-35); ctx.stroke();
+  // terra destra
+  ctx.fillStyle= '#69bb53';
+  ctx.beginPath(); ctx.moveTo(rightSlope[0].x,rightSlope[0].y);
+  for(const p of rightSlope) ctx.lineTo(p.x,p.y);
+  ctx.closePath(); ctx.fill();
+  // pennone + bandierina
+  ctx.strokeStyle='#ff0033'; ctx.lineWidth=4;
+  ctx.beginPath(); ctx.moveTo(w-54, waterTop-40); ctx.lineTo(w-54, waterTop-110); ctx.stroke();
+  ctx.fillStyle='#fff'; ctx.fillRect(w-54, waterTop-110, 26, 14);
+  // mare
+  if (seaAnimated){
+    W.seaPhase += 0.04;
+    const base = waterTop;
+    ctx.fillStyle = '#248eff';
+    ctx.fillRect(0, base, w, waterH);
+    ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth=2;
+    for (let k=0;k<3;k++){
+      ctx.beginPath();
+      for (let x=0;x<=w;x+=6){
+        const y = base + 10 + 6*Math.sin((x*0.02)+(W.seaPhase+k*0.8));
+        if (x===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+      }
+      ctx.stroke();
     }
-    if (b.type === 'deck') stroke = '#6b4e2e'; // colore dedicato al deck
-    ctx.strokeStyle = stroke;
-    ctx.lineWidth = b.type === 'deck' ? 4 : 2;
-    ctx.beginPath(); ctx.moveTo(ni.x, ni.y); ctx.lineTo(nj.x, nj.y); ctx.stroke();
+  } else {
+    ctx.fillStyle='#3aa0ff';
+    ctx.fillRect(0, waterTop, w, waterH);
   }
-
-  // nodi
-  for (let i=0;i<W.nodes.length;i++) {
-    const n = W.nodes[i];
-    ctx.fillStyle = n.fixed ? (n.type === 'incastro' ? '#000' : '#444') : '#0a66cc';
-    ctx.beginPath(); ctx.arc(n.x, n.y, 5, 0, Math.PI*2); ctx.fill();
-    if (n.fixed) {
+}
+function drawBeams(){
+  for (const b of W.beams){
+    const ni=W.nodes[b.i], nj=W.nodes[b.j];
+    let stroke='#cfcfcf'; let lw=(b.type==='deck'?4:2);
+    if (!b.broken){
+      const L=Math.hypot(nj.x-ni.x, nj.y-ni.y);
+      const strain = Math.abs((L-b.L0)/b.L0);
+      stroke = (b.type==='deck')
+        ? (b.tilted? '#5f3e1d' : '#8b5a2b')
+        : (strain < 0.01 ? '#34c759' : (strain < 0.03 ? '#ffcf33' : '#ff3b30'));
+    }
+    ctx.strokeStyle=stroke; ctx.lineWidth=lw;
+    ctx.beginPath(); ctx.moveTo(ni.x,ni.y); ctx.lineTo(nj.x,nj.y); ctx.stroke();
+  }
+}
+function drawNodes(){
+  for (let i=0;i<W.nodes.length;i++){
+    const n=W.nodes[i];
+    ctx.fillStyle = n.fixed ? (n.type==='incastro'?'#000':'#444') : '#0a66cc';
+    ctx.beginPath(); ctx.arc(n.x,n.y,5,0,Math.PI*2); ctx.fill();
+    if (n.fixed){
       ctx.strokeStyle='#000'; ctx.lineWidth=1.2;
-      if (n.type === 'cerniera') { ctx.beginPath(); ctx.moveTo(n.x-8, n.y+8); ctx.lineTo(n.x+8, n.y+8); ctx.stroke(); }
-      else { ctx.strokeRect(n.x-8, n.y+5, 16, 6); }
+      if (n.type==='cerniera'){ ctx.beginPath(); ctx.moveTo(n.x-8,n.y+8); ctx.lineTo(n.x+8,n.y+8); ctx.stroke(); }
+      else { ctx.strokeRect(n.x-8,n.y+5,16,6); }
     }
   }
-
-  if (selectFirst !== null) {
-    const n = W.nodes[selectFirst];
+  if (selectFirst!==null){
+    const n=W.nodes[selectFirst];
     ctx.setLineDash([6,6]); ctx.strokeStyle='#000'; ctx.lineWidth=1.5;
-    ctx.beginPath(); ctx.arc(n.x, n.y, 9, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+    ctx.beginPath(); ctx.arc(n.x,n.y,9,0,Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
   }
-
-  // camioncino
-  const t = W.truck;
-  ctx.fillStyle = '#ff8c00';
+}
+function drawTruck(){
+  const t=truck; if (!t) return;
+  ctx.fillStyle='#ff8c00';
   ctx.fillRect(t.x - t.w/2, t.y - t.h/2, t.w, t.h);
-  ctx.fillStyle = '#222';
+  ctx.fillStyle='#222';
   ctx.beginPath(); ctx.arc(t.x - t.w*0.25, t.y + t.h/2, 5, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(t.x + t.w*0.25, t.y + t.h/2, 5, 0, Math.PI*2); ctx.fill();
 }
+/* Splash visivo + suono */
+let splash=null;
+function startSplash(x,y){ splash={x,y,t:0}; }
+function drawSplash(dt){
+  if (!splash) return;
+  splash.t += dt;
+  const k = splash.t, alpha = Math.max(0, 1 - k/0.7);
+  if (alpha<=0){ splash=null; return; }
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.strokeStyle='#fff'; ctx.lineWidth=2;
+  for (let i=0;i<3;i++){
+    const r=10+30*i*k;
+    ctx.beginPath(); ctx.arc(splash.x, splash.y, r, 0, Math.PI*2); ctx.stroke();
+  }
+  ctx.restore();
+}
+let audioCtx=null;
+function playSplash(){
+  try{
+    if (!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type='triangle'; o.frequency.value=180;
+    g.gain.value=0.15;
+    o.connect(g).connect(audioCtx.destination);
+    o.start();
+    o.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime+0.25);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.28);
+    o.stop(audioCtx.currentTime+0.3);
+  }catch(e){}
+}
 
-/* ============ Loop + HUD + punteggio ============ */
+/* ===== 10) LOOP PRINCIPALE ===== */
 let last = performance.now();
-function loop() {
-  const now = performance.now();
-  const dt = Math.min(0.033, (now - last)/1000);
-  last = now;
-  step(dt); draw(); updateHUD();
+function loop(){
+  const now=performance.now(); const dt=Math.min(0.033,(now-last)/1000); last=now;
+  step(dt);
+  ctx.clearRect(0,0,cv.width,cv.height);
+  drawBackground();
+  drawBeams();
+  drawNodes();
+  drawTruck();
+  drawSplash(dt);
   requestAnimationFrame(loop);
 }
-function updateHUD() {
-  const broken = W.beams.filter(b=>b.broken).length;
-  ui.brokenCnt.textContent = broken.toString();
-  const L = W.beams.reduce((s,b)=> s + Math.hypot(nodeX(b.j)-nodeX(b.i), nodeY(b.j)-nodeY(b.i)), 0);
-  ui.matLen.textContent = rnd(L/50, 2);
-  ui.status.textContent = running ? 'In esecuzione' : 'In pausa';
-}
-function calcScore() {
-  const broken = W.beams.filter(b=>b.broken).length;
-  const L = W.beams.reduce((s,b)=> s + Math.hypot(nodeX(b.j)-nodeX(b.i), nodeY(b.j)-nodeY(b.i)), 0);
-  const base = 1000, matPenalty = L * 0.5, intactBonus = (broken === 0 ? 200 : 0);
-  score = Math.max(0, Math.round(base - matPenalty - broken*50 + intactBonus));
-}
+/* ===== 11) START / RESET / UTILITY ===== */
+function startSimulation(){
+  if (leftSupport===null || rightSupport===null) return alert('Inserisci i due vincoli sulle sponde (SX e DX).');
+  if (deckCount() < 3) return alert('Il piano di percorrenza deve avere almeno 3 segmenti.');
+  if (!deckConnected()) return alert('I segmenti del piano devono essere collegati (percorso continuo SX→DX).');
 
-/* ============ Avvio & Reset ============ */
-function startSimulation() {
-  if (leftSupport === null || rightSupport === null) {
-    alert('Inserisci un vincolo sinistro e uno destro (cerniera/incastro) sulla terra ferma prima di avviare.');
+  const chk = checkDeterminacy();
+  if (!chk.stable || chk.mechanism){
+    for (const b of W.beams) b.broken = true; // crollo immediato per meccanismo
+    setBadge('Stato: Crollo (meccanismo)');
+    alert('Struttura labile: compare un cinematismo. Triangola/controventa e riprova.');
     return;
   }
-  // Mantieni posizione a terra; solo velocità iniziale
-  W.truck.vx = 40; W.truck.vy = 0;
-  running = true; ui.msg.style.display = 'none'; ui.status.textContent = 'In esecuzione';
+  setBadge(chk.isostatic ? 'Stato: Isostatico' : (chk.hyperstatic ? 'Stato: Iperstatico' : 'Stato: Stabile'));
+
+  // posiziona il camion sulla terraferma sinistra (sicuro)
+  const x0=Math.max(10, W.nodes[leftSupport].x);
+  const gy=groundYAt(x0);
+  truck = {x:x0, y:(isFinite(gy)? gy : W.nodes[leftSupport].y)-10, vx:40, vy:0, w:34, h:18, onDeck:false};
+
+  running=true; timeStart=performance.now();
 }
 function hardReset(){
-  running = false; winAccum = 0; score = 0;
-  leftSupport = null; rightSupport = null; selectFirst = null; beamsRedo = [];
-  W.nodes = []; W.beams = []; W.truck = { x: 0, y: 0, vx: 0, vy: 0, w: 34, h: 18, mass: 260, onDeck: false };
-  mode='fixL'; ui.modeLabel.textContent='Inserisci Vincolo Sinistro';
-  ui.msg.style.display = 'block'; ui.status.textContent = 'In pausa';
-  ui.help.style.display = showHelp ? 'block' : 'none'; // mostra solo alla prima volta dopo reset
-  spawnTruckOnGroundLeft();
+  running=false; selectFirst=null; beamsRedo.length=0; score=0; setTimer(0);
+  leftSupport=null; rightSupport=null;
+  W.nodes=[]; W.beams=[];
+  const gx = 60, gy = groundYAt(gx);
+  truck = {x:gx, y:(isFinite(gy)? gy : 140)-10, vx:0, vy:0, w:34, h:18, onDeck:false};
+  mode='fixL'; ui.mode.textContent='Modalità: Vincolo SX';
+  setBadge('Stato: In costruzione');
+  if (showHelp) ui.help.style.display='flex';
 }
+function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
 
-/* ============ Salva/Carica JSON ============ */
-function saveProject(){
-  const data = {
-    nodes: W.nodes.map(n=>({x:n.x,y:n.y,fixed:n.fixed,type:n.type})),
-    beams: W.beams.map(b=>({i:b.i,j:b.j,L0:b.L0,A:b.A,type:b.type}))
-  };
-  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'ponte_project.json';
-  document.body.appendChild(a); a.click(); a.remove();
-}
-function onLoadFile(ev){
-  const f = ev.target.files[0]; if(!f) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try{
-      const obj = JSON.parse(reader.result);
-      hardReset();
-      showHelp = false; // se stai caricando un progetto, non bloccare con l'help
-      ui.help.style.display = 'none';
-      for(const n of obj.nodes||[]) addNode(n.x,n.y,!!n.fixed, n.type||'cerniera');
-      for(const b of obj.beams||[]) addBeam(b.i,b.j,b.A||0.0026,MATERIAL.steel,b.type||'struct');
-      ui.msg.style.display='block';
-    }catch(err){ alert('File non valido: '+err.message); }
-    ev.target.value = '';
-  };
-  reader.readAsText(f);
-}
+/* ===== 12) MINI-SCHEMA CARTOON (pannello guida) ===== */
+(function drawMini(){
+  const m = document.getElementById('mini'); const c=m.getContext('2d');
+  const Wm=m.width, Hm=m.height, seaY=Hm*0.68;
+  c.fillStyle='#a6d8ff'; c.fillRect(0,0,Wm,Hm);
+  c.fillStyle='#3aa0ff'; c.fillRect(0,seaY,Wm,Hm-seaY);
+  c.fillStyle='#7fc96b';
+  c.beginPath(); c.moveTo(0,Hm); c.lineTo(0,seaY-50); c.lineTo(120,seaY-20); c.lineTo(180,seaY-5); c.lineTo(210,seaY); c.lineTo(0,seaY); c.closePath(); c.fill();
+  c.beginPath(); c.moveTo(Wm,Hm); c.lineTo(Wm,seaY-60); c.lineTo(Wm-120,seaY-20); c.lineTo(Wm-70,seaY-8); c.lineTo(Wm-30,seaY); c.lineTo(Wm,seaY); c.closePath(); c.fill();
+  // tre segmenti di piano
+  c.strokeStyle='#8b5a2b'; c.lineWidth=6;
+  c.beginPath(); c.moveTo(210,seaY); c.lineTo(Wm-120,seaY-8); c.stroke();
+  c.beginPath(); c.moveTo(Wm-120,seaY-8); c.lineTo(Wm-60,seaY-4); c.stroke();
+  c.beginPath(); c.moveTo(Wm-60,seaY-4); c.lineTo(Wm-30,seaY); c.stroke();
+  // vincoli
+  c.fillStyle='#ff0033'; c.beginPath(); c.arc(210,seaY,6,0,Math.PI*2); c.fill();
+  c.beginPath(); c.arc(Wm-30,seaY,6,0,Math.PI*2); c.fill();
+  // camion
+  c.fillStyle='#ff9a00'; c.fillRect(200,seaY-16,26,14);
+  c.fillStyle='#222'; c.beginPath(); c.arc(206,seaY,4,0,Math.PI*2); c.fill();
+  c.beginPath(); c.arc(220,seaY,4,0,Math.PI*2); c.fill();
+  // bandiera
+  c.strokeStyle='#ff0033'; c.lineWidth=4; c.beginPath(); c.moveTo(Wm-46,seaY-8); c.lineTo(Wm-46,seaY-42); c.stroke();
+  c.fillStyle='#fff'; c.fillRect(Wm-46,seaY-42,20,12);
+})();
 
-/* ============ Utility ============ */
-function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
-
-/* Bootstrap */
-sizeCanvas();
-spawnTruckOnGroundLeft();
-ui.modeLabel.textContent='Inserisci Vincolo Sinistro';
-ui.help.style.display = showHelp ? 'block' : 'none';
-(function loopStart(){ requestAnimationFrame(loop); })();
+/* ===== 13) AVVIO ===== */
+hardReset();
+loop();
 </script>
 </body>
 </html>
-"""
-path = "/mnt/data/ponte_deck_help.html"
-with open(path, "w", encoding="utf-8") as f:
-    f.write(html)
-path

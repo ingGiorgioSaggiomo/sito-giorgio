@@ -2,187 +2,175 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Progetta il Ponte Ingegnere! – v3</title>
+<title>Progetta il Ponte Ingegnere! – v7 (validator strutturale)</title>
 <style>
-    html, body { height: 100%; }
-    body {
-        margin: 0;
-        font-family: 'Comic Sans MS', cursive, sans-serif;
-        background: #cce6ff;
-        overflow: hidden;
-    }
-    canvas#giocoCanvas{
-        position: fixed;
-        inset: 0;
-        width: 100vw;
-        height: 100vh;
-        display: block;
-        background: #cce6ff;
-    }
-    #toolbar {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: rgba(255,255,255,0.9);
-        padding: 10px;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        z-index: 10;
-        flex-wrap: wrap;
-    }
-    button, select {
-        padding: 5px 10px;
-        font-size: 14px;
-        border-radius: 5px;
-        border: 1px solid #444;
-        cursor: pointer;
-        background: #fff;
-    }
-    .active { outline: 2px solid #0077ff; }
-    #pannelloGuida {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        border: 2px solid #333;
-        box-shadow: 0px 4px 12px rgba(0,0,0,0.3);
-        z-index: 20;
-        text-align: center;
-        max-width: 640px;
-    }
-    #pannelloGuida button {
-        margin-top: 15px;
-        background-color: #4CAF50;
-        color: white;
-        font-size: 16px;
-        cursor: pointer;
-        border: none;
-        border-radius: 8px;
-        padding: 8px 14px;
-    }
-    #cronometro {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba(255,255,255,0.8);
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 18px;
-        z-index: 10;
-    }
-    #validator {
-        position: absolute;
-        right: 10px;
-        top: 52px;
-        background: rgba(255,255,255,0.9);
-        padding: 6px 10px;
-        border-radius: 6px;
-        font-size: 13px;
-        z-index: 10;
-        border: 1px solid #ccc;
-    }
-    #validator.ok { border-color: #22aa22; color: #127512; }
-    #validator.warn { border-color: #d08a00; color: #7a5300; }
-    #validator.bad { border-color: #cc2222; color: #7a1010; }
-    #toast {
-        position: absolute;
-        left: 50%;
-        transform: translateX(-50%);
-        top: 64px;
-        background: rgba(0,0,0,0.75);
-        color: #fff;
-        padding: 6px 10px;
-        border-radius: 6px;
-        font-size: 13px;
-        display: none;
-        z-index: 12;
-    }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans";
+    background: #cce6ff;
+    overflow: hidden;
+  }
+  canvas#giocoCanvas{
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    background: #cce6ff;
+  }
+  #toolbar {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(255,255,255,0.95);
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,.08);
+  }
+  button, select {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 8px;
+    border: 1px solid #444;
+    cursor: pointer;
+    background: #fff;
+  }
+  .active { outline: 2px solid #0077ff; }
+  #pannelloGuida {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #333;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 20;
+    text-align: left;
+    max-width: 720px;
+    line-height: 1.35;
+  }
+  #pannelloGuida button {
+    margin-top: 15px;
+    background-color: #005bbb;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+  }
+  #cronometro, #validator, #requisiti {
+    position: absolute;
+    right: 10px;
+    background: rgba(255,255,255,0.95);
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    z-index: 10;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  }
+  #cronometro { top: 10px; font-size: 18px; }
+  #validator { top: 52px; font-size: 13px; max-width: 320px; line-height: 1.25; }
+  #requisiti { top: 140px; font-size: 12px; max-width: 320px; line-height: 1.2; }
+  #validator.ok { border-color: #22aa22; color: #127512; }
+  #validator.warn { border-color: #d08a00; color: #7a5300; }
+  #validator.bad { border-color: #cc2222; color: #7a1010; }
+  #toast {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 64px;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    display: none;
+    z-index: 12;
+  }
 </style>
 </head>
 <body>
-
 <div id="toolbar">
-    <button id="btnNodo">Aggiungi nodo</button>
-    <button id="btnDelNodo">Cancella nodo</button>
-    <button id="btnVincolo">Vincolo a terra</button>
-    <select id="tipoVincolo">
-        <option value="cerniera">Cerniera</option>
-        <option value="incastro">Incastro</option>
-    </select>
-    <button id="btnAsta">Aggiungi asta</button>
-    <button id="btnPiano">Piano di percorrenza</button>
-    <button id="btnAnnulla">Annulla ultima asta</button>
-    <button id="btnAvvia">Avvia simulazione</button>
-    <button id="btnReset">Reset</button>
+  <button id="btnNodo">Aggiungi nodo</button>
+  <button id="btnDelNodo">Cancella nodo</button>
+  <button id="btnVincolo">Vincolo a terra</button>
+  <select id="tipoVincolo">
+    <option value="cerniera">Cerniera</option>
+    <option value="incastro">Incastro</option>
+  </select>
+  <button id="btnAsta">Aggiungi asta</button>
+  <button id="btnPiano">Piano di percorrenza</button>
+  <button id="btnAnnulla">Annulla ultima asta</button>
+  <button id="btnAvvia">Avvia simulazione</button>
+  <button id="btnReset">Reset</button>
 </div>
 
 <div id="toast"></div>
 <div id="cronometro">Tempo: 0.0s</div>
 <div id="validator" class="warn">Piano: nessun tratto</div>
+<div id="requisiti">
+  Requisiti per avvio:<br>
+  • ≥ 3 tratti di piano<br>
+  • Catena continua senza ramificazioni<br>
+  • Stabilizzazione a triangoli per ogni tratto<br>
+  • Almeno 1 vincolo a terra a sinistra e 1 a destra
+</div>
 
 <div id="pannelloGuida">
-    <h2>Progetta il Ponte Ingegnere!</h2>
-    <p>Gameplay (Stretto di Messina):<br>
-    1) Crea <b>nodi</b> con “Aggiungi nodo” (visibili).<br>
-    2) Posiziona fino a <b>4 vincoli</b> sulla <b>terraferma</b>.<br>
-    3) Collega <b>solo nodi esistenti</b> con “Aggiungi asta” o “Piano”.<br>
-    4) “Cancella nodo” rimuove il nodo e i collegamenti.<br>
-    5) Il camion parte dal <b>versante sinistro</b> su un breve piano predefinito.
-    <br><i>Obiettivo: creare un piano continuo e far attraversare il camion.</i>
-    </p>
-    <button id="btnHoCapito">Ho capito</button>
+  <h2>Progetta il Ponte – Stretto di Messina</h2>
+  <p><b>Obiettivo gioco</b>: far attraversare il camion su una carreggiata continua (piano di percorrenza) strutturalmente stabilizzata con aste reticolari.</p>
+  <p><b>Flusso</b>:<br>
+  1) Aggiungi nodi e fino a 4 vincoli a terra (solo su terraferma).<br>
+  2) Disegna il <b>piano di percorrenza</b> (minimo 3 tratti), continuo costa–costa.<br>
+  3) Stabilizza ciascun tratto con <b>triangolazioni</b> (aste nere) collegate ai nodi del tratto.<br>
+  4) Premi <b>Avvia simulazione</b>. Se i requisiti non sono rispettati, l’avvio è bloccato con spiegazione.</p>
+  <button id="btnHoCapito">Ho capito</button>
 </div>
 
 <canvas id="giocoCanvas"></canvas>
 
 <script>
-// ===== Variabili globali =====
-let guidaMostrata = true; // mostra pannello guida al primo avvio
-
+// ===== Stato =====
+let guidaMostrata = true;
 let canvas, ctx;
 let cronometroInterval = null;
 
 let nodi = [];
-let aste = [];
-let vincoli = [];
-let pianoPercorrenza = [];
+let aste = [];               // {n1, n2, tipo: "normale"|"piano"}
+let vincoli = [];            // {x, y, tipo}
+let pianoPercorrenza = [];   // sottoinsieme di aste
 let vincoliPosizionati = 0;
 const MAX_VINCOLI = 4;
 
-let modalita = "nodo"; // default: aggiungi nodo
-
+let modalita = "nodo";
 let inSimulazione = false;
 let tempoTrascorso = 0;
 let timerAttivo = false;
 let camion = null;
-let pezziCrollati = [];
 
 let audioSplash = null;
 
 const RAGGIO_SELEZIONE = 12;
-
 let nodoSelezionato = null;
 
-// ===== Avvio al ready =====
+// ===== Setup =====
 document.addEventListener('DOMContentLoaded', () => {
   canvas = document.getElementById('giocoCanvas');
   ctx = canvas.getContext('2d');
-
   try { audioSplash = new Audio("splash.mp3"); } catch(e) { audioSplash = null; }
 
   hookToolbar();
-
   fitCanvas();
-
-  // Prepara un piccolo piano di percorrenza sicuro sul versante sinistro
-  creaPianettoSinistro();
-
+  creaPianettoSinistroVincolato();
   inizializzaCamionSulVersanteSinistro();
 
   if (guidaMostrata) {
@@ -193,49 +181,40 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.getElementById("btnHoCapito")?.addEventListener("click", () => {
-      document.getElementById("pannelloGuida").style.display = "none";
-      guidaMostrata = false;
-      redrawAll();
+    document.getElementById("pannelloGuida").style.display = "none";
+    guidaMostrata = false; redrawAll();
   });
 
   canvas.addEventListener("click", onCanvasClick);
-
   addEventListener('resize', ()=>{ fitCanvas(); redrawAll(); }, {passive:true});
   addEventListener('orientationchange', ()=> setTimeout(()=>{ fitCanvas(); redrawAll(); }, 80), {passive:true});
 });
 
 function hookToolbar(){
-  const btns = {
-    btnNodo: "nodo",
-    btnDelNodo: "cancellaNodo",
-    btnVincolo: "vincolo",
-    btnAsta: "asta",
-    btnPiano: "piano"
-  };
+  const btns = { btnNodo:"nodo", btnDelNodo:"cancellaNodo", btnVincolo:"vincolo", btnAsta:"asta", btnPiano:"piano" };
   for (const [id, mode] of Object.entries(btns)){
     const el = document.getElementById(id);
     el.addEventListener("click", ()=>{ modalita = mode; evidenziaAttivo(id); });
   }
   document.getElementById("btnAnnulla").addEventListener("click", () => { 
-      if (aste.length){
-        const rimossa = aste.pop();
-        if (rimossa.tipo === "piano") {
-            // rimuovi anche dal pianoPercorrenza
-            pianoPercorrenza = pianoPercorrenza.filter(seg => seg !== rimossa);
-            aggiornaValidator();
-        }
-        redrawAll();
+    if (aste.length){
+      const rimossa = aste.pop();
+      if (rimossa.tipo === "piano") {
+        pianoPercorrenza = pianoPercorrenza.filter(seg => seg !== rimossa);
+        aggiornaValidator();
       }
+      redrawAll();
+    }
   });
   document.getElementById("btnReset").addEventListener("click", resetGioco);
   document.getElementById("btnAvvia").addEventListener("click", () => {
-      if (!inSimulazione) {
-          if (guidaMostrata) {
-              document.getElementById("pannelloGuida").style.display = "none";
-              guidaMostrata = false;
-          }
-          avviaSimulazione();
-      }
+    if (inSimulazione) return;
+    const check = valutaRequisiti();
+    if (!check.ok){
+      alert("Impossibile avviare:\n- " + check.messaggi.join("\n- "));
+      return;
+    }
+    avviaSimulazione();
   });
   evidenziaAttivo("btnNodo");
 }
@@ -246,12 +225,11 @@ function evidenziaAttivo(id){
 }
 function showToast(msg){
   const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.style.display = "block";
-  setTimeout(()=> t.style.display = "none", 1200);
+  t.textContent = msg; t.style.display = "block";
+  setTimeout(()=> t.style.display = "none", 1400);
 }
 
-// ===== Utility layout =====
+// ===== Canvas/Layout =====
 function fitCanvas(){
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const cssW = canvas.clientWidth;
@@ -260,517 +238,317 @@ function fitCanvas(){
   canvas.height = Math.floor(cssH * dpr);
   ctx.setTransform(dpr,0,0,dpr,0,0);
 }
-
 function redrawAll(){
   if (guidaMostrata) disegnaSchermataIniziale();
   else {
     disegnaSfondoGioco();
     disegnaAste();
-    disegnaNodi(); // include highlight selezione
+    disegnaNodi();
     disegnaVincoli();
-    disegnaCamion();
+    disegnaCamion(); // sempre sopra tutto
     aggiornaValidator();
   }
 }
 
-// ===== Schermata iniziale =====
+// ===== Disegno =====
 function disegnaSchermataIniziale() {
-  const W = canvas.clientWidth;
-  const H = canvas.clientHeight;
-  const waterTop = Math.round(H * 0.65);
-
-  // sfondo base
+  const W = canvas.clientWidth, H = canvas.clientHeight, waterTop = Math.round(H * 0.65);
   ctx.fillStyle = "#cce6ff"; ctx.fillRect(0, 0, W, H);
 
-  // pendio sinistro
   ctx.fillStyle = "#66cc66";
-  ctx.beginPath();
-  ctx.moveTo(0, waterTop - Math.min(140, H*0.16));
-  ctx.lineTo(W * 0.15, waterTop);
-  ctx.lineTo(0, H);
-  ctx.closePath();
-  ctx.fill();
+  ctx.beginPath(); ctx.moveTo(0, waterTop - Math.min(140, H*0.16)); ctx.lineTo(W * 0.15, waterTop); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W, waterTop - Math.min(140, H*0.16)); ctx.lineTo(W * 0.85, waterTop); ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
 
-  // pendio destro
-  ctx.beginPath();
-  ctx.moveTo(W, waterTop - Math.min(140, H*0.16));
-  ctx.lineTo(W * 0.85, waterTop);
-  ctx.lineTo(W, H);
-  ctx.closePath();
-  ctx.fill();
+  ctx.fillStyle = "#3399ff"; ctx.fillRect(0, waterTop, W, H - waterTop);
 
-  // mare
-  ctx.fillStyle = "#3399ff";
-  ctx.fillRect(0, waterTop, W, H - waterTop);
-
-  // Titoli
-  ctx.fillStyle = "#ff6600";
-  ctx.font = "bold " + Math.round(H * 0.055) + "px Comic Sans MS";
+  ctx.fillStyle = "#003b8e"; ctx.font = "700 " + Math.round(H * 0.05) + "px system-ui";
   ctx.textAlign = "center";
   ctx.fillText("Progetta il Ponte sullo Stretto di Messina", W/2, H*0.16);
-
-  ctx.fillStyle = "#000";
-  ctx.font = Math.round(H * 0.03) + "px Comic Sans MS";
-  ctx.fillText("Collega i pendii siciliano e calabrese", W/2, waterTop + 40);
-  ctx.fillText("Costruisci un ponte stabile per il camion", W/2, waterTop + 70);
+  ctx.fillStyle = "#102A43"; ctx.font = "400 " + Math.round(H * 0.024) + "px system-ui";
+  ctx.fillText("Crea un piano continuo e stabilizzalo con reticolari", W/2, waterTop + 42);
 
   disegnaCamion();
 }
-
-// ===== Sfondo gioco =====
 function disegnaSfondoGioco() {
-  const W = canvas.clientWidth;
-  const H = canvas.clientHeight;
-  const waterTop = Math.round(H * 0.65);
-
-  // cielo
-  ctx.fillStyle = "#cce6ff";
-  ctx.fillRect(0, 0, W, H);
-
-  // terraferma sinistra (pendio in discesa)
+  const W = canvas.clientWidth, H = canvas.clientHeight, waterTop = Math.round(H * 0.65);
+  ctx.fillStyle = "#cce6ff"; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = "#66cc66";
-  ctx.beginPath();
-  ctx.moveTo(0, waterTop - Math.min(140, H*0.16));
-  ctx.lineTo(W * 0.15, waterTop);
-  ctx.lineTo(0, H);
-  ctx.closePath();
-  ctx.fill();
-
-  // terraferma destra (pendio in salita)
-  ctx.beginPath();
-  ctx.moveTo(W, waterTop - Math.min(140, H*0.16));
-  ctx.lineTo(W * 0.85, waterTop);
-  ctx.lineTo(W, H);
-  ctx.closePath();
-  ctx.fill();
-
-  // mare aperto
-  ctx.fillStyle = "#3399ff";
-  ctx.fillRect(0, waterTop, W, H - waterTop);
+  ctx.beginPath(); ctx.moveTo(0, waterTop - Math.min(140, H*0.16)); ctx.lineTo(W * 0.15, waterTop); ctx.lineTo(0, H); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(W, waterTop - Math.min(140, H*0.16)); ctx.lineTo(W * 0.85, waterTop); ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = "#3399ff"; ctx.fillRect(0, waterTop, W, H - waterTop);
 }
-
-// ===== Disegno elementi =====
 function disegnaNodi() {
-    // highlight se un nodo è selezionato
-    if (nodoSelezionato) {
-        ctx.beginPath();
-        ctx.arc(nodoSelezionato.x, nodoSelezionato.y, 10, 0, Math.PI*2);
-        ctx.strokeStyle = "#0077ff";
-        ctx.lineWidth = 3;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(nodoSelezionato.x, nodoSelezionato.y, 4, 0, Math.PI*2);
-        ctx.fillStyle = "#0077ff";
-        ctx.fill();
-    }
-    // nodi normali
-    ctx.fillStyle = "#000";
-    nodi.forEach(n => {
-        ctx.beginPath();
-        ctx.arc(n.x, n.y, 5, 0, Math.PI*2);
-        ctx.fill();
-    });
+  if (nodoSelezionato) {
+    ctx.beginPath(); ctx.arc(nodoSelezionato.x, nodoSelezionato.y, 10, 0, Math.PI*2);
+    ctx.strokeStyle = "#0077ff"; ctx.lineWidth = 3; ctx.stroke();
+    ctx.beginPath(); ctx.arc(nodoSelezionato.x, nodoSelezionato.y, 4, 0, Math.PI*2);
+    ctx.fillStyle = "#0077ff"; ctx.fill();
+  }
+  ctx.fillStyle = "#000";
+  nodi.forEach(n => { ctx.beginPath(); ctx.arc(n.x, n.y, 5, 0, Math.PI*2); ctx.fill(); });
 }
-
 function disegnaAste() {
-    aste.forEach(a => {
-        ctx.strokeStyle = a.tipo === "piano" ? "#aa0000" : "#000";
-        ctx.lineWidth = a.tipo === "piano" ? 3 : 2;
-        ctx.beginPath();
-        ctx.moveTo(a.n1.x, a.n1.y);
-        ctx.lineTo(a.n2.x, a.n2.y);
-        ctx.stroke();
-    });
+  aste.forEach(a => {
+    ctx.strokeStyle = a.tipo === "piano" ? "#aa0000" : "#111";
+    ctx.lineWidth = a.tipo === "piano" ? 3 : 1.5;
+    ctx.beginPath(); ctx.moveTo(a.n1.x, a.n1.y); ctx.lineTo(a.n2.x, a.n2.y); ctx.stroke();
+  });
 }
-
 function disegnaVincoli() {
-    vincoli.forEach(v => {
-        ctx.fillStyle = v.tipo === "cerniera" ? "#555" : "#222";
-        ctx.fillRect(v.x-5, v.y, 10, 20);
-    });
+  vincoli.forEach(v => {
+    ctx.fillStyle = v.tipo === "cerniera" ? "#444" : "#222";
+    ctx.fillRect(v.x-6, v.y, 12, 22);
+  });
 }
-
 function disegnaCamion() {
-    if (!camion) return;
-    ctx.fillStyle = "#ff0000";
-    ctx.fillRect(camion.x, camion.y - camion.altezza, camion.larghezza, camion.altezza);
+  if (!camion) return;
+  ctx.fillStyle = "#e53935";
+  ctx.fillRect(camion.x, camion.y - camion.altezza, camion.larghezza, camion.altezza);
+  // ruote
+  ctx.fillStyle = "#222";
+  ctx.beginPath(); ctx.arc(camion.x + 4, camion.y, 3.5, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(camion.x + camion.larghezza - 4, camion.y, 3.5, 0, Math.PI*2); ctx.fill();
 }
 
-// ===== Interazione canvas =====
+// ===== Interazione =====
 function onCanvasClick(e){
   const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const x = e.clientX - rect.left, y = e.clientY - rect.top;
 
-  if (modalita === "nodo") {
-      aggiungiNodo(x, y);
-      redrawAll();
-      return;
-  }
-
+  if (modalita === "nodo") { aggiungiNodo(x, y); redrawAll(); return; }
   if (modalita === "cancellaNodo") {
-      const n = trovaNodoVicino(x,y);
-      if (!n) { showToast("Nessun nodo da cancellare"); return; }
-      cancellaNodo(n);
-      redrawAll();
-      return;
+    const n = trovaNodoVicino(x,y); if (!n) { showToast("Nessun nodo da cancellare"); return; }
+    cancellaNodo(n); redrawAll(); return;
   }
-
   if (modalita === "vincolo" && vincoliPosizionati < MAX_VINCOLI) {
-      const tipo = document.getElementById("tipoVincolo").value;
-      if (eTerraferma(x, y)) {
-          const yTerra = getYTerraferma(x);
-          const v = {x, y: yTerra, tipo};
-          vincoli.push(v);
-          const nodoV = {x, y: yTerra, vincolo: true};
-          nodi.push(nodoV);
-          vincoliPosizionati++;
-          redrawAll();
-      } else {
-          showToast("I vincoli si posano solo sulla terraferma");
-      }
-      return;
+    const tipo = document.getElementById("tipoVincolo").value;
+    if (eTerraferma(x, y)) {
+      const yTerra = getYTerraferma(x);
+      vincoli.push({x, y: yTerra, tipo});
+      nodi.push({x, y: yTerra, vincolo:true});
+      vincoliPosizionati++; redrawAll();
+    } else { showToast("I vincoli si posano solo sulla terraferma"); }
+    return;
   }
-
   if (modalita === "asta" || modalita === "piano") {
-      const vicino = trovaNodoVicino(x,y);
-      if (!vicino) { showToast("Seleziona un nodo esistente"); return; }
+    const vicino = trovaNodoVicino(x,y);
+    if (!vicino) { showToast("Seleziona un nodo esistente"); return; }
 
-      if (!nodoSelezionato) {
-          nodoSelezionato = vicino;
-          redrawAll();
-          return;
-      } else {
-          const nodo2 = vicino;
-          if (nodo2 === nodoSelezionato) { showToast("Scegli un nodo diverso"); return; }
-          const tipoAsta = modalita === "piano" ? "piano" : "normale";
-          const nuova = {n1: nodoSelezionato, n2: nodo2, tipo: tipoAsta};
-          aste.push(nuova);
-          if (tipoAsta === "piano") {
-              pianoPercorrenza.push(nuova);
-              aggiornaValidator();
-          }
-          nodoSelezionato = null;
-          redrawAll();
-          return;
-      }
+    if (!nodoSelezionato) { nodoSelezionato = vicino; redrawAll(); return; }
+    const nodo2 = vicino;
+    if (nodo2 === nodoSelezionato) { showToast("Scegli un nodo diverso"); return; }
+
+    const tipoAsta = modalita === "piano" ? "piano" : "normale";
+    const nuova = {n1: nodoSelezionato, n2: nodo2, tipo: tipoAsta};
+    aste.push(nuova);
+    if (tipoAsta === "piano") { pianoPercorrenza.push(nuova); aggiornaValidator(); }
+    nodoSelezionato = null; redrawAll(); return;
   }
 }
-
-function trovaNodoVicino(x,y) {
-    return nodi.find(n => Math.hypot(n.x-x, n.y-y) < RAGGIO_SELEZIONE);
-}
-
-function aggiungiNodo(x,y) {
-    const n = {x, y};
-    nodi.push(n);
-    return n;
-}
-
+function trovaNodoVicino(x,y) { return nodi.find(n => Math.hypot(n.x-x, n.y-y) < RAGGIO_SELEZIONE); }
+function aggiungiNodo(x,y) { const n = {x, y}; nodi.push(n); return n; }
 function cancellaNodo(nodo){
-    // Rimuovi aste collegate
-    aste = aste.filter(a => a.n1 !== nodo && a.n2 !== nodo);
-    // Rimuovi elementi del piano collegati
-    pianoPercorrenza = pianoPercorrenza.filter(seg => seg.n1 !== nodo && seg.n2 !== nodo);
-    // Se era vincolo, rimuovi il vincolo e aggiorna contatore
-    if (nodo.vincolo) {
-        vincoli = vincoli.filter(v => Math.hypot(v.x - nodo.x, v.y - nodo.y) >= RAGGIO_SELEZIONE);
-        vincoliPosizionati = Math.max(0, vincoliPosizionati - 1);
-    }
-    // Rimuovi il nodo
-    const idx = nodi.indexOf(nodo);
-    if (idx >= 0) nodi.splice(idx,1);
-    // Reset selezione se necessario
-    if (nodoSelezionato === nodo) nodoSelezionato = null;
-    aggiornaValidator();
+  aste = aste.filter(a => a.n1 !== nodo && a.n2 !== nodo);
+  pianoPercorrenza = pianoPercorrenza.filter(seg => seg.n1 !== nodo && seg.n2 !== nodo);
+  if (nodo.vincolo) {
+    vincoli = vincoli.filter(v => Math.hypot(v.x - nodo.x, v.y - nodo.y) >= RAGGIO_SELEZIONE);
+    vincoliPosizionati = Math.max(0, vincoliPosizionati - 1);
+  }
+  const idx = nodi.indexOf(nodo); if (idx >= 0) nodi.splice(idx,1);
+  if (nodoSelezionato === nodo) nodoSelezionato = null;
+  aggiornaValidator();
 }
 
-// ===== Camion e pianetto sinistro =====
+// ===== Camion & pianetto vincolato =====
 function inizializzaCamionSulVersanteSinistro(){
-    // se esiste un tratto di piano nel primo 20% dell'ampiezza, posiziona sul suo inizio
-    const W = canvas.clientWidth;
-    const sinistra = pianoPercorrenza.find(seg => Math.max(seg.n1.x, seg.n2.x) < W * 0.22);
-    if (sinistra) {
-        const inizio = segOrd(sinistra)[0];
-        camion = {x: inizio.x - 20, y: inizio.y - 10, vx: 0, vy: 0, larghezza: 20, altezza: 10};
-        return;
-    }
-    // fallback: su pendio sinistro
-    const x0 = 20;
-    const y0 = getYTerraferma(x0) - 2;
-    camion = {x: x0, y: y0, vx: 0, vy: 0, larghezza: 20, altezza: 10};
+  const W = canvas.clientWidth;
+  const sinistra = pianoPercorrenza.find(seg => Math.max(seg.n1.x, seg.n2.x) < W * 0.24);
+  if (sinistra) {
+    const [sx] = segOrd(sinistra);
+    camion = {x: sx.x - 18, y: sx.y - 10, vx: 0, vy: 0, larghezza: 22, altezza: 12};
+    return;
+  }
+  const x0 = 20, y0 = getYTerraferma(x0) - 2;
+  camion = {x: x0, y: y0, vx: 0, vy: 0, larghezza: 22, altezza: 12};
+}
+function creaPianettoSinistroVincolato(){
+  const W = canvas.clientWidth;
+  const xA = Math.max(20, Math.round(W * 0.06));
+  const xB = Math.max(xA + 60, Math.round(W * 0.12));
+  const yA = getYTerraferma(xA);
+  const yB = getYTerraferma(xB);
+  const nA = {x:xA, y:yA, vincolo:true};
+  const nB = {x:xB, y:yB, vincolo:true};
+  nodi.push(nA, nB);
+  vincoli.push({x: xA, y: yA, tipo:"cerniera"});
+  vincoli.push({x: xB, y: yB, tipo:"cerniera"});
+  vincoliPosizionati += 2;
+  const seg = {n1:nA, n2:nB, tipo:"piano"};
+  aste.push(seg); pianoPercorrenza.push(seg); aggiornaValidator();
 }
 
-function creaPianettoSinistro(){
-    // crea 2 nodi sul versante sinistro e un tratto di piano tra loro
-    const W = canvas.clientWidth;
-    const H = canvas.clientHeight;
-    const xA = maxInt(20, Math.round(W * 0.06));
-    const xB = maxInt(xA + 60, Math.round(W * 0.12));
-    const yA = getYTerraferma(xA) - 6;
-    const yB = getYTerraferma(xB) - 6;
-
-    // Nodi del pianetto ancorati a terra con vincolo (cerniera)
-    const nA = {x:xA, y:yA, vincolo: true};
-    const nB = {x:xB, y:yB, vincolo: true};
-    nodi.push(nA, nB);
-
-    // Aggiungi i vincoli a terra corrispondenti (se non superiamo il limite)
-    if (vincoliPosizionati + 2 <= MAX_VINCOLI) {
-        vincoli.push({x: xA, y: yA, tipo: "cerniera"});
-        vincoli.push({x: xB, y: yB, tipo: "cerniera"});
-        vincoliPosizionati += 2;
-    } else {
-        // Se già al limite, segna comunque i nodi come vincolati per non farli cadere
-        // ma senza aggiungere oggetti vincolo extra (fallback).
-    }
-
-    // crea il piano di percorrenza tra i due nodi
-    const seg = {n1:nA, n2:nB, tipo:"piano"};
-    aste.push(seg);
-    pianoPercorrenza.push(seg);
-    aggiornaValidator();
-}
-
-// ===== Simulazione fisica (semplificata) =====
+// ===== Simulazione (quasi-statica) =====
 function avviaSimulazione() {
-    inSimulazione = true;
-    timerAttivo = true;
-    tempoTrascorso = 0;
-    if (cronometroInterval) clearInterval(cronometroInterval);
-    cronometroInterval = setInterval(() => {
-        if (timerAttivo) {
-            tempoTrascorso += 0.1;
-            document.getElementById("cronometro").innerText = `Tempo: ${tempoTrascorso.toFixed(1)}s`;
-        }
-    }, 100);
-
-    // posiziona camion sul primo piano (se presente), altrimenti parte da sinistra
-    if (pianoPercorrenza.length > 0) {
-        const p0 = pianoPercorrenza[0];
-        const inizio = segOrd(p0)[0];
-        camion.x = inizio.x - 20;
-        camion.y = inizio.y - 10;
-        camion.vx = 1.2; camion.vy = 0;
-    } else {
-        camion.vx = 1.0; camion.vy = 0;
+  inSimulazione = true; timerAttivo = true; tempoTrascorso = 0;
+  if (cronometroInterval) clearInterval(cronometroInterval);
+  cronometroInterval = setInterval(() => {
+    if (timerAttivo) {
+      tempoTrascorso += 0.1;
+      document.getElementById("cronometro").innerText = `Tempo: ${tempoTrascorso.toFixed(1)}s`;
     }
+  }, 100);
 
-    requestAnimationFrame(loopSimulazione);
+  if (pianoPercorrenza.length > 0) {
+    const [sx] = segOrd(pianoPercorrenza[0]);
+    camion.x = sx.x - 18; camion.y = sx.y - 10; camion.vx = 1.2; camion.vy = 0;
+  } else { camion.vx = 1.0; camion.vy = 0; }
+  requestAnimationFrame(loopSimulazione);
 }
 
-function loopSimulazione() {
-    if (!inSimulazione) return;
+function loopSimulazione(){
+  if (!inSimulazione) return;
 
-    // gravità su nodi non vincolati
-    nodi.forEach(n => { if (!n.vincolo) { n.y += 0.5; } });
+  // Nota: in v7 i nodi restano fissi (quasi-statico). Nessuna gravità sui nodi.
+  // Movimento camion
+  camion.x += camion.vx;
 
-    // verifica cinematismi (struttura labile)
-    if (verificaCinematismo()) { crolloPonte(); return; }
+  const seg = trovaSegmentoPiano(camion.x);
+  const waterTop = Math.round(canvas.clientHeight * 0.65);
 
-    // muovi camioncino lungo il piano
-    if (camion) {
-        camion.x += camion.vx;
-        camion.y += camion.vy;
-        const segmento = trovaSegmentoPiano(camion.x);
-        if (segmento) {
-            const dx = segmento.n2.x - segmento.n1.x;
-            const dy = segmento.n2.y - segmento.n1.y;
-            const inclinazione = dy / (dx || 1e-6);
-            camion.vy = inclinazione * camion.vx;
-        } else {
-            camion.vy += 0.3; // semigravità
-            if (camion.y > canvas.clientHeight * 0.65 + 5) { splash(); sconfitta(); return; }
-        }
-        if (camion.x > canvas.clientWidth * 0.90) { vittoria(); return; }
-    }
+  if (seg) {
+    const [a,b] = segOrd(seg);
+    const t = (camion.x - a.x) / ((b.x - a.x) || 1e-6);
+    const yLine = a.y + t * (b.y - a.y);
+    camion.y = yLine - 10;
+    camion.vy = (b.y - a.y)/((b.x - a.x) || 1e-6) * camion.vx;
+  } else {
+    // se non c'è piano sotto, cade subito
+    camion.vy += 0.4;
+    camion.y += camion.vy;
+    if (camion.y > waterTop + 5) { splash(); sconfitta(); return; }
+  }
 
-    // disegno
-    disegnaSfondoGioco();
-    disegnaAste();
-    disegnaNodi();
-    disegnaVincoli();
-    disegnaCamion();
+  if (camion.x > canvas.clientWidth * 0.90) { vittoria(); return; }
 
-    requestAnimationFrame(loopSimulazione);
+  disegnaSfondoGioco();
+  disegnaAste(); disegnaNodi(); disegnaVincoli(); disegnaCamion();
+  requestAnimationFrame(loopSimulazione);
 }
 
 function trovaSegmentoPiano(xCamion) {
-    return pianoPercorrenza.find(seg =>
-        (xCamion >= Math.min(seg.n1.x, seg.n2.x) && xCamion <= Math.max(seg.n1.x, seg.n2.x))
-    );
+  return pianoPercorrenza.find(seg =>
+    (xCamion >= Math.min(seg.n1.x, seg.n2.x) && xCamion <= Math.max(seg.n1.x, seg.n2.x))
+  );
 }
 
-// ===== Verifica cinematismo =====
-function verificaCinematismo(){
-  const H = canvas.clientHeight;
-  const waterTop = Math.round(H * 0.65);
-  return nodi.filter(n => !n.vincolo).some(n => n.y > waterTop - 10);
-}
-
-// ===== Validator di continuità piano =====
+// ===== Validator strutturale =====
 function aggiornaValidator(){
-    const el = document.getElementById("validator");
-    if (!el) return;
-    if (pianoPercorrenza.length === 0){
-        el.textContent = "Piano: nessun tratto";
-        el.className = "warn";
-        return;
-    }
-    // Costruisci il grafo sugli estremi dei segmenti
-    const degree = new Map();
-    const allNodes = new Set();
-    pianoPercorrenza.forEach(seg => {
-        allNodes.add(seg.n1); allNodes.add(seg.n2);
-        degree.set(seg.n1, (degree.get(seg.n1)||0)+1);
-        degree.set(seg.n2, (degree.get(seg.n2)||0)+1);
-    });
-    const degVals = [...degree.values()];
-    const branching = degVals.some(d => d > 2);
-    const endpoints = [...degree.entries()].filter(([n,d]) => d === 1).map(([n])=>n);
+  const el = document.getElementById("validator"); if (!el) return;
+  const v = valutaRequisiti();
+  el.textContent = v.testo;
+  el.className = v.classe;
+}
+function valutaRequisiti(){
+  const messaggi = [];
+  // continuità del piano come catena unica (no branche)
+  if (pianoPercorrenza.length === 0) return {ok:false, testo:"Piano: nessun tratto", classe:"warn", messaggi:["Nessun tratto di piano"]};
 
-    // DFS componenti
-    const adj = new Map();
-    allNodes.forEach(n => adj.set(n, []));
-    pianoPercorrenza.forEach(seg => {
-        adj.get(seg.n1).push(seg.n2);
-        adj.get(seg.n2).push(seg.n1);
-    });
-    const start = endpoints[0] || [...allNodes][0];
-    const visited = new Set();
-    (function dfs(n){
-        if (visited.has(n)) return;
-        visited.add(n);
-        adj.get(n).forEach(m=>dfs(m));
-    })(start);
+  const degree = new Map(); const allNodes = new Set();
+  pianoPercorrenza.forEach(seg => { allNodes.add(seg.n1); allNodes.add(seg.n2); degree.set(seg.n1,(degree.get(seg.n1)||0)+1); degree.set(seg.n2,(degree.get(seg.n2)||0)+1); });
+  const branching = [...degree.values()].some(d => d > 2);
+  const adj = new Map(); allNodes.forEach(n => adj.set(n, []));
+  pianoPercorrenza.forEach(seg => { adj.get(seg.n1).push(seg.n2); adj.get(seg.n2).push(seg.n1); });
+  const start = [...allNodes][0]; const visited = new Set();
+  (function dfs(n){ if (visited.has(n)) return; visited.add(n); adj.get(n).forEach(m=>dfs(m)); })(start);
+  const connected = visited.size === allNodes.size;
+  const endpoints = [...degree.entries()].filter(([n,d]) => d===1).map(([n])=>n);
 
-    const connected = visited.size === allNodes.size;
+  const W = canvas.clientWidth;
+  const toLeft = (n)=> n.x <= W*0.18 + 2;
+  const toRight = (n)=> n.x >= W*0.82 - 2;
+  const touchesLeft = [...allNodes].some(toLeft);
+  const touchesRight = [...allNodes].some(toRight);
 
-    // Check costa-costa
-    const W = canvas.clientWidth;
-    const toLeft = (n)=> n.x <= W*0.18 + 2;
-    const toRight = (n)=> n.x >= W*0.82 - 2;
-    const touchesLeft = [...allNodes].some(toLeft);
-    const touchesRight = [...allNodes].some(toRight);
-    const coastToCoast = touchesLeft && touchesRight && connected && !branching;
+  const lenOK = pianoPercorrenza.length >= 3;
+  if (!connected) messaggi.push("Piano non connesso");
+  if (branching) messaggi.push("Ramificazioni sul piano");
+  if (!lenOK) messaggi.push("Meno di 3 tratti di piano");
 
-    if (!connected){
-        el.textContent = "Piano: interrotto (pezzi non connessi)";
-        el.className = "bad";
-    } else if (branching){
-        el.textContent = "Piano: interrotto (ramificazioni)";
-        el.className = "bad";
-    } else if (endpoints.length > 2){
-        el.textContent = "Piano: interrotto (più percorsi)";
-        el.className = "bad";
-    } else {
-        el.textContent = coastToCoast ? "Piano: CONTINUO (costa a costa)" : "Piano: continuo (non ancora costa a costa)";
-        el.className = "ok";
-    }
+  // triangolazione per ogni tratto
+  const trianglesMissing = pianoPercorrenza.filter(seg => !esisteTriangolazionePerSegmento(seg));
+  if (trianglesMissing.length) messaggi.push("Manca triangolazione su uno o più tratti");
+  // appoggi su entrambe le coste
+  const supportsLeft = nodi.some(n => n.vincolo && toLeft(n));
+  const supportsRight = nodi.some(n => n.vincolo && toRight(n));
+  if (!supportsLeft) messaggi.push("Nessun vincolo a terra lato sinistro");
+  if (!supportsRight) messaggi.push("Nessun vincolo a terra lato destro");
+
+  const ok = connected && !branching && lenOK && trianglesMissing.length===0 && supportsLeft && supportsRight;
+
+  let testo, classe;
+  if (ok) { testo = "Piano: CONTINUO e STABILIZZATO – pronto all'avvio"; classe = "ok"; }
+  else if (!connected || branching) { testo = "Piano: interrotto o ramificato"; classe = "bad"; }
+  else { testo = "Piano: incompleto – " + messaggi.join("; "); classe = "warn"; }
+
+  return {ok, testo, classe, messaggi};
+}
+function esisteTriangolazionePerSegmento(seg){
+  const hasBar = (a,b) => aste.some(s => s.tipo !== "piano" && ((s.n1===a && s.n2===b)||(s.n1===b && s.n2===a)));
+  const collinear = (A,B,C)=> Math.abs((B.y-A.y)*(C.x-B.x) - (B.x-A.x)*(C.y-B.y)) < 1e-3;
+  for (const p of nodi){
+    if (p===seg.n1 || p===seg.n2) continue;
+    const c1 = hasBar(p, seg.n1);
+    const c2 = hasBar(p, seg.n2);
+    if ((c1 && c2) && !collinear(seg.n1, seg.n2, p)) return true;
+  }
+  return false;
 }
 
 // ===== Effetti / esiti =====
-function crolloPonte() {
-    inSimulazione = false;
-    timerAttivo = false;
-    pezziCrollati = [...aste];
-    aste = [];
-    splash();
-    sconfitta();
-}
-
 function splash() {
-    const H = canvas.clientHeight;
-    if (!camion) return;
-    ctx.fillStyle = "rgba(255,255,255,0.6)";
-    for (let i=0; i<10; i++) {
-        ctx.beginPath();
-        ctx.arc(camion.x + Math.random()*20, H*0.65 + 10 + Math.random()*20, Math.random()*5, 0, Math.PI*2);
-        ctx.fill();
-    }
-    if (audioSplash && typeof audioSplash.play === "function") {
-        audioSplash.play().catch(()=>{});
-    }
+  const H = canvas.clientHeight; if (!camion) return;
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  for (let i=0; i<12; i++) { ctx.beginPath(); ctx.arc(camion.x + Math.random()*20, H*0.65 + 10 + Math.random()*20, Math.random()*5, 0, Math.PI*2); ctx.fill(); }
+  if (audioSplash && typeof audioSplash.play === "function") { audioSplash.play().catch(()=>{}); }
 }
+function vittoria() { inSimulazione = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; } alert("Vittoria! Attraversamento completato."); }
+function sconfitta() { inSimulazione = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; } alert("Sconfitta! Il camion è caduto in acqua."); document.getElementById("cronometro").innerText = "Tempo: 0.0s"; }
 
-function vittoria() {
-    inSimulazione = false;
-    timerAttivo = false;
-    if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; }
-    alert("Vittoria! Il camion ha attraversato il ponte!");
-}
-
-function sconfitta() {
-    inSimulazione = false;
-    timerAttivo = false;
-    if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; }
-    alert("Sconfitta! Il camion è caduto in acqua!");
-    document.getElementById("cronometro").innerText = "Tempo: 0.0s";
-}
-
-// ===== Suolo e vincoli =====
+// ===== Terreno/Vincoli =====
 function eTerraferma(x, y) {
-  const W = canvas.clientWidth;
-  const H = canvas.clientHeight;
-  const waterTop = Math.round(H * 0.65);
-
+  const W = canvas.clientWidth, H = canvas.clientHeight, waterTop = Math.round(H * 0.65);
   const yTerra = getYTerraferma(x);
-  const latoSx = (x >= 0 && x <= W*0.18);
-  const latoDx = (x >= W*0.82 && x <= W);
+  const latoSx = (x >= 0 && x <= W*0.18), latoDx = (x >= W*0.82 && x <= W);
   return (latoSx || latoDx) && y >= Math.min(yTerra, waterTop);
 }
-
 function getYTerraferma(x) {
-  const W = canvas.clientWidth;
-  const H = canvas.clientHeight;
-  const waterTop = Math.round(H * 0.65);
-
+  const W = canvas.clientWidth, H = canvas.clientHeight, waterTop = Math.round(H * 0.65);
   if (x >= 0 && x <= W*0.18) {
-    const x0 = 0,           y0 = waterTop - Math.min(140, H*0.16);
-    const x1 = W*0.15,      y1 = waterTop;
+    const x0 = 0, y0 = waterTop - Math.min(140, H*0.16);
+    const x1 = W*0.15, y1 = waterTop;
     const m = (y1 - y0) / (x1 - x0 + 1e-9);
     return m*(x - x0) + y0;
   }
-
   if (x >= W*0.82 && x <= W) {
-    const x0 = W,          y0 = waterTop - Math.min(140, H*0.16);
-    const x1 = W*0.85,     y1 = waterTop;
+    const x0 = W, y0 = waterTop - Math.min(140, H*0.16);
+    const x1 = W*0.85, y1 = waterTop;
     const m = (y1 - y0) / (x1 - x0 + 1e-9);
     return m*(x - x0) + y0;
   }
-
   return H;
 }
 
-// ===== Helpers vari =====
-function segOrd(seg){
-    // restituisce [left, right] ordinati per x
-    return (seg.n1.x <= seg.n2.x) ? [seg.n1, seg.n2] : [seg.n2, seg.n1];
-}
-function maxInt(a,b){ return a>b?a:b; }
+// ===== Helpers =====
+function segOrd(seg){ return (seg.n1.x <= seg.n2.x) ? [seg.n1, seg.n2] : [seg.n2, seg.n1]; }
 
 // ===== Reset =====
 function resetGioco(){
-    if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; }
-
-    nodi = [];
-    aste = [];
-    vincoli = [];
-    pianoPercorrenza = [];
-    vincoliPosizionati = 0;
-    inSimulazione = false;
-    tempoTrascorso = 0;
-    timerAttivo = false;
-    pezziCrollati = [];
-    nodoSelezionato = null;
-    document.getElementById("cronometro").innerText = "Tempo: 0.0s";
-
-    fitCanvas();
-    creaPianettoSinistro();
-    inizializzaCamionSulVersanteSinistro();
-    guidaMostrata = false; // riparti direttamente nel gioco
-    redrawAll();
+  if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; }
+  nodi = []; aste = []; vincoli = []; pianoPercorrenza = []; vincoliPosizionati = 0;
+  inSimulazione = false; tempoTrascorso = 0; timerAttivo = false; nodoSelezionato = null;
+  document.getElementById("cronometro").innerText = "Tempo: 0.0s";
+  fitCanvas(); creaPianettoSinistroVincolato(); inizializzaCamionSulVersanteSinistro();
+  guidaMostrata = false; redrawAll();
 }
 </script>
 </body>

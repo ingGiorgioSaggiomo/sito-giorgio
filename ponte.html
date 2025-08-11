@@ -510,9 +510,23 @@ function creaPianettoSinistro(){
     const xB = maxInt(xA + 60, Math.round(W * 0.12));
     const yA = getYTerraferma(xA) - 6;
     const yB = getYTerraferma(xB) - 6;
-    const nA = {x:xA, y:yA};
-    const nB = {x:xB, y:yB};
+
+    // Nodi del pianetto ancorati a terra con vincolo (cerniera)
+    const nA = {x:xA, y:yA, vincolo: true};
+    const nB = {x:xB, y:yB, vincolo: true};
     nodi.push(nA, nB);
+
+    // Aggiungi i vincoli a terra corrispondenti (se non superiamo il limite)
+    if (vincoliPosizionati + 2 <= MAX_VINCOLI) {
+        vincoli.push({x: xA, y: yA, tipo: "cerniera"});
+        vincoli.push({x: xB, y: yB, tipo: "cerniera"});
+        vincoliPosizionati += 2;
+    } else {
+        // Se già al limite, segna comunque i nodi come vincolati per non farli cadere
+        // ma senza aggiungere oggetti vincolo extra (fallback).
+    }
+
+    // crea il piano di percorrenza tra i due nodi
     const seg = {n1:nA, n2:nB, tipo:"piano"};
     aste.push(seg);
     pianoPercorrenza.push(seg);

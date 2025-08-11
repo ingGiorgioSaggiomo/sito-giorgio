@@ -2,7 +2,8 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Progetta il Ponte Ingegnere! – v7 (validator strutturale)</title>
+<title>Progetta il Ponte Ingegnere! – v9</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
   html, body { height: 100%; }
   body {
@@ -53,7 +54,7 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     z-index: 20;
     text-align: left;
-    max-width: 720px;
+    max-width: 760px;
     line-height: 1.35;
   }
   #pannelloGuida button {
@@ -66,7 +67,7 @@
     border-radius: 8px;
     padding: 8px 14px;
   }
-  #cronometro, #validator, #requisiti {
+  #cronometro, #validator, #requisiti, #diagnostica {
     position: absolute;
     right: 10px;
     background: rgba(255,255,255,0.95);
@@ -78,8 +79,9 @@
     box-shadow: 0 2px 8px rgba(0,0,0,.06);
   }
   #cronometro { top: 10px; font-size: 18px; }
-  #validator { top: 52px; font-size: 13px; max-width: 320px; line-height: 1.25; }
-  #requisiti { top: 140px; font-size: 12px; max-width: 320px; line-height: 1.2; }
+  #validator { top: 52px; font-size: 13px; max-width: 340px; line-height: 1.25; }
+  #requisiti { top: 140px; font-size: 12px; max-width: 340px; line-height: 1.2; }
+  #diagnostica { top: 250px; font-size: 12px; max-width: 340px; line-height: 1.2; display:none; }
   #validator.ok { border-color: #22aa22; color: #127512; }
   #validator.warn { border-color: #d08a00; color: #7a5300; }
   #validator.bad { border-color: #cc2222; color: #7a1010; }
@@ -112,6 +114,12 @@
   <button id="btnAnnulla">Annulla ultima asta</button>
   <button id="btnAvvia">Avvia simulazione</button>
   <button id="btnReset">Reset</button>
+  <button id="btnDiag">Diagnostica</button>
+  <select id="selDifficolta">
+    <option value="facile">Facile</option>
+    <option value="medio" selected>Medio</option>
+    <option value="difficile">Difficile</option>
+  </select>
 </div>
 
 <div id="toast"></div>
@@ -119,33 +127,57 @@
 <div id="validator" class="warn">Piano: nessun tratto</div>
 <div id="requisiti">
   Requisiti per avvio:<br>
-  • ≥ 3 tratti di piano<br>
-  • Catena continua senza ramificazioni<br>
-  • Stabilizzazione a triangoli per ogni tratto<br>
-  • Almeno 1 vincolo a terra a sinistra e 1 a destra
+  • ≥ 3 tratti di piano, catena continua<br>
+  • Triangolazione (aste) per ogni tratto<br>
+  • Vincoli a terra su entrambe le coste
 </div>
+<div id="diagnostica"></div>
 
 <div id="pannelloGuida">
-  <h2>Progetta il Ponte – Stretto di Messina</h2>
-  <p><b>Obiettivo gioco</b>: far attraversare il camion su una carreggiata continua (piano di percorrenza) strutturalmente stabilizzata con aste reticolari.</p>
-  <p><b>Flusso</b>:<br>
-  1) Aggiungi nodi e fino a 4 vincoli a terra (solo su terraferma).<br>
-  2) Disegna il <b>piano di percorrenza</b> (minimo 3 tratti), continuo costa–costa.<br>
-  3) Stabilizza ciascun tratto con <b>triangolazioni</b> (aste nere) collegate ai nodi del tratto.<br>
-  4) Premi <b>Avvia simulazione</b>. Se i requisiti non sono rispettati, l’avvio è bloccato con spiegazione.</p>
+  <h2>Progetta il Ponte – Stretto di Messina (v9)</h2>
+  <p><b>Novità</b>: condizioni di sconfitta a runtime (freccia, rottura aste, pendenze eccessive, angoli non percorribili, tempo massimo).</p>
+  <p><b>Parametri</b> tarabili da menu difficoltà. In “Difficile” la massa del camion varia ±20%, limiti più severi e rischio instabilità maggiore.</p>
   <button id="btnHoCapito">Ho capito</button>
 </div>
 
 <canvas id="giocoCanvas"></canvas>
 
 <script>
-// ===== Stato =====
+'use strict';
+
+/* ===== Parametri simulazione (profilati per difficoltà) ===== */
+const PRESET = {
+  facile: {
+    truck: { m: 1200, vx0: 1.3, mu: 0.6 },
+    beam:  { E: 2.1e11, A_plane: 0.012, A_bar: 0.008, deltaMaxRatio: 1/150 },
+    limits:{ slopeMax: 0.25, jointAngleMax: Math.PI/10, tMax: 25 },
+    safety:{ N_tension: 2.2e5, N_comp: 1.8e5, bucklingFactor: 0.9, triBoost: 0.9 },
+    noise: { truckMass: 0.0 }
+  },
+  medio: {
+    truck: { m: 1500, vx0: 1.2, mu: 0.5 },
+    beam:  { E: 2.1e11, A_plane: 0.010, A_bar: 0.006, deltaMaxRatio: 1/200 },
+    limits:{ slopeMax: 0.18, jointAngleMax: Math.PI/12, tMax: 18 },
+    safety:{ N_tension: 1.5e5, N_comp: 1.0e5, bucklingFactor: 0.7, triBoost: 0.7 },
+    noise: { truckMass: 0.1 }
+  },
+  difficile: {
+    truck: { m: 1700, vx0: 1.15, mu: 0.45 },
+    beam:  { E: 2.1e11, A_plane: 0.008, A_bar: 0.005, deltaMaxRatio: 1/250 },
+    limits:{ slopeMax: 0.15, jointAngleMax: Math.PI/14, tMax: 15 },
+    safety:{ N_tension: 1.2e5, N_comp: 0.8e5, bucklingFactor: 0.6, triBoost: 0.55 },
+    noise: { truckMass: 0.2 }
+  }
+};
+let SIM = JSON.parse(JSON.stringify(PRESET.medio));
+
+/* ===== Stato ===== */
 let guidaMostrata = true;
 let canvas, ctx;
 let cronometroInterval = null;
 
 let nodi = [];
-let aste = [];               // {n1, n2, tipo: "normale"|"piano"}
+let aste = [];               // {n1, n2, tipo: "normale"|"piano", alive:true}
 let vincoli = [];            // {x, y, tipo}
 let pianoPercorrenza = [];   // sottoinsieme di aste
 let vincoliPosizionati = 0;
@@ -162,7 +194,9 @@ let audioSplash = null;
 const RAGGIO_SELEZIONE = 12;
 let nodoSelezionato = null;
 
-// ===== Setup =====
+let stallTimer = 0;
+
+/* ===== Setup ===== */
 document.addEventListener('DOMContentLoaded', () => {
   canvas = document.getElementById('giocoCanvas');
   ctx = canvas.getContext('2d');
@@ -180,10 +214,13 @@ document.addEventListener('DOMContentLoaded', () => {
     redrawAll();
   }
 
-  document.getElementById("btnHoCapito")?.addEventListener("click", () => {
-    document.getElementById("pannelloGuida").style.display = "none";
-    guidaMostrata = false; redrawAll();
-  });
+  const btn = document.getElementById("btnHoCapito");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      document.getElementById("pannelloGuida").style.display = "none";
+      guidaMostrata = false; redrawAll();
+    });
+  }
 
   canvas.addEventListener("click", onCanvasClick);
   addEventListener('resize', ()=>{ fitCanvas(); redrawAll(); }, {passive:true});
@@ -214,7 +251,17 @@ function hookToolbar(){
       alert("Impossibile avviare:\n- " + check.messaggi.join("\n- "));
       return;
     }
+    preparaDifficolta();
     avviaSimulazione();
+  });
+  document.getElementById("btnDiag").addEventListener("click", ()=>{
+    const d = document.getElementById("diagnostica");
+    d.style.display = (d.style.display === "none" || !d.style.display) ? "block" : "none";
+  });
+  document.getElementById("selDifficolta").addEventListener("change", (e)=>{
+    SIM = JSON.parse(JSON.stringify(PRESET[e.target.value]));
+    aggiornaValidator();
+    showToast("Profilo: " + e.target.value.toUpperCase());
   });
   evidenziaAttivo("btnNodo");
 }
@@ -229,7 +276,7 @@ function showToast(msg){
   setTimeout(()=> t.style.display = "none", 1400);
 }
 
-// ===== Canvas/Layout =====
+/* ===== Canvas/Layout ===== */
 function fitCanvas(){
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   const cssW = canvas.clientWidth;
@@ -245,12 +292,12 @@ function redrawAll(){
     disegnaAste();
     disegnaNodi();
     disegnaVincoli();
-    disegnaCamion(); // sempre sopra tutto
+    disegnaCamion(); // sopra tutto
     aggiornaValidator();
   }
 }
 
-// ===== Disegno =====
+/* ===== Disegno ===== */
 function disegnaSchermataIniziale() {
   const W = canvas.clientWidth, H = canvas.clientHeight, waterTop = Math.round(H * 0.65);
   ctx.fillStyle = "#cce6ff"; ctx.fillRect(0, 0, W, H);
@@ -289,28 +336,25 @@ function disegnaNodi() {
 }
 function disegnaAste() {
   aste.forEach(a => {
+    if (a.alive === false) return;
     ctx.strokeStyle = a.tipo === "piano" ? "#aa0000" : "#111";
     ctx.lineWidth = a.tipo === "piano" ? 3 : 1.5;
     ctx.beginPath(); ctx.moveTo(a.n1.x, a.n1.y); ctx.lineTo(a.n2.x, a.n2.y); ctx.stroke();
   });
 }
 function disegnaVincoli() {
-  vincoli.forEach(v => {
-    ctx.fillStyle = v.tipo === "cerniera" ? "#444" : "#222";
-    ctx.fillRect(v.x-6, v.y, 12, 22);
-  });
+  vincoli.forEach(v => { ctx.fillStyle = v.tipo === "cerniera" ? "#444" : "#222"; ctx.fillRect(v.x-6, v.y, 12, 22); });
 }
 function disegnaCamion() {
   if (!camion) return;
   ctx.fillStyle = "#e53935";
   ctx.fillRect(camion.x, camion.y - camion.altezza, camion.larghezza, camion.altezza);
-  // ruote
   ctx.fillStyle = "#222";
   ctx.beginPath(); ctx.arc(camion.x + 4, camion.y, 3.5, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(camion.x + camion.larghezza - 4, camion.y, 3.5, 0, Math.PI*2); ctx.fill();
 }
 
-// ===== Interazione =====
+/* ===== Interazione ===== */
 function onCanvasClick(e){
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left, y = e.clientY - rect.top;
@@ -339,7 +383,7 @@ function onCanvasClick(e){
     if (nodo2 === nodoSelezionato) { showToast("Scegli un nodo diverso"); return; }
 
     const tipoAsta = modalita === "piano" ? "piano" : "normale";
-    const nuova = {n1: nodoSelezionato, n2: nodo2, tipo: tipoAsta};
+    const nuova = {n1: nodoSelezionato, n2: nodo2, tipo: tipoAsta, alive:true};
     aste.push(nuova);
     if (tipoAsta === "piano") { pianoPercorrenza.push(nuova); aggiornaValidator(); }
     nodoSelezionato = null; redrawAll(); return;
@@ -359,7 +403,7 @@ function cancellaNodo(nodo){
   aggiornaValidator();
 }
 
-// ===== Camion & pianetto vincolato =====
+/* ===== Camion & pianetto vincolato ===== */
 function inizializzaCamionSulVersanteSinistro(){
   const W = canvas.clientWidth;
   const sinistra = pianoPercorrenza.find(seg => Math.max(seg.n1.x, seg.n2.x) < W * 0.24);
@@ -383,11 +427,19 @@ function creaPianettoSinistroVincolato(){
   vincoli.push({x: xA, y: yA, tipo:"cerniera"});
   vincoli.push({x: xB, y: yB, tipo:"cerniera"});
   vincoliPosizionati += 2;
-  const seg = {n1:nA, n2:nB, tipo:"piano"};
+  const seg = {n1:nA, n2:nB, tipo:"piano", alive:true};
   aste.push(seg); pianoPercorrenza.push(seg); aggiornaValidator();
 }
 
-// ===== Simulazione (quasi-statica) =====
+/* ===== Simulazione (con fallimenti runtime) ===== */
+function preparaDifficolta(){
+  if (!camion) camion = {x:0,y:0,vx:0,vy:0,larghezza:22,altezza:12};
+  // massa con rumore
+  const noise = (Math.random()*2 - 1) * SIM.noise.truckMass;
+  camion.m = SIM.truck.m * (1 + noise);
+  camion.vx = SIM.truck.vx0;
+  stallTimer = 0;
+}
 function avviaSimulazione() {
   inSimulazione = true; timerAttivo = true; tempoTrascorso = 0;
   if (cronometroInterval) clearInterval(cronometroInterval);
@@ -395,53 +447,140 @@ function avviaSimulazione() {
     if (timerAttivo) {
       tempoTrascorso += 0.1;
       document.getElementById("cronometro").innerText = `Tempo: ${tempoTrascorso.toFixed(1)}s`;
+      if (tempoTrascorso > SIM.limits.tMax) { sconfitta("Tempo massimo superato"); }
     }
   }, 100);
 
   if (pianoPercorrenza.length > 0) {
     const [sx] = segOrd(pianoPercorrenza[0]);
-    camion.x = sx.x - 18; camion.y = sx.y - 10; camion.vx = 1.2; camion.vy = 0;
-  } else { camion.vx = 1.0; camion.vy = 0; }
+    camion.x = sx.x - 18; camion.y = sx.y - 10; camion.vy = 0;
+  }
   requestAnimationFrame(loopSimulazione);
 }
 
-function loopSimulazione(){
+function loopSimulazione() {
   if (!inSimulazione) return;
 
-  // Nota: in v7 i nodi restano fissi (quasi-statico). Nessuna gravità sui nodi.
-  // Movimento camion
-  camion.x += camion.vx;
-
+  // Movimento camion con attrito e pendenza
   const seg = trovaSegmentoPiano(camion.x);
   const waterTop = Math.round(canvas.clientHeight * 0.65);
 
-  if (seg) {
+  if (seg && seg.alive !== false) {
     const [a,b] = segOrd(seg);
+    const L = Math.hypot(b.x - a.x, b.y - a.y);
+    const slope = (b.y - a.y) / ((b.x - a.x) || 1e-6);
+
+    // velocità adattiva: proiezione semplice lungo la pendenza
+    const g = 9.81, mu = SIM.truck.mu;
+    const sinTheta = slope / Math.sqrt(1 + slope*slope);
+    const cosTheta = 1 / Math.sqrt(1 + slope*slope);
+    const acc = g*(sinTheta - mu*cosTheta);
+    camion.vx += acc * 0.05; // dt ~0.05 s
+    camion.vx = Math.max(0.2, Math.min(camion.vx, 2.0)); // clamp
+
+    // stallo se pendenza eccessiva
+    if (Math.abs(slope) > SIM.limits.slopeMax && camion.vx <= 0.25) {
+      stallTimer += 0.05; if (stallTimer > 1.5) { sconfitta("Stallo per pendenza eccessiva"); return; }
+    } else { stallTimer = 0; }
+
+    // clamp del camion sul piano
+    camion.x += camion.vx;
     const t = (camion.x - a.x) / ((b.x - a.x) || 1e-6);
     const yLine = a.y + t * (b.y - a.y);
     camion.y = yLine - 10;
-    camion.vy = (b.y - a.y)/((b.x - a.x) || 1e-6) * camion.vx;
+    camion.vy = slope * camion.vx;
+
+    // --- verifiche runtime su questo tratto ---
+    // 1) freccia ammessa (deflessione elastica semplificata)
+    const F = (camion.m||SIM.truck.m) * g * 0.5; // metà per ruota virtuale
+    const triCount = contaTriangoli(seg);
+    const triBoost = 1 + SIM.safety.triBoost * triCount;
+    const k_eff = SIM.beam.E * SIM.beam.A_plane / (L || 1e-6) * triBoost;
+    const delta = F / (k_eff || 1e-6);
+    const deltaMax = L * SIM.beam.deltaMaxRatio;
+    aggiornaDiagnostica(`Δ=${delta.toFixed(3)} (limite ${deltaMax.toFixed(3)})  |  Tri=${triCount}  |  vx=${camion.vx.toFixed(2)}`);
+    if (delta > deltaMax) {
+      seg.alive = false;
+      pianoPercorrenza = pianoPercorrenza.filter(s => s.alive !== false);
+      showToast("Cedimento del piano: Δ oltre il limite");
+    }
+
+    // 2) stress aste adiacenti (stima grezza)
+    rompiAsteSeSuperanoLimite(seg, F, L);
+
+    // 3) angolo di giunto: quando vicino al nodo b valuta discontinuità
+    if (t > 0.95) {
+      const next = trovaProssimoSegmentoPiano(b);
+      if (next) {
+        const ang = angoloTraSegmenti(seg, next);
+        if (Math.abs(ang) > SIM.limits.jointAngleMax) {
+          sconfitta("Discontinuità eccessiva tra tratti"); return;
+        }
+      }
+    }
+
   } else {
-    // se non c'è piano sotto, cade subito
-    camion.vy += 0.4;
+    // non su piano → caduta
+    camion.vy += 0.45;
     camion.y += camion.vy;
-    if (camion.y > waterTop + 5) { splash(); sconfitta(); return; }
+    camion.x += Math.max(0.2, camion.vx*0.95);
+    if (camion.y > waterTop + 5) { splash(); sconfitta("Carreggiata assente: caduta"); return; }
   }
 
+  // vittoria
   if (camion.x > canvas.clientWidth * 0.90) { vittoria(); return; }
 
+  // disegno
   disegnaSfondoGioco();
   disegnaAste(); disegnaNodi(); disegnaVincoli(); disegnaCamion();
+  aggiornaValidator();
+
   requestAnimationFrame(loopSimulazione);
 }
 
+/* ===== Helpers runtime ===== */
+function contaTriangoli(seg){
+  let count = 0;
+  const hasBar = (a,b) => aste.some(s => s.alive !== false && s.tipo !== "piano" && ((s.n1===a && s.n2===b)||(s.n1===b && s.n2===a)));
+  const collinear = (A,B,C)=> Math.abs((B.y-A.y)*(C.x-B.x) - (B.x-A.x)*(C.y-B.y)) < 1e-3;
+  for (const p of nodi){
+    if (p===seg.n1 || p===seg.n2) continue;
+    const c1 = hasBar(p, seg.n1), c2 = hasBar(p, seg.n2);
+    if ((c1 && c2) && !collinear(seg.n1, seg.n2, p)) count++;
+  }
+  return count;
+}
+function rompiAsteSeSuperanoLimite(seg, F, L){
+  // proietta forza sulle aste che formano triangoli con il tratto
+  const bars = aste.filter(s => s.alive !== false && s.tipo !== "piano" &&
+    (s.n1===seg.n1 || s.n2===seg.n1 || s.n1===seg.n2 || s.n2===seg.n2));
+  bars.forEach(bar => {
+    const len = Math.hypot(bar.n2.x - bar.n1.x, bar.n2.y - bar.n1.y);
+    const cos = Math.abs(( (seg.n2.x - seg.n1.x)*(bar.n2.x - bar.n1.x) + (seg.n2.y - seg.n1.y)*(bar.n2.y - bar.n1.y) ) / ((L*len) || 1e-6));
+    const N = F * cos; // stima grezza della componente assiale
+    const Ncomp = SIM.safety.N_comp * SIM.safety.bucklingFactor * (1.0 / (len/100 + 1)); // buckling peggiora con lunghezza
+    const limit = Math.max(SIM.safety.N_tension, Ncomp);
+    if (N > limit) { bar.alive = false; showToast("Rottura asta per supero sforzo"); }
+  });
+}
+function trovaProssimoSegmentoPiano(node){
+  return pianoPercorrenza.find(s => (s.n1===node || s.n2===node) && s.alive !== false);
+}
+function angoloTraSegmenti(s1, s2){
+  const v1 = {x: s1.n2.x - s1.n1.x, y: s1.n2.y - s1.n1.y};
+  const v2 = {x: s2.n2.x - s2.n1.x, y: s2.n2.y - s2.n1.y};
+  const dot = v1.x*v2.x + v1.y*v2.y;
+  const m1 = Math.hypot(v1.x, v1.y), m2 = Math.hypot(v2.x, v2.y);
+  return Math.acos(Math.max(-1, Math.min(1, dot / ((m1*m2)||1e-6))));
+}
+
 function trovaSegmentoPiano(xCamion) {
-  return pianoPercorrenza.find(seg =>
+  return pianoPercorrenza.find(seg => seg.alive !== false &&
     (xCamion >= Math.min(seg.n1.x, seg.n2.x) && xCamion <= Math.max(seg.n1.x, seg.n2.x))
   );
 }
 
-// ===== Validator strutturale =====
+/* ===== Validator strutturale prima dell'avvio ===== */
 function aggiornaValidator(){
   const el = document.getElementById("validator"); if (!el) return;
   const v = valutaRequisiti();
@@ -450,71 +589,66 @@ function aggiornaValidator(){
 }
 function valutaRequisiti(){
   const messaggi = [];
-  // continuità del piano come catena unica (no branche)
   if (pianoPercorrenza.length === 0) return {ok:false, testo:"Piano: nessun tratto", classe:"warn", messaggi:["Nessun tratto di piano"]};
-
   const degree = new Map(); const allNodes = new Set();
-  pianoPercorrenza.forEach(seg => { allNodes.add(seg.n1); allNodes.add(seg.n2); degree.set(seg.n1,(degree.get(seg.n1)||0)+1); degree.set(seg.n2,(degree.get(seg.n2)||0)+1); });
+  pianoPercorrenza.forEach(seg => { if (seg.alive === false) return; allNodes.add(seg.n1); allNodes.add(seg.n2); degree.set(seg.n1,(degree.get(seg.n1)||0)+1); degree.set(seg.n2,(degree.get(seg.n2)||0)+1); });
   const branching = [...degree.values()].some(d => d > 2);
   const adj = new Map(); allNodes.forEach(n => adj.set(n, []));
-  pianoPercorrenza.forEach(seg => { adj.get(seg.n1).push(seg.n2); adj.get(seg.n2).push(seg.n1); });
+  pianoPercorrenza.forEach(seg => { if (seg.alive === false) return; adj.get(seg.n1).push(seg.n2); adj.get(seg.n2).push(seg.n1); });
   const start = [...allNodes][0]; const visited = new Set();
   (function dfs(n){ if (visited.has(n)) return; visited.add(n); adj.get(n).forEach(m=>dfs(m)); })(start);
   const connected = visited.size === allNodes.size;
   const endpoints = [...degree.entries()].filter(([n,d]) => d===1).map(([n])=>n);
-
   const W = canvas.clientWidth;
-  const toLeft = (n)=> n.x <= W*0.18 + 2;
-  const toRight = (n)=> n.x >= W*0.82 - 2;
-  const touchesLeft = [...allNodes].some(toLeft);
-  const touchesRight = [...allNodes].some(toRight);
-
-  const lenOK = pianoPercorrenza.length >= 3;
+  const toLeft = (n)=> n.x <= W*0.18 + 2, toRight = (n)=> n.x >= W*0.82 - 2;
+  const touchesLeft = [...allNodes].some(toLeft), touchesRight = [...allNodes].some(toRight);
+  const lenOK = pianoPercorrenza.filter(s=>s.alive!==false).length >= 3;
   if (!connected) messaggi.push("Piano non connesso");
   if (branching) messaggi.push("Ramificazioni sul piano");
   if (!lenOK) messaggi.push("Meno di 3 tratti di piano");
-
-  // triangolazione per ogni tratto
-  const trianglesMissing = pianoPercorrenza.filter(seg => !esisteTriangolazionePerSegmento(seg));
+  const trianglesMissing = pianoPercorrenza.filter(seg => seg.alive!==false && !esisteTriangolazionePerSegmento(seg));
   if (trianglesMissing.length) messaggi.push("Manca triangolazione su uno o più tratti");
-  // appoggi su entrambe le coste
   const supportsLeft = nodi.some(n => n.vincolo && toLeft(n));
   const supportsRight = nodi.some(n => n.vincolo && toRight(n));
   if (!supportsLeft) messaggi.push("Nessun vincolo a terra lato sinistro");
   if (!supportsRight) messaggi.push("Nessun vincolo a terra lato destro");
-
   const ok = connected && !branching && lenOK && trianglesMissing.length===0 && supportsLeft && supportsRight;
-
   let testo, classe;
   if (ok) { testo = "Piano: CONTINUO e STABILIZZATO – pronto all'avvio"; classe = "ok"; }
   else if (!connected || branching) { testo = "Piano: interrotto o ramificato"; classe = "bad"; }
   else { testo = "Piano: incompleto – " + messaggi.join("; "); classe = "warn"; }
-
   return {ok, testo, classe, messaggi};
 }
 function esisteTriangolazionePerSegmento(seg){
-  const hasBar = (a,b) => aste.some(s => s.tipo !== "piano" && ((s.n1===a && s.n2===b)||(s.n1===b && s.n2===a)));
+  const hasBar = (a,b) => aste.some(s => s.alive !== false && s.tipo !== "piano" && ((s.n1===a && s.n2===b)||(s.n1===b && s.n2===a)));
   const collinear = (A,B,C)=> Math.abs((B.y-A.y)*(C.x-B.x) - (B.x-A.x)*(C.y-B.y)) < 1e-3;
   for (const p of nodi){
     if (p===seg.n1 || p===seg.n2) continue;
-    const c1 = hasBar(p, seg.n1);
-    const c2 = hasBar(p, seg.n2);
+    const c1 = hasBar(p, seg.n1), c2 = hasBar(p, seg.n2);
     if ((c1 && c2) && !collinear(seg.n1, seg.n2, p)) return true;
   }
   return false;
 }
 
-// ===== Effetti / esiti =====
+/* ===== Effetti / esiti ===== */
+function aggiornaDiagnostica(txt){ const d = document.getElementById("diagnostica"); d.textContent = txt; }
 function splash() {
   const H = canvas.clientHeight; if (!camion) return;
   ctx.fillStyle = "rgba(255,255,255,0.7)";
   for (let i=0; i<12; i++) { ctx.beginPath(); ctx.arc(camion.x + Math.random()*20, H*0.65 + 10 + Math.random()*20, Math.random()*5, 0, Math.PI*2); ctx.fill(); }
-  if (audioSplash && typeof audioSplash.play === "function") { audioSplash.play().catch(()=>{}); }
+  try { audioSplash?.play?.(); } catch(e){}
 }
-function vittoria() { inSimulazione = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; } alert("Vittoria! Attraversamento completato."); }
-function sconfitta() { inSimulazione = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; } alert("Sconfitta! Il camion è caduto in acqua."); document.getElementById("cronometro").innerText = "Tempo: 0.0s"; }
+function vittoria() {
+  inSimulazione = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; }
+  alert("Vittoria! Attraversamento completato.");
+}
+function sconfitta(msg) {
+  inSimulazione = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; }
+  alert("Sconfitta! " + (msg||"Il camion è caduto in acqua."));
+  document.getElementById("cronometro").innerText = "Tempo: 0.0s";
+}
 
-// ===== Terreno/Vincoli =====
+/* ===== Terreno/Vincoli ===== */
 function eTerraferma(x, y) {
   const W = canvas.clientWidth, H = canvas.clientHeight, waterTop = Math.round(H * 0.65);
   const yTerra = getYTerraferma(x);
@@ -538,10 +672,10 @@ function getYTerraferma(x) {
   return H;
 }
 
-// ===== Helpers =====
+/* ===== Helpers ===== */
 function segOrd(seg){ return (seg.n1.x <= seg.n2.x) ? [seg.n1, seg.n2] : [seg.n2, seg.n1]; }
 
-// ===== Reset =====
+/* ===== Reset ===== */
 function resetGioco(){
   if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; }
   nodi = []; aste = []; vincoli = []; pianoPercorrenza = []; vincoliPosizionati = 0;

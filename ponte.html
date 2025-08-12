@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<title>Progetta il Ponte Ingegnere! – v7 (validator strutturale)</title>
+<title>Progetta il Ponte Ingegnere! – v8 (collasso se requisiti mancanti)</title>
 <style>
   html, body { height: 100%; }
   body {
@@ -118,21 +118,17 @@
 <div id="cronometro">Tempo: 0.0s</div>
 <div id="validator" class="warn">Piano: nessun tratto</div>
 <div id="requisiti">
-  Requisiti per avvio:<br>
+  Requisiti consigliati per attraversamento:<br>
   • ≥ 3 tratti di piano<br>
   • Catena continua senza ramificazioni<br>
   • Stabilizzazione a triangoli per ogni tratto<br>
-  • Almeno 1 vincolo a terra a sinistra e 1 a destra
+  • ≥ 1 vincolo a sinistra e ≥ 1 a destra
 </div>
 
 <div id="pannelloGuida">
   <h2>Progetta il Ponte – Stretto di Messina</h2>
-  <p><b>Obiettivo gioco</b>: far attraversare il camion su una carreggiata continua (piano di percorrenza) strutturalmente stabilizzata con aste reticolari.</p>
-  <p><b>Flusso</b>:<br>
-  1) Aggiungi nodi e fino a 4 vincoli a terra (solo su terraferma).<br>
-  2) Disegna il <b>piano di percorrenza</b> (minimo 3 tratti), continuo costa–costa.<br>
-  3) Stabilizza ciascun tratto con <b>triangolazioni</b> (aste nere) collegate ai nodi del tratto.<br>
-  4) Premi <b>Avvia simulazione</b>. Se i requisiti non sono rispettati, l’avvio è bloccato con spiegazione.</p>
+  <p><b>Obiettivo</b>: far attraversare il camion su una carreggiata continua stabilizzata con aste reticolari.</p>
+  <p><b>Novità v8</b>: se i requisiti non sono rispettati, la simulazione <u>parte comunque</u> e l’opera <b>collassa</b> precipitando in mare (aste e piano di percorrenza).</p>
   <button id="btnHoCapito">Ho capito</button>
 </div>
 
@@ -153,6 +149,7 @@ const MAX_VINCOLI = 4;
 
 let modalita = "nodo";
 let inSimulazione = false;
+let inCollasso = false;
 let tempoTrascorso = 0;
 let timerAttivo = false;
 let camion = null;
@@ -161,6 +158,8 @@ let audioSplash = null;
 
 const RAGGIO_SELEZIONE = 12;
 let nodoSelezionato = null;
+
+const G = 0.45; // gravità per il collasso
 
 // ===== Setup =====
 document.addEventListener('DOMContentLoaded', () => {
@@ -194,9 +193,10 @@ function hookToolbar(){
   const btns = { btnNodo:"nodo", btnDelNodo:"cancellaNodo", btnVincolo:"vincolo", btnAsta:"asta", btnPiano:"piano" };
   for (const [id, mode] of Object.entries(btns)){
     const el = document.getElementById(id);
-    el.addEventListener("click", ()=>{ modalita = mode; evidenziaAttivo(id); });
+    el.addEventListener("click", ()=>{ if (!inCollasso) { modalita = mode; evidenziaAttivo(id); } });
   }
   document.getElementById("btnAnnulla").addEventListener("click", () => { 
+    if (inCollasso) return;
     if (aste.length){
       const rimossa = aste.pop();
       if (rimossa.tipo === "piano") {
@@ -210,11 +210,8 @@ function hookToolbar(){
   document.getElementById("btnAvvia").addEventListener("click", () => {
     if (inSimulazione) return;
     const check = valutaRequisiti();
-    if (!check.ok){
-      alert("Impossibile avviare:\n- " + check.messaggi.join("\n- "));
-      return;
-    }
-    avviaSimulazione();
+    // v8: si avvia sempre; se non ok, parte collasso
+    avviaSimulazione(check.ok);
   });
   evidenziaAttivo("btnNodo");
 }
@@ -289,12 +286,15 @@ function disegnaNodi() {
 }
 function disegnaAste() {
   aste.forEach(a => {
-    ctx.strokeStyle = a.tipo === "piano" ? "#aa0000" : "#111";
+    // durante il collasso sfumiamo leggermente il piano
+    const alpha = inCollasso ? 0.9 : 1.0;
+    ctx.strokeStyle = (a.tipo === "piano") ? "rgba(170,0,0,"+alpha+")" : "rgba(17,17,17,"+alpha+")";
     ctx.lineWidth = a.tipo === "piano" ? 3 : 1.5;
     ctx.beginPath(); ctx.moveTo(a.n1.x, a.n1.y); ctx.lineTo(a.n2.x, a.n2.y); ctx.stroke();
   });
 }
 function disegnaVincoli() {
+  // I vincoli restano parte del terreno (non cadono)
   vincoli.forEach(v => {
     ctx.fillStyle = v.tipo === "cerniera" ? "#444" : "#222";
     ctx.fillRect(v.x-6, v.y, 12, 22);
@@ -302,16 +302,24 @@ function disegnaVincoli() {
 }
 function disegnaCamion() {
   if (!camion) return;
+  // Un piccolo fade quando affonda
+  let alpha = 1.0;
+  const waterTop = Math.round(canvas.clientHeight * 0.65);
+  if (camion.y > waterTop + 20) alpha = Math.max(0, 1 - (camion.y - (waterTop+20)) / 200);
+  ctx.save();
+  ctx.globalAlpha = alpha;
   ctx.fillStyle = "#e53935";
   ctx.fillRect(camion.x, camion.y - camion.altezza, camion.larghezza, camion.altezza);
   // ruote
   ctx.fillStyle = "#222";
   ctx.beginPath(); ctx.arc(camion.x + 4, camion.y, 3.5, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(camion.x + camion.larghezza - 4, camion.y, 3.5, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
 }
 
 // ===== Interazione =====
 function onCanvasClick(e){
+  if (inCollasso) return; // nessuna interazione durante il collasso
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left, y = e.clientY - rect.top;
 
@@ -365,11 +373,11 @@ function inizializzaCamionSulVersanteSinistro(){
   const sinistra = pianoPercorrenza.find(seg => Math.max(seg.n1.x, seg.n2.x) < W * 0.24);
   if (sinistra) {
     const [sx] = segOrd(sinistra);
-    camion = {x: sx.x - 18, y: sx.y - 10, vx: 0, vy: 0, larghezza: 22, altezza: 12};
+    camion = {x: sx.x - 18, y: sx.y - 10, vx: 0, vy: 0, larghezza: 22, altezza: 12, affondato:false};
     return;
   }
   const x0 = 20, y0 = getYTerraferma(x0) - 2;
-  camion = {x: x0, y: y0, vx: 0, vy: 0, larghezza: 22, altezza: 12};
+  camion = {x: x0, y: y0, vx: 0, vy: 0, larghezza: 22, altezza: 12, affondato:false};
 }
 function creaPianettoSinistroVincolato(){
   const W = canvas.clientWidth;
@@ -387,8 +395,8 @@ function creaPianettoSinistroVincolato(){
   aste.push(seg); pianoPercorrenza.push(seg); aggiornaValidator();
 }
 
-// ===== Simulazione (quasi-statica) =====
-function avviaSimulazione() {
+// ===== Simulazione =====
+function avviaSimulazione(requisitiOK) {
   inSimulazione = true; timerAttivo = true; tempoTrascorso = 0;
   if (cronometroInterval) clearInterval(cronometroInterval);
   cronometroInterval = setInterval(() => {
@@ -400,35 +408,44 @@ function avviaSimulazione() {
 
   if (pianoPercorrenza.length > 0) {
     const [sx] = segOrd(pianoPercorrenza[0]);
-    camion.x = sx.x - 18; camion.y = sx.y - 10; camion.vx = 1.2; camion.vy = 0;
-  } else { camion.vx = 1.0; camion.vy = 0; }
+    camion.x = sx.x - 18; camion.y = sx.y - 10;
+    camion.vx = requisitiOK ? 1.2 : 0.0; // se collasso, niente moto orizzontale
+    camion.vy = 0;
+  } else { camion.vx = 0; camion.vy = 0; }
+
+  if (!requisitiOK) {
+    // Avvia il collasso
+    inCollasso = true;
+    preparaCollasso();
+  }
+
   requestAnimationFrame(loopSimulazione);
 }
 
 function loopSimulazione(){
   if (!inSimulazione) return;
-
-  // Nota: in v7 i nodi restano fissi (quasi-statico). Nessuna gravità sui nodi.
-  // Movimento camion
-  camion.x += camion.vx;
-
-  const seg = trovaSegmentoPiano(camion.x);
   const waterTop = Math.round(canvas.clientHeight * 0.65);
 
-  if (seg) {
-    const [a,b] = segOrd(seg);
-    const t = (camion.x - a.x) / ((b.x - a.x) || 1e-6);
-    const yLine = a.y + t * (b.y - a.y);
-    camion.y = yLine - 10;
-    camion.vy = (b.y - a.y)/((b.x - a.x) || 1e-6) * camion.vx;
+  if (!inCollasso) {
+    // modalità precedente
+    camion.x += camion.vx;
+    const seg = trovaSegmentoPiano(camion.x);
+    if (seg) {
+      const [a,b] = segOrd(seg);
+      const t = (camion.x - a.x) / ((b.x - a.x) || 1e-6);
+      const yLine = a.y + t * (b.y - a.y);
+      camion.y = yLine - 10;
+      camion.vy = (b.y - a.y)/((b.x - a.x) || 1e-6) * camion.vx;
+    } else {
+      camion.vy += G;
+      camion.y += camion.vy;
+      if (!camion.affondato && camion.y > waterTop + 5) { camion.affondato = true; splash(); sconfitta(); }
+    }
+    if (camion.x > canvas.clientWidth * 0.90) { vittoria(); return; }
   } else {
-    // se non c'è piano sotto, cade subito
-    camion.vy += 0.4;
-    camion.y += camion.vy;
-    if (camion.y > waterTop + 5) { splash(); sconfitta(); return; }
+    // aggiornamento collasso
+    aggiornaCollasso();
   }
-
-  if (camion.x > canvas.clientWidth * 0.90) { vittoria(); return; }
 
   disegnaSfondoGioco();
   disegnaAste(); disegnaNodi(); disegnaVincoli(); disegnaCamion();
@@ -450,8 +467,7 @@ function aggiornaValidator(){
 }
 function valutaRequisiti(){
   const messaggi = [];
-  // continuità del piano come catena unica (no branche)
-  if (pianoPercorrenza.length === 0) return {ok:false, testo:"Piano: nessun tratto", classe:"warn", messaggi:["Nessun tratto di piano"]};
+  if (pianoPercorrenza.length === 0) return {ok:false, testo:"Piano: nessun tratto (partirà il collasso)", classe:"bad", messaggi:["Nessun tratto di piano"]};
 
   const degree = new Map(); const allNodes = new Set();
   pianoPercorrenza.forEach(seg => { allNodes.add(seg.n1); allNodes.add(seg.n2); degree.set(seg.n1,(degree.get(seg.n1)||0)+1); degree.set(seg.n2,(degree.get(seg.n2)||0)+1); });
@@ -461,34 +477,28 @@ function valutaRequisiti(){
   const start = [...allNodes][0]; const visited = new Set();
   (function dfs(n){ if (visited.has(n)) return; visited.add(n); adj.get(n).forEach(m=>dfs(m)); })(start);
   const connected = visited.size === allNodes.size;
-  const endpoints = [...degree.entries()].filter(([n,d]) => d===1).map(([n])=>n);
-
-  const W = canvas.clientWidth;
-  const toLeft = (n)=> n.x <= W*0.18 + 2;
-  const toRight = (n)=> n.x >= W*0.82 - 2;
-  const touchesLeft = [...allNodes].some(toLeft);
-  const touchesRight = [...allNodes].some(toRight);
 
   const lenOK = pianoPercorrenza.length >= 3;
   if (!connected) messaggi.push("Piano non connesso");
   if (branching) messaggi.push("Ramificazioni sul piano");
   if (!lenOK) messaggi.push("Meno di 3 tratti di piano");
 
-  // triangolazione per ogni tratto
   const trianglesMissing = pianoPercorrenza.filter(seg => !esisteTriangolazionePerSegmento(seg));
   if (trianglesMissing.length) messaggi.push("Manca triangolazione su uno o più tratti");
-  // appoggi su entrambe le coste
-  const supportsLeft = nodi.some(n => n.vincolo && toLeft(n));
+
+  const W = canvas.clientWidth;
+  const toLeft  = (n)=> n.x <= W*0.18 + 2;
+  const toRight = (n)=> n.x >= W*0.82 - 2;
+  const supportsLeft  = nodi.some(n => n.vincolo && toLeft(n));
   const supportsRight = nodi.some(n => n.vincolo && toRight(n));
-  if (!supportsLeft) messaggi.push("Nessun vincolo a terra lato sinistro");
+  if (!supportsLeft)  messaggi.push("Nessun vincolo a terra lato sinistro");
   if (!supportsRight) messaggi.push("Nessun vincolo a terra lato destro");
 
   const ok = connected && !branching && lenOK && trianglesMissing.length===0 && supportsLeft && supportsRight;
 
   let testo, classe;
   if (ok) { testo = "Piano: CONTINUO e STABILIZZATO – pronto all'avvio"; classe = "ok"; }
-  else if (!connected || branching) { testo = "Piano: interrotto o ramificato"; classe = "bad"; }
-  else { testo = "Piano: incompleto – " + messaggi.join("; "); classe = "warn"; }
+  else { testo = "Piano: requisiti mancanti – la simulazione causerà il collasso"; classe = "bad"; }
 
   return {ok, testo, classe, messaggi};
 }
@@ -504,6 +514,57 @@ function esisteTriangolazionePerSegmento(seg){
   return false;
 }
 
+// ===== Collasso =====
+function preparaCollasso(){
+  // converti tutti i nodi in particelle dinamiche
+  nodi.forEach(n => {
+    n.vx = (Math.random()*2 - 1) * 0.8; // leggera spinta laterale
+    n.vy = -Math.random()*0.5;          // piccola “staccata” verso l’alto
+    n.dyn = true;
+  });
+  // il camion cade
+  camion.vx = 0; camion.vy = 0.2;
+}
+function aggiornaCollasso(){
+  const H = canvas.clientHeight;
+  const waterTop = Math.round(H * 0.65);
+
+  // aggiorna i nodi/particelle
+  let tuttiAffondati = true;
+  nodi.forEach(n => {
+    if (!n.dyn) return;
+    n.vy += G;
+    n.x  += n.vx;
+    n.y  += n.vy;
+    if (n.y <= H + 40) tuttiAffondati = false;
+
+    // lievissimo attrito in aria
+    n.vx *= 0.995;
+    // spruzzi quando attraversano il pelo dell'acqua
+    if (!n.splash && n.y > waterTop + 2) { n.splash = true; miniSplash(n.x, waterTop); }
+  });
+
+  // rompi progressivamente le aste del piano (effetto “cedevolezza”)
+  if (pianoPercorrenza.length > 0) {
+    if (Math.random() < 0.35) { pianoPercorrenza.pop(); aste = aste.filter(a => a.tipo !== "piano" || pianoPercorrenza.includes(a)); }
+  }
+
+  // aggiorna camion (cade)
+  camion.vy += G;
+  camion.y  += camion.vy;
+  if (!camion.affondato && camion.y > waterTop + 5) { camion.affondato = true; splash(); }
+
+  // condizione di fine: quando nodi + camion sono affondati/spariti
+  if (tuttiAffondati && camion.affondato) {
+    sconfitta();
+  }
+}
+
+function miniSplash(x, waterTop){
+  ctx.fillStyle = "rgba(255,255,255,0.7)";
+  for (let i=0; i<6; i++) { ctx.beginPath(); ctx.arc(x + Math.random()*16 - 8, waterTop + 8 + Math.random()*18, Math.random()*3, 0, Math.PI*2); ctx.fill(); }
+}
+
 // ===== Effetti / esiti =====
 function splash() {
   const H = canvas.clientHeight; if (!camion) return;
@@ -511,8 +572,8 @@ function splash() {
   for (let i=0; i<12; i++) { ctx.beginPath(); ctx.arc(camion.x + Math.random()*20, H*0.65 + 10 + Math.random()*20, Math.random()*5, 0, Math.PI*2); ctx.fill(); }
   if (audioSplash && typeof audioSplash.play === "function") { audioSplash.play().catch(()=>{}); }
 }
-function vittoria() { inSimulazione = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; } alert("Vittoria! Attraversamento completato."); }
-function sconfitta() { inSimulazione = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; } alert("Sconfitta! Il camion è caduto in acqua."); document.getElementById("cronometro").innerText = "Tempo: 0.0s"; }
+function vittoria() { inSimulazione = false; inCollasso = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; } alert("Vittoria! Attraversamento completato."); }
+function sconfitta() { inSimulazione = false; inCollasso = false; timerAttivo = false; if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; } alert("Sconfitta! Il ponte è collassato e il camion è caduto in acqua."); document.getElementById("cronometro").innerText = "Tempo: 0.0s"; }
 
 // ===== Terreno/Vincoli =====
 function eTerraferma(x, y) {
@@ -545,7 +606,7 @@ function segOrd(seg){ return (seg.n1.x <= seg.n2.x) ? [seg.n1, seg.n2] : [seg.n2
 function resetGioco(){
   if (cronometroInterval) { clearInterval(cronometroInterval); cronometroInterval = null; }
   nodi = []; aste = []; vincoli = []; pianoPercorrenza = []; vincoliPosizionati = 0;
-  inSimulazione = false; tempoTrascorso = 0; timerAttivo = false; nodoSelezionato = null;
+  inSimulazione = false; inCollasso = false; tempoTrascorso = 0; timerAttivo = false; nodoSelezionato = null;
   document.getElementById("cronometro").innerText = "Tempo: 0.0s";
   fitCanvas(); creaPianettoSinistroVincolato(); inizializzaCamionSulVersanteSinistro();
   guidaMostrata = false; redrawAll();

@@ -246,6 +246,37 @@ let nodoSelezionato = null;
 
 let stallTimer = 0;
 
+
+// === Export/Download helpers ===
+function __exportHTMLString(){
+  try {
+    const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+    return html;
+  } catch(e){
+    console.error('serialize failed', e);
+    return document.documentElement.outerHTML;
+  }
+}
+async function downloadCurrentHTML(filename="ponte.html"){
+  const html = __exportHTMLString();
+  try{
+    const blob = new Blob([html], {type:"text/html;charset=utf-8"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{
+      URL.revokeObjectURL(url);
+      a.remove();
+    }, 500);
+  }catch(e){
+    const dataUrl = "data:text/html;charset=utf-8," + encodeURIComponent(html);
+    window.open(dataUrl, "_blank");
+  }
+}
+
 /* ===== Setup ===== */
 document.addEventListener('DOMContentLoaded', () => {
   canvas = document.getElementById('giocoCanvas');

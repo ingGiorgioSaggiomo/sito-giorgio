@@ -17,10 +17,10 @@
     position: fixed;
     inset: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;
     display: block;
     background: #cce6ff;
-    touch-action: none;
+    touch-action: none; /* disable browser gestures; handled via Pointer Events */
   }
   #toolbar {
     position: absolute;
@@ -82,7 +82,7 @@
       max-width: 96vw;
     }
     #cronometro { top: 54px; }
-    #validator { top: 92px; }
+    #validator { top: 92px; max-width: min(94vw, 800px); }
     #requisiti { top: 170px; }
     #diagnostica { top: 270px; }
   }
@@ -141,6 +141,148 @@
     display: none;
     z-index: 12;
   }
+
+/* === Mobile optimizations & safe-area support === */
+:root{
+  --sat: env(safe-area-inset-top);
+  --sab: env(safe-area-inset-bottom);
+  --sal: env(safe-area-inset-left);
+  --sar: env(safe-area-inset-right);
+}
+body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+#toolbar {
+  top: calc(10px + var(--sat));
+  padding-top: calc(6px + var(--sat));
+}
+@media (max-width: 700px) {
+  #toolbar { top: var(--sat); }
+}
+
+
+/* Larger touch targets override */
+@media (pointer: coarse) {
+  button, select {
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 16px;
+  }
+}
+
+
+/* === Mobile layout overrides === */
+@media (pointer: coarse) {
+  #toolbar {
+    position: fixed;
+    bottom: calc(8px + var(--sab));
+    top: auto;
+    left: calc(8px + var(--sal));
+    right: calc(8px + var(--sar));
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    padding: 8px;
+    border-radius: 14px;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+  }
+  #toolbar button, #toolbar select {
+    min-width: 48px;
+    min-height: 48px;
+    font-size: 16px;
+  }
+  #cronometro, #validator, #requisiti, #diagnostica {
+    left: calc(8px + var(--sal));
+    right: auto;
+    max-width: min(94vw, 720px);
+    font-size: 14px;
+  }
+  #cronometro { top: calc(8px + var(--sat)); }
+  #validator  { top: calc(56px + var(--sat)); }
+  #requisiti  { top: calc(138px + var(--sat)); }
+  #diagnostica{ top: calc(228px + var(--sat)); }
+}
+
+
+/* === Bottom-sheet toolbar (mobile) === */
+@media (pointer: coarse) {
+  #toolbar {
+    position: fixed;
+    inset: auto calc(8px + var(--sar)) calc(8px + var(--sab)) calc(8px + var(--sal));
+    border-radius: 16px;
+    padding-bottom: calc(8px + max(0px, var(--sab) - 6px));
+    max-height: 45vh;
+    overflow-y: auto;
+    transition: max-height .25s ease, box-shadow .25s ease, transform .25s ease;
+  }
+  #toolbar.sheet-collapsed {
+    max-height: 64px;      /* one row visible */
+    overflow-y: hidden;
+  }
+  #toolbar .sheet-row {
+    display: flex; flex-wrap: nowrap; gap: 6px; align-items: center;
+  }
+  #toolbar .sheet-controls { display: flex; flex-wrap: wrap; gap: 6px; }
+  #toolbar .sheet-toggle {
+    border: none; outline: none; border-radius: 12px;
+    min-width: 44px; min-height: 44px; font-size: 18px;
+    background: rgba(0,0,0,0.06);
+  }
+  #toolbar::after{ /* top handle hint */
+    content: "";
+    position: absolute;
+    top: 6px; left: 50%; transform: translateX(-50%);
+    width: 44px; height: 4px; border-radius: 2px;
+    background: rgba(0,0,0,.15);
+  }
+}
+
+
+/* === Mobile FAB & compact menu === */
+@media (pointer: coarse) {
+  #toolbar { display: none !important; } /* hide legacy toolbar on mobile */
+  #fab {
+    position: fixed;
+    right: calc(12px + var(--sar));
+    bottom: calc(12px + var(--sab));
+    width: 56px; height: 56px; border-radius: 28px;
+    box-shadow: 0 10px 26px rgba(0,0,0,.25);
+    background: #2563eb; color: white; font-size: 26px; line-height: 56px;
+    text-align: center; user-select: none; z-index: 9999;
+  }
+  #fab:active { transform: scale(0.98); }
+  #mobileMenu {
+    position: fixed;
+    right: calc(12px + var(--sar));
+    bottom: calc(80px + var(--sab));
+    display: none;
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: blur(6px);
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow: 0 12px 28px rgba(0,0,0,.25);
+    z-index: 9998;
+  }
+  #mobileMenu.open { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  #mobileMenu button, #mobileMenu select {
+    min-width: 44px; min-height: 44px; font-size: 16px;
+  }
+  /* draggable hint */
+  #fab::after {
+    content: "⋮";
+    position: absolute; right: 6px; top: 6px; font-size: 14px; opacity: .7;
+  }
+  /* auto-hide big validator after 3s on mobile */
+  #validator.mobile-autohide { animation: hideVal 0s ease 3s forwards; }
+  @keyframes hideVal { to { opacity: 0; visibility: hidden; } }
+}
+
 </style>
 </head>
 <body>
@@ -241,41 +383,187 @@ let camion = null;
 
 let audioSplash = null;
 
-const RAGGIO_SELEZIONE = 12;
+let RAGGIO_SELEZIONE = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ? 22 : 12;
 let nodoSelezionato = null;
 
 let stallTimer = 0;
 
 
-// === Export/Download helpers ===
-function __exportHTMLString(){
-  try {
-    const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
-    return html;
-  } catch(e){
-    console.error('serialize failed', e);
-    return document.documentElement.outerHTML;
+// Utility: allow future dynamic tuning of hit radius (e.g., with zoom)
+// Call setHitRadius(f) with a factor in (0.5..2) to scale.
+function setHitRadius(f=1){ 
+  const base = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ? 22 : 12;
+  RAGGIO_SELEZIONE = Math.max(8, Math.min(44, base * f));
+}
+
+
+// === Mobile helpers ===
+function addMobileHelpers(){
+  const tb = document.getElementById('toolbar');
+  if(!tb) return;
+  const btnFS = document.createElement('button');
+  btnFS.id = 'btnFull';
+  btnFS.title = 'Schermo intero';
+  btnFS.textContent = '⛶';
+  btnFS.addEventListener('click', async ()=>{
+    try{
+      const root = document.documentElement;
+      if (!document.fullscreenElement) { await (root.requestFullscreen?.() || root.webkitRequestFullscreen?.()); }
+      else { await (document.exitFullscreen?.() || document.webkitExitFullscreen?.()); }
+    }catch(e){ console.warn('fullscreen not available', e); }
+  });
+  const btnInfo = document.createElement('button');
+  btnInfo.id = 'btnInfo';
+  btnInfo.title = 'Mostra/Nascondi requisiti';
+  btnInfo.textContent = 'ℹ️';
+  btnInfo.addEventListener('click', ()=>{
+    const r = document.getElementById('requisiti');
+    if(!r) return;
+    r.style.display = (r.style.display === 'none') ? 'block' : 'none';
+  });
+  tb.appendChild(btnFS);
+  tb.appendChild(btnInfo);
+}
+// Auto-hide requisiti after first interaction on mobile
+let __hidOnce=false;
+function autoHideRequisitiOnce(){
+  if (__hidOnce) return;
+  if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches){
+    const r = document.getElementById('requisiti');
+    if (r) r.style.display = 'none';
+    __hidOnce=true;
   }
 }
-async function downloadCurrentHTML(filename="ponte.html"){
-  const html = __exportHTMLString();
-  try{
-    const blob = new Blob([html], {type:"text/html;charset=utf-8"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(()=>{
-      URL.revokeObjectURL(url);
-      a.remove();
-    }, 500);
-  }catch(e){
-    const dataUrl = "data:text/html;charset=utf-8," + encodeURIComponent(html);
-    window.open(dataUrl, "_blank");
+document.addEventListener('pointerdown', autoHideRequisitiOnce, {passive:true});
+
+
+// === Bottom sheet installer ===
+function installBottomSheet(){
+  const tb = document.getElementById('toolbar');
+  if(!tb) return;
+  tb.classList.add('sheet-collapsed'); // start collapsed on mobile
+  // Move existing children into a wrapper so toggle button can sit aside
+  const wrap = document.createElement('div');
+  wrap.className = 'sheet-controls';
+  while (tb.firstChild) wrap.appendChild(tb.firstChild);
+  const row = document.createElement('div');
+  row.className = 'sheet-row';
+  const btnCollapse = document.createElement('button');
+  btnCollapse.className = 'sheet-toggle';
+  btnCollapse.title = 'Espandi/Riduci comandi';
+  const setLabel = ()=> btnCollapse.textContent = tb.classList.contains('sheet-collapsed') ? '⌃' : '⌄';
+  setLabel();
+  btnCollapse.addEventListener('click', ()=>{
+    tb.classList.toggle('sheet-collapsed');
+    setLabel();
+  });
+  row.appendChild(btnCollapse);
+  row.appendChild(wrap);
+  tb.appendChild(row);
+
+  // Auto collapse when interacting near the bottom area (to liberate gli appoggi)
+  const bottomGuard = 140; // px from bottom
+  const onPointer = (e)=>{
+    if (!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) return;
+    const y = e.clientY || 0;
+    const h = window.innerHeight || document.documentElement.clientHeight;
+    if (h - y < bottomGuard && !tb.classList.contains('sheet-collapsed')){
+      tb.classList.add('sheet-collapsed');
+      setLabel();
+    }
+  };
+  document.addEventListener('pointerdown', onPointer, {passive:true});
+  // Collapse when starting actions through canvas click mapping
+  const _oc = window.onCanvasClick;
+  if (typeof _oc === 'function'){
+    window.onCanvasClick = function(ev){
+      if (!tb.classList.contains('sheet-collapsed')){
+        tb.classList.add('sheet-collapsed'); setLabel();
+      }
+      return _oc.apply(this, arguments);
+    }
   }
 }
+
+
+// === Mobile compact menu logic ===
+function buildMobileMenu(){
+  if (!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches)) return;
+  const fab = document.getElementById('fab');
+  const menu = document.getElementById('mobileMenu');
+  if (!fab || !menu) return;
+  // Mirror the toolbar buttons/select if available
+  const tb = document.getElementById('toolbar');
+  const controls = [];
+  if (tb){
+    tb.querySelectorAll('button, select').forEach(el => {
+      if (el.id === 'btnFull' || el.id === 'btnInfo') return; // skip desktop helpers
+      controls.push(el);
+    });
+  }
+  // Create clones
+  controls.forEach(ctrl => {
+    let clone;
+    if (ctrl.tagName === 'SELECT'){
+      clone = document.createElement('select');
+      clone.innerHTML = ctrl.innerHTML;
+      clone.value = ctrl.value;
+      clone.addEventListener('change', ()=> ctrl.value = clone.value);
+    } else {
+      clone = document.createElement('button');
+      clone.textContent = ctrl.textContent || ctrl.value || '...';
+      clone.addEventListener('click', (e)=>{ e.preventDefault(); ctrl.click(); closeMenu(); });
+    }
+    menu.appendChild(clone);
+  });
+  function toggleMenu(){ menu.classList.toggle('open'); }
+  function closeMenu(){ menu.classList.remove('open'); }
+  fab.addEventListener('click', (e)=>{ e.preventDefault(); toggleMenu(); });
+  // Close on outside tap
+  document.addEventListener('pointerdown', (e)=>{
+    if (!menu.contains(e.target) && e.target !== fab) closeMenu();
+  }, {passive:true});
+
+  // Draggable FAB (and menu follows)
+  let dragging=false, sx=0, sy=0, ox=0, oy=0;
+  const startDrag = (e)=>{
+    dragging=true;
+    sx = e.clientX; sy = e.clientY;
+    const r = fab.getBoundingClientRect();
+    ox = r.left; oy = r.top;
+    e.preventDefault();
+  };
+  const moveDrag = (e)=>{
+    if (!dragging) return;
+    const nx = ox + (e.clientX - sx);
+    const ny = oy + (e.clientY - sy);
+    // clamp
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const w = rW(fab), h = rH(fab);
+    const left = Math.max(8, Math.min(vw - w - 8, nx));
+    const top  = Math.max(8, Math.min(vh - h - 8, ny));
+    fab.style.left = left + 'px';
+    fab.style.top  = top + 'px';
+    fab.style.right = 'auto';
+    fab.style.bottom = 'auto';
+    // move menu near fab
+    menu.style.right = 'auto';
+    menu.style.bottom = 'auto';
+    menu.style.left = (left - 4) + 'px';
+    menu.style.top  = (top - rH(menu) - 12) + 'px';
+  };
+  const endDrag = ()=>{ dragging=false; };
+  const rW = (el)=> el.getBoundingClientRect().width;
+  const rH = (el)=> el.getBoundingClientRect().height;
+  fab.addEventListener('pointerdown', startDrag);
+  window.addEventListener('pointermove', moveDrag);
+  window.addEventListener('pointerup', endDrag);
+
+  // Auto-hide validator message after 3s (mobile)
+  const val = document.getElementById('validator');
+  if (val){ val.classList.add('mobile-autohide'); }
+}
+document.addEventListener('DOMContentLoaded', buildMobileMenu);
 
 /* ===== Setup ===== */
 document.addEventListener('DOMContentLoaded', () => {
@@ -284,6 +572,8 @@ document.addEventListener('DOMContentLoaded', () => {
   try { audioSplash = new Audio("splash.mp3"); } catch(e) { audioSplash = null; }
 
   hookToolbar();
+  addMobileHelpers();
+  installBottomSheet();
   fitCanvas();
   creaPianettoSinistroVincolato();
   inizializzaCamionSulVersanteSinistro();
@@ -304,21 +594,31 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   canvas.addEventListener("click", onCanvasClick);
-  // Supporto touch per dispositivi mobili
-  canvas.addEventListener("touchstart", function(e) {
-    if (e.touches.length === 1) {
-      const touch = e.touches[0];
-      const rect = canvas.getBoundingClientRect();
-      const fakeEvent = {
-        clientX: touch.clientX,
-        clientY: touch.clientY,
-        preventDefault: ()=>{}
-      };
-      onCanvasClick(fakeEvent);
-      e.preventDefault();
+
+  // Prefer Pointer Events (covers mouse, touch, pen) and suppress double-firing with 'click'
+  let __lastPointerDownTS = 0;
+  const __suppressClickCapture = (e) => {
+    if (performance.now() - __lastPointerDownTS < 250) { 
+      e.stopImmediatePropagation(); 
+      e.preventDefault(); 
     }
+  };
+  // Capture-phase blocker to avoid duplicate onCanvasClick on mobile (pointerdown + click)
+  canvas.addEventListener('click', __suppressClickCapture, true);
+  canvas.addEventListener('pointerdown', (e) => {
+    // Only act on primary pointer or left mouse button
+    if (e.isPrimary === false && e.pointerType !== 'mouse') return;
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    __lastPointerDownTS = performance.now();
+    const fakeEvent = { clientX: e.clientX, clientY: e.clientY, preventDefault: ()=>{} };
+    onCanvasClick(fakeEvent);
+    e.preventDefault();
   }, {passive:false});
-  addEventListener('resize', ()=>{ fitCanvas(); redrawAll(); }, {passive:true});
+  canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
+
+  // Supporto touch per dispositivi mobili
+  /* touchstart handler replaced by pointerdown for mobile */
+addEventListener('resize', ()=>{ fitCanvas(); redrawAll(); }, {passive:true});
   addEventListener('orientationchange', ()=> setTimeout(()=>{ fitCanvas(); redrawAll(); }, 80), {passive:true});
 });
 
@@ -781,5 +1081,10 @@ function resetGioco(){
   guidaMostrata = false; redrawAll();
 }
 </script>
+
+<!-- Mobile FAB and compact menu -->
+<div id="fab" title="Comandi">＋</div>
+<div id="mobileMenu" aria-label="Comandi ponte"></div>
+
 </body>
 </html>

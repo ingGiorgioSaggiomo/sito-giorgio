@@ -11,6 +11,7 @@
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans";
     background: #cce6ff;
     overflow: hidden;
+    touch-action: manipulation;
   }
   canvas#giocoCanvas{
     position: fixed;
@@ -19,11 +20,13 @@
     height: 100vh;
     display: block;
     background: #cce6ff;
+    touch-action: none;
   }
   #toolbar {
     position: absolute;
     top: 10px;
     left: 10px;
+    right: 10px;
     background: rgba(255,255,255,0.95);
     padding: 10px;
     border-radius: 10px;
@@ -33,16 +36,56 @@
     z-index: 10;
     flex-wrap: wrap;
     box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    overflow-x: auto;
+    max-width: calc(100vw - 20px);
   }
   button, select {
-    padding: 6px 10px;
-    font-size: 14px;
-    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 16px;
+    border-radius: 10px;
     border: 1px solid #444;
     cursor: pointer;
     background: #fff;
+    min-width: 44px;
+    min-height: 44px;
   }
   .active { outline: 2px solid #0077ff; }
+  @media (max-width: 700px) {
+    #toolbar {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      gap: 6px;
+      padding: 6px 2px 6px 2px;
+      top: 0;
+      left: 0;
+      right: 0;
+      border-radius: 0 0 12px 12px;
+      max-width: 100vw;
+    }
+    button, select {
+      font-size: 15px;
+      padding: 8px 10px;
+      min-width: 40px;
+      min-height: 40px;
+    }
+    #pannelloGuida {
+      max-width: 98vw;
+      padding: 10px;
+      font-size: 15px;
+    }
+    #cronometro, #validator, #requisiti, #diagnostica {
+      right: 2px;
+      left: auto;
+      font-size: 13px;
+      padding: 6px 6px;
+      border-radius: 8px;
+      max-width: 96vw;
+    }
+    #cronometro { top: 54px; }
+    #validator { top: 92px; }
+    #requisiti { top: 170px; }
+    #diagnostica { top: 270px; }
+  }
   #pannelloGuida {
     position: absolute;
     top: 50%; left: 50%;
@@ -155,21 +198,21 @@
 /* ===== Parametri simulazione (profilati per difficoltà) ===== */
 const PRESET = {
   facile: {
-    truck: { m: 1200, vx0: 1.3, mu: 0.6 },
+  truck: { m: 1200, vx0: 1.8, mu: 0.6 },
     beam:  { E: 2.1e11, A_plane: 0.012, A_bar: 0.008, deltaMaxRatio: 1/120 }, // L/120
   limits:{ slopeMax: 0.30, jointAngleMax: 30 * Math.PI/180, tMax: 75 }, // 30%, ≈30°, 75s
     safety:{ N_tension: 2.2e5, N_comp: 1.8e5, bucklingFactor: 0.9, triBoost: 0.9 },
     noise: { truckMass: 0.0 }
   },
   medio: {
-    truck: { m: 1500, vx0: 1.2, mu: 0.5 },
+  truck: { m: 1500, vx0: 1.6, mu: 0.5 },
     beam:  { E: 2.1e11, A_plane: 0.010, A_bar: 0.006, deltaMaxRatio: 1/160 }, // L/160
   limits:{ slopeMax: 0.22, jointAngleMax: 22 * Math.PI/180, tMax: 45 }, // 22%, ≈22°, 45s
     safety:{ N_tension: 1.5e5, N_comp: 1.0e5, bucklingFactor: 0.7, triBoost: 0.7 },
     noise: { truckMass: 0.1 }
   },
   difficile: {
-    truck: { m: 1700, vx0: 1.15, mu: 0.45 },
+  truck: { m: 1700, vx0: 1.3, mu: 0.45 },
     beam:  { E: 2.1e11, A_plane: 0.008, A_bar: 0.005, deltaMaxRatio: 1/200 }, // L/200
   limits:{ slopeMax: 0.18, jointAngleMax: 18 * Math.PI/180, tMax: 30 }, // 18%, ≈18°, 30s
     safety:{ N_tension: 1.2e5, N_comp: 0.8e5, bucklingFactor: 0.6, triBoost: 0.55 },
@@ -230,6 +273,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   canvas.addEventListener("click", onCanvasClick);
+  // Supporto touch per dispositivi mobili
+  canvas.addEventListener("touchstart", function(e) {
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      const rect = canvas.getBoundingClientRect();
+      const fakeEvent = {
+        clientX: touch.clientX,
+        clientY: touch.clientY,
+        preventDefault: ()=>{}
+      };
+      onCanvasClick(fakeEvent);
+      e.preventDefault();
+    }
+  }, {passive:false});
   addEventListener('resize', ()=>{ fitCanvas(); redrawAll(); }, {passive:true});
   addEventListener('orientationchange', ()=> setTimeout(()=>{ fitCanvas(); redrawAll(); }, 80), {passive:true});
 });
@@ -485,9 +542,10 @@ function loopSimulazione() {
     camion.vx += acc * 0.05; // dt ~0.05 s
   camion.vx = Math.max(0.2, Math.min(camion.vx, 4.0)); // clamp
 
-    // stallo se pendenza eccessiva
+    // rimosso: stallo per pendenza eccessiva
     if (Math.abs(slope) > SIM.limits.slopeMax && camion.vx <= 0.25) {
-      stallTimer += 0.05; if (stallTimer > 1.5) { sconfitta("Stallo per pendenza eccessiva"); return; }
+      stallTimer += 0.05;
+      // nessuna sconfitta, il camion resta fermo
     } else { stallTimer = 0; }
 
     // clamp del camion sul piano

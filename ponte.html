@@ -466,17 +466,17 @@ function aggiornaValidator(){
   el.className = v.classe;
 }
 
-// ===== Helper di verifica avanzata =====
-function dofVincoloTipo(tipo){ return tipo==="incastro" ? 3 : 2; } // cerniera=2
+// === Patch: controlli avanzati di stabilità ===
+function dofVincolo(t){ return t==="incastro"?3 : t==="cerniera"?2 : 1; }
 
 function buildGraphNonPiano(){
   const g = new Map(); nodi.forEach(n=>g.set(n,[]));
-  for (const s of aste) if (s.tipo !== "piano"){ g.get(s.n1).push(s.n2); g.get(s.n2).push(s.n1); }
+  for (const s of aste) if (s.tipo!=="piano"){ g.get(s.n1).push(s.n2); g.get(s.n2).push(s.n1); }
   return g;
 }
 function pathToSupport(start, side){ // side: "L","R", or null
   const g=buildGraphNonPiano(), W=canvas.clientWidth, vis=new Set(), q=[start];
-  const toLeft = n=> n.x <= W*0.18+2, toRight=n=> n.x >= W*0.82-2;
+  const toLeft = n=> n.x<=W*0.18+2, toRight=n=> n.x>=W*0.82-2;
   while(q.length){
     const n=q.shift(); if(vis.has(n)) continue; vis.add(n);
     if(n.vincolo && (!side || (side==="L"?toLeft(n):toRight(n)))) return true;
@@ -486,41 +486,32 @@ function pathToSupport(start, side){ // side: "L","R", or null
 }
 function triangoloAncorato(seg){
   const hasBar=(a,b)=>aste.some(s=>s.tipo!=="piano"&&((s.n1===a&&s.n2===b)||(s.n1===b&&s.n2===a)));
-  const collin=(A,B,C)=> Math.abs((B.y-A.y)*(C.x-B.x)-(B.x-A.x)*(C.y-B.y)) < 1e-3;
+  const collin=(A,B,C)=> Math.abs((B.y-A.y)*(C.x-B.x)-(B.x-A.x)*(C.y-B.y))<1e-3;
   function ang(p,q,r){ const u={x:p.x-q.x,y:p.y-q.y}, v={x:r.x-q.x,y:r.y-q.y};
     const cu=u.x*v.x+u.y*v.y, nu=Math.hypot(u.x,u.y), nv=Math.hypot(v.x,v.y);
-    if (nu===0||nv===0) return 180;
-    const c = Math.min(1, Math.max(-1, cu/(nu*nv))); return Math.acos(c)*180/Math.PI; }
+    const a=Math.acos(Math.min(1,Math.max(-1,cu/(nu*nv)))); return a*180/Math.PI; }
   for(const C of nodi){
     if(C===seg.n1||C===seg.n2) continue;
-    if(hasBar(C,seg.n1) && hasBar(C,seg.n2) && !collin(seg.n1,seg.n2,C)){
-      const aA = ang(seg.n2, seg.n1, C), aB = ang(seg.n1, seg.n2, C), aC = ang(seg.n1, C, seg.n2);
-      const minA = Math.min(aA,aB,aC);
-      const L1 = Math.hypot(seg.n1.x-seg.n2.x, seg.n1.y-seg.n2.y);
-      const L2 = Math.hypot(seg.n1.x-C.x, seg.n1.y-C.y);
-      const L3 = Math.hypot(seg.n2.x-C.x, seg.n2.y-C.y);
-      const ratio = Math.max(L1,L2,L3)/Math.max(1e-6, Math.min(L1,L2,L3));
-      if(minA >= 15 && ratio <= 5 && pathToSupport(C,null)) return true;
-    }
+    const c1=hasBar(C,seg.n1), c2=hasBar(C,seg.n2);
+    if(!(c1&&c2) || collin(seg.n1,seg.n2,C)) continue;
+    const aA=ang(seg.n2, seg.n1, C), aB=ang(seg.n1, seg.n2, C), aC=ang(seg.n1, C, seg.n2);
+    const minA=Math.min(aA,aB,aC);
+    const L=[Math.hypot(seg.n1.x-seg.n2.x,seg.n1.y-seg.n2.y),
+             Math.hypot(seg.n1.x-C.x,seg.n1.y-C.y),
+             Math.hypot(seg.n2.x-C.x,seg.n2.y-C.y)];
+    const ratio=Math.max(...L)/Math.min(...L);
+    if(minA>=15 && ratio<=5 && pathToSupport(C,null)) return true;
   }
   return false;
 }
 function checkDeterminacy(){
-  const bars = aste.filter(s=>s.tipo!=="piano");
-  const jointsSet = new Set(); bars.forEach(s=>{jointsSet.add(s.n1); jointsSet.add(s.n2);});
-  const joints = jointsSet.size;
-  // conta reazioni solo ai giunti effettivamente presenti
-  function key(n){ return `${Math.round(n.x)}:${Math.round(n.y)}`; }
-  const jointsKeys = new Set(Array.from(jointsSet).map(key));
-  let reactions = 0;
-  for(const v of vincoli){
-    const k = `${Math.round(v.x)}:${Math.round(v.y)}`;
-    if(jointsKeys.has(k)) reactions += dofVincoloTipo(v.tipo);
-  }
-  const val = bars.length + reactions - 2*joints;
-  return {val, bars: bars.length, joints, reactions};
+  const bars = aste.filter(s=>s.tipo!=="piano").length;
+  const joints = new Set(aste.filter(s=>s.tipo!=="piano").flatMap(s=>[s.n1,s.n2])).size;
+  const reactions = vincoli.reduce((a,v)=>a+dofVincolo(v.tipo),0);
+  const val = bars + reactions - 2*joints;
+  return {val, bars, joints, reactions};
 }
-
+// === Fine patch ===
 function valutaRequisiti(){
   const messaggi = [];
   if (pianoPercorrenza.length === 0) return {ok:false, testo:"Piano: nessun tratto (partirà il collasso)", classe:"bad", messaggi:["Nessun tratto di piano"]};
@@ -539,7 +530,7 @@ function valutaRequisiti(){
   if (branching) messaggi.push("Ramificazioni sul piano");
   if (!lenOK) messaggi.push("Meno di 3 tratti di piano");
 
-  const trianglesMissing = pianoPercorrenza.filter(seg => !triangoloAncorato(seg));
+  const trianglesMissing = pianoPercorrenza.filter(seg => !esisteTriangolazionePerSegmento(seg));
   if (trianglesMissing.length) messaggi.push("Manca triangolazione su uno o più tratti");
 
   const W = canvas.clientWidth;
@@ -549,24 +540,21 @@ function valutaRequisiti(){
   const supportsRight = nodi.some(n => n.vincolo && toRight(n));
   if (!supportsLeft)  messaggi.push("Nessun vincolo a terra lato sinistro");
   if (!supportsRight) messaggi.push("Nessun vincolo a terra lato destro");
-
-  
-  // verifiche avanzate
+  // Patch: determinazione globale e ridondanza ancoraggi
   const det = checkDeterminacy();
-  const vincoliKeys = Array.from(new Set(vincoli.map(v=>`${Math.round(v.x)}:${Math.round(v.y)}`)));
-  const vincoliConcentrati = vincoliKeys.length < 2;
+  if(det.joints>0){
+    if(det.val<0) messaggi.push("Meccanismo globale (b+r < 2j)");
+    if(det.val>0) messaggi.push("Iperstaticità globale (b+r > 2j)");
+    const uniquePts = Array.from(new Set(vincoli.map(v=>`${Math.round(v.x)}:${Math.round(v.y)}`)));
+    if(uniquePts.length<2) messaggi.push("Vincoli troppo concentrati");
+  }
+  const nodesOnDeck = nodi.filter(n => pianoPercorrenza.some(s=>s.n1===n||s.n2===n));
+  const leftOK  = nodesOnDeck.every(n=>pathToSupport(n,"L"));
+  const rightOK = nodesOnDeck.every(n=>pathToSupport(n,"R"));
+  if(!leftOK||!rightOK) messaggi.push("Il piano non ha ancoraggi ridondanti a entrambi i lati");
 
-  // ridondanza ancoraggi: ogni nodo del piano raggiunge sia sx che dx
-  const nodesPiano = Array.from(new Set(pianoPercorrenza.flatMap(s=>[s.n1,s.n2])));
-  const leftRedund = nodesPiano.every(n => pathToSupport(n,"L"));
-  const rightRedund= nodesPiano.every(n => pathToSupport(n,"R"));
 
-  if(det.val < 0) messaggi.push("Meccanismo globale (b+r < 2j)");
-  if(det.val > 0) messaggi.push("Struttura iperstatica (b+r > 2j)");
-  if(vincoliConcentrati) messaggi.push("Vincoli concentrati nello stesso punto");
-  if(!leftRedund || !rightRedund) messaggi.push("Ancoraggi non ridondanti a entrambi i lati");
-
-  const ok = connected && !branching && lenOK && trianglesMissing.length===0 && supportsLeft && supportsRight && det.val>=0 && !vincoliConcentrati && leftRedund && rightRedund;
+  const ok = connected && !branching && lenOK && trianglesMissing.length===0 && supportsLeft && supportsRight;
 
   let testo, classe;
   if (ok) { testo = "Piano: CONTINUO e STABILIZZATO – pronto all'avvio"; classe = "ok"; }

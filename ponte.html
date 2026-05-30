@@ -530,7 +530,7 @@ function valutaRequisiti(){
   if (branching) messaggi.push("Ramificazioni sul piano");
   if (!lenOK) messaggi.push("Meno di 3 tratti di piano");
 
-  const trianglesMissing = pianoPercorrenza.filter(seg => !esisteTriangolazionePerSegmento(seg));
+  const trianglesMissing = pianoPercorrenza.filter(seg => !triangoloAncorato(seg));
   if (trianglesMissing.length) messaggi.push("Manca triangolazione su uno o più tratti");
 
   const W = canvas.clientWidth;
@@ -542,11 +542,11 @@ function valutaRequisiti(){
   if (!supportsRight) messaggi.push("Nessun vincolo a terra lato destro");
   // Patch: determinazione globale e ridondanza ancoraggi
   const det = checkDeterminacy();
+  const uniqueSupportPoints = Array.from(new Set(vincoli.map(v=>`${Math.round(v.x)}:${Math.round(v.y)}`)));
   if(det.joints>0){
     if(det.val<0) messaggi.push("Meccanismo globale (b+r < 2j)");
     if(det.val>0) messaggi.push("Iperstaticità globale (b+r > 2j)");
-    const uniquePts = Array.from(new Set(vincoli.map(v=>`${Math.round(v.x)}:${Math.round(v.y)}`)));
-    if(uniquePts.length<2) messaggi.push("Vincoli troppo concentrati");
+    if(uniqueSupportPoints.length<2) messaggi.push("Vincoli troppo concentrati");
   }
   const nodesOnDeck = nodi.filter(n => pianoPercorrenza.some(s=>s.n1===n||s.n2===n));
   const leftOK  = nodesOnDeck.every(n=>pathToSupport(n,"L"));
@@ -554,7 +554,7 @@ function valutaRequisiti(){
   if(!leftOK||!rightOK) messaggi.push("Il piano non ha ancoraggi ridondanti a entrambi i lati");
 
 
-  const ok = connected && !branching && lenOK && trianglesMissing.length===0 && supportsLeft && supportsRight;
+  const ok = connected && !branching && lenOK && trianglesMissing.length===0 && supportsLeft && supportsRight && det.val===0 && uniqueSupportPoints.length>=2 && leftOK && rightOK;
 
   let testo, classe;
   if (ok) { testo = "Piano: CONTINUO e STABILIZZATO – pronto all'avvio"; classe = "ok"; }

@@ -1,0 +1,1004 @@
+/* ============================================================
+   CTU FEE CALCULATOR - STYLE SHEET
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* VARIABLE DESIGN SYSTEM */
+:root {
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    
+    /* Light Theme (Default) */
+    --bg-color: #f1f5f9;
+    --card-bg: #ffffff;
+    --text-color: #0f172a;
+    --text-secondary: #475569;
+    --border-color: #cbd5e1;
+    --primary-color: #1e3a8a;
+    --primary-hover: #172554;
+    --primary-light: #eff6ff;
+    --accent-color: #d97706;
+    --accent-hover: #b45309;
+    --accent-light: #fef3c7;
+    --success-color: #15803d;
+    --danger-color: #b91c1c;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+    --transition-speed: 0.2s;
+    
+    /* Document page visual style */
+    --doc-bg: #ffffff;
+    --doc-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --doc-text: #1e293b;
+    --doc-border: #e2e8f0;
+}
+
+[data-theme="dark"] {
+    /* Dark Theme */
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #f8fafc;
+    --text-secondary: #94a3b8;
+    --border-color: #334155;
+    --primary-color: #3b82f6;
+    --primary-hover: #60a5fa;
+    --primary-light: #1e3a8a;
+    --accent-color: #fbbf24;
+    --accent-hover: #f59e0b;
+    --accent-light: #78350f;
+    --success-color: #22c55e;
+    --danger-color: #ef4444;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+    
+    --doc-bg: #ffffff; /* Previews remain white/paper-like for print realism */
+    --doc-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    --doc-text: #1e293b;
+    --doc-border: #cbd5e1;
+}
+
+/* RESET */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.5;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+/* APP LAYOUT */
+.app-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* HEADER STYLE */
+header.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.logo-container h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-container p {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.header-controls {
+    display: flex;
+    gap: 10px;
+}
+
+/* GRID DASHBOARD */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 450px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* LEFT PANEL (INPUTS) */
+.left-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.accordion-card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.accordion-title {
+    width: 100%;
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    text-align: left;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.accordion-title:hover {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.accordion-content {
+    padding: 20px;
+}
+
+/* FORMS STYLE */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.form-group-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.grid {
+    display: grid;
+    gap: 10px;
+}
+
+.grid-2 {
+    grid-template-columns: 1fr 1fr;
+}
+
+label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    outline: none;
+    transition: border-color var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.input-help {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+}
+
+/* SLIDER RANGE */
+input[type="range"] {
+    width: 100%;
+    margin-top: 8px;
+    accent-color: var(--primary-color);
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.slider-val {
+    font-weight: 700;
+    min-width: 35px;
+    text-align: right;
+}
+
+/* BUTTONS */
+button.btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 20px;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background-color var(--transition-speed), transform 0.1s;
+    gap: 8px;
+}
+
+button.btn:active {
+    transform: scale(0.98);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-accent {
+    background-color: var(--accent-color);
+    color: #ffffff;
+}
+
+.btn-accent:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    background-color: var(--border-color);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: #ffffff;
+}
+
+.btn-danger:hover {
+    filter: brightness(0.9);
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background-color var(--transition-speed);
+}
+
+.btn-icon:hover {
+    background-color: var(--bg-color);
+}
+
+/* RIGHT PANEL (DOCUMENT & TABS) */
+.right-panel {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 800px;
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+/* TABS HEADER */
+.tabs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--bg-color);
+    padding: 10px 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.tab-btn {
+    padding: 8px 16px;
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 500;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+.tab-btn:hover {
+    color: var(--text-color);
+    background-color: var(--card-bg);
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    font-weight: 600;
+    box-shadow: var(--shadow-sm);
+}
+
+.tab-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.tab-content {
+    padding: 25px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* LIST CARDS (Review Tab) */
+.item-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.list-item-card {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px 20px;
+    position: relative;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.list-item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.card-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.card-item-title-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.card-item-title-badge h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.badge {
+    padding: 2px 8px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badge-art15 {
+    background-color: var(--accent-light);
+    color: var(--accent-color);
+}
+
+.badge-imponibile {
+    background-color: var(--primary-light);
+    color: var(--primary-color);
+}
+
+.card-action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.card-item-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+}
+
+.card-item-price-tag {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px dashed var(--border-color);
+    padding-top: 10px;
+    font-size: 0.85rem;
+}
+
+.card-item-price-tag strong {
+    font-size: 1.1rem;
+    color: var(--text-color);
+}
+
+.empty-list-msg {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-secondary);
+    border: 2px dashed var(--border-color);
+    border-radius: 10px;
+    font-style: italic;
+}
+
+/* ACCORDIONS FOR BRACKETS DETAILED CALCULATION */
+.btn-toggle-scaglioni {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--primary-color);
+    cursor: pointer;
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 8px;
+    outline: none;
+}
+
+.arrow-indicator {
+    font-size: 0.6rem;
+    transition: transform var(--transition-speed);
+}
+
+.scaglioni-table-wrapper {
+    display: none;
+    margin-bottom: 15px;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.scaglioni-table-wrapper.active {
+    display: block;
+}
+
+.scaglioni-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.75rem;
+}
+
+.scaglioni-table th,
+.scaglioni-table td {
+    padding: 6px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.scaglioni-table th {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.scaglione-quota-bar {
+    width: 100%;
+    height: 16px;
+    background-color: var(--bg-color);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid var(--border-color);
+}
+
+.scaglione-quota-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    opacity: 0.15;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: width 0.3s;
+}
+
+.scaglione-quota-text {
+    position: relative;
+    z-index: 2;
+    padding-left: 6px;
+    line-height: 14px;
+    font-weight: 600;
+}
+
+.eccedenza-alert {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--accent-light);
+    color: var(--accent-color);
+    font-size: 0.75rem;
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 10px;
+}
+
+.highlight-bollo {
+    background-color: var(--accent-light);
+    border-radius: 8px;
+    padding: 5px 8px;
+    border: 1px solid var(--accent-color);
+}
+
+/* ============================================================
+   PRINT DOCUMENT RENDERING (PAPER VIEW ON SCREEN)
+   ============================================================ */
+.print-document {
+    background-color: var(--doc-bg);
+    color: var(--doc-text);
+    padding: 50px 60px;
+    border: 1px solid var(--doc-border);
+    box-shadow: var(--doc-shadow);
+    border-radius: 4px;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: "Georgia", "Times New Roman", serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.print-header h2 {
+    font-family: var(--font-sans);
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.print-header h3 {
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.print-header h4 {
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.print-parties-info {
+    border-top: 1px solid #000000;
+    border-bottom: 1px solid #000000;
+    padding: 10px 0;
+    margin-bottom: 30px;
+    font-size: 0.9rem;
+}
+
+.print-title {
+    margin-bottom: 25px;
+}
+
+.print-title h3 {
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: underline;
+}
+
+.print-body p {
+    text-align: justify;
+    margin-bottom: 15px;
+    text-indent: 20px;
+}
+
+.print-sec-title {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin: 25px 0 10px 0;
+    border-bottom: 1px solid var(--doc-border);
+    padding-bottom: 4px;
+}
+
+.print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+}
+
+.print-table th,
+.print-table td {
+    padding: 6px 10px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.print-table th {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    background-color: #f8fafc;
+}
+
+.table-subtotal-row td {
+    font-weight: 700;
+    border-top: 1px solid #000000;
+    border-bottom: 1px solid #000000;
+    background-color: #f8fafc;
+}
+
+.print-totals-summary {
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    margin-left: auto;
+    border: 1px solid #000000;
+    padding: 15px;
+    background-color: #f8fafc;
+    margin-bottom: 30px;
+    font-size: 0.85rem;
+}
+
+.print-totals-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.print-grand-total {
+    border-top: 1px solid #000000;
+    padding-top: 8px;
+    margin-top: 4px;
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.print-disclaimer {
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-bottom: 40px;
+    line-height: 1.4;
+}
+
+.print-footer {
+    margin-top: 40px;
+    font-size: 0.9rem;
+}
+
+.indent-1 {
+    padding-left: 20px !important;
+}
+
+/* ============================================================
+   PROFORMA SPECIFIC PRINT VIEW
+   ============================================================ */
+.proforma-letterhead {
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.letterhead-ctu-info h3 {
+    font-family: var(--font-sans);
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.letterhead-ctu-info p {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+    font-family: var(--font-sans);
+    color: #475569;
+}
+
+.letterhead-doc-meta h2 {
+    font-family: var(--font-sans);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.letterhead-doc-meta p {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+    font-family: var(--font-sans);
+}
+
+.proforma-case-details {
+    border: 1px solid var(--doc-border);
+    background-color: #f8fafc;
+    border-radius: 4px;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+.proforma-case-details h4 {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--doc-border);
+    padding-bottom: 3px;
+}
+
+.proforma-case-details p {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+    font-family: var(--font-sans);
+}
+
+.proforma-calculation-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 25px;
+    font-size: 0.85rem;
+}
+
+.proforma-calculation-table th,
+.proforma-calculation-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.proforma-calculation-table th {
+    font-family: var(--font-sans);
+    background-color: #f1f5f9;
+    font-weight: 600;
+}
+
+.proforma-subtotal-row td {
+    font-weight: 700;
+    border-top: 1px solid #0f172a;
+    border-bottom: 1px solid #0f172a;
+    background-color: #f8fafc;
+}
+
+.proforma-acconto-row td {
+    background-color: #fef2f2;
+}
+
+.proforma-final-total-row td {
+    font-size: 1rem;
+    font-weight: 700;
+    border-top: 2px double #000000;
+    border-bottom: 2px double #000000;
+    background-color: #f0fdf4;
+    color: #166534;
+}
+
+.proforma-tax-notes {
+    border: 1px solid #cbd5e1;
+    padding: 12px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+}
+
+.proforma-tax-notes h4 {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.proforma-tax-notes p {
+    font-size: 0.75rem;
+    font-style: italic;
+    line-height: 1.4;
+    margin-bottom: 4px;
+    text-indent: 0;
+    text-align: left;
+}
+
+.proforma-payment-instructions {
+    border: 1px dashed #cbd5e1;
+    padding: 12px;
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+}
+
+.proforma-payment-instructions h4 {
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: var(--primary-color);
+}
+
+.proforma-payment-instructions p {
+    margin-bottom: 2px;
+    text-indent: 0;
+}
+
+/* UTILITY */
+.d-none {
+    display: none !important;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.bold {
+    font-weight: 700;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-muted {
+    color: #94a3b8 !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.text-success {
+    color: var(--success-color) !important;
+}
+
+.text-warning {
+    color: var(--accent-color) !important;
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+}
+
+/* ============================================================
+   BROWSER PRINT MEDIA RULE overrides
+   ============================================================ */
+@media print {
+    @page {
+        size: A4;
+        margin: 15mm;
+    }
+    
+    body {
+        background-color: #ffffff !important;
+        color: #000000 !important;
+        font-size: 11pt !important;
+    }
+    
+    .no-print,
+    header.app-header,
+    .left-panel,
+    .tabs-header,
+    .logo-container,
+    .header-controls,
+    button,
+    input,
+    select,
+    textarea,
+    .card-action-buttons,
+    .accordion-card {
+        display: none !important;
+    }
+    
+    .app-container {
+        padding: 0 !important;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+    }
+    
+    .right-panel {
+        border: none !important;
+        box-shadow: none !important;
+        background: none !important;
+        min-height: 0 !important;
+        width: 100% !important;
+    }
+    
+    .tab-content {
+        padding: 0 !important;
+        overflow: visible !important;
+    }
+    
+    .tab-content.d-none {
+        display: none !important;
+    }
+    
+    .tab-content:not(.d-none) {
+        display: block !important;
+    }
+    
+    .print-document {
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        background-color: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    /* Force background colors to print */
+    .table-subtotal-row td,
+    .proforma-subtotal-row td,
+    .print-totals-summary,
+    .proforma-case-details {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: #f8fafc !important;
+    }
+    
+    .proforma-final-total-row td {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        background-color: #f0fdf4 !important;
+    }
+}

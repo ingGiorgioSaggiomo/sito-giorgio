@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcolatore Compensi CTU - D.M. 30 Maggio 2002</title>
+    <link rel="stylesheet" href="onorari-ctu.css">
+    <script src="onorari-ctu.js" defer></script>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- HEADER -->
+        <header class="app-header no-print">
+            <div class="logo-container">
+                <h1>⚖️ Calcolatore Compensi CTU</h1>
+                <p>Artt. 11, 12, 13 e Vacazioni (Aggiornate Corte cost. n. 16/2025)</p>
+            </div>
+            <div class="header-controls">
+                <button id="theme-toggle" class="btn btn-secondary">🌙 Modalità Scura</button>
+                <button id="btn-esporta" class="btn btn-secondary" title="Esporta la parcella attuale in formato JSON">📥 Esporta</button>
+                <button id="btn-importa" class="btn btn-secondary" title="Importa una parcella da un file JSON precedentemente salvato">📤 Importa</button>
+                <button id="btn-pulisci-dati" class="btn btn-danger">🧹 Pulisci Dati</button>
+                <input type="file" id="import-file-input" accept=".json" class="d-none">
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="dashboard-grid">
+            
+            <!-- LEFT PANEL: INPUT FORMS -->
+            <div class="left-panel no-print">
+                
+                <!-- CARD 1: DATI ANAGRAFICI E CANCELLERIA -->
+                <div class="accordion-card">
+                    <button class="accordion-title" onclick="this.nextElementSibling.classList.toggle('d-none')">
+                        <span>📋 Dati Pratica & Professionista</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="accordion-content d-none">
+                        <h4 style="margin-bottom: 10px; font-size: 0.85rem; text-transform: uppercase; color: var(--primary-color);">Dati Ufficio Giudiziario</h4>
+                        <div class="form-group">
+                            <label for="tribunale">Tribunale / Ufficio Giudiziario</label>
+                            <input type="text" id="tribunale" value="Tribunale di ...">
+                        </div>
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="giudice">Giudice Istruttore</label>
+                                <input type="text" id="giudice" placeholder="es. Dott. Rossi">
+                            </div>
+                            <div class="form-group">
+                                <label for="nrg">Numero R.G.</label>
+                                <input type="text" id="nrg" placeholder="es. 1234/2025">
+                            </div>
+                        </div>
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="attore">Attore / Ricorrente</label>
+                                <input type="text" id="attore" placeholder="Parte attrice">
+                            </div>
+                            <div class="form-group">
+                                <label for="convenuto">Convenuto / Resistente</label>
+                                <input type="text" id="convenuto" placeholder="Parte convenuta">
+                            </div>
+                        </div>
+
+                        <h4 style="margin: 15px 0 10px 0; font-size: 0.85rem; text-transform: uppercase; color: var(--primary-color);">Anagrafica C.T.U.</h4>
+                        <div class="form-group">
+                            <label for="ctu-nome">Nome e Titolo CTU</label>
+                            <input type="text" id="ctu-nome" value="Dott. Ing. ...">
+                        </div>
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="partita-iva">Partita IVA</label>
+                                <input type="text" id="partita-iva" placeholder="P.IVA">
+                            </div>
+                            <div class="form-group">
+                                <label for="codice-fiscale">Codice Fiscale</label>
+                                <input type="text" id="codice-fiscale" placeholder="C.F.">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="indirizzo">Indirizzo Studio</label>
+                            <input type="text" id="indirizzo" placeholder="Via, Città, CAP">
+                        </div>
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="email">E-mail</label>
+                                <input type="text" id="email" placeholder="E-mail ordinaria">
+                            </div>
+                            <div class="form-group">
+                                <label for="telefono">Telefono</label>
+                                <input type="text" id="telefono" placeholder="Telefono/Cellulare">
+                            </div>
+                        </div>
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="pec">P.E.C.</label>
+                                <input type="text" id="pec" placeholder="PEC">
+                            </div>
+                            <div class="form-group">
+                                <label for="codice-destinatario">SDI (Cod. Destinatario)</label>
+                                <input type="text" id="codice-destinatario" placeholder="SDI">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: AGGIUNGI ONORARIO -->
+                <div class="accordion-card">
+                    <button class="accordion-title" onclick="this.nextElementSibling.classList.toggle('d-none')">
+                        <span>💵 Aggiungi Voce Onorario</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label for="onorario-tipo">Articolo D.M. 30 maggio 2002</label>
+                            <select id="onorario-tipo">
+                                <option value="art11" selected>Art. 11 (Costruzioni, Impianti, Strutture)</option>
+                                <option value="art12">Art. 12 (Verifiche, Collaudi, Rilievi, Contabilità)</option>
+                                <option value="art13">Art. 13 (Estimo / Valutazioni immobiliari)</option>
+                                <option value="vacazioni">Vacazioni (Compenso a tempo)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Contenitore Form Dinamico Onorario -->
+                        <div id="form-container-onorario"></div>
+                        
+                        <button id="btn-add-onorario" class="btn btn-primary" style="width: 100%; margin-top: 10px;">➕ Aggiungi Onorario</button>
+                    </div>
+                </div>
+
+                <!-- CARD 3: AGGIUNGI SPESA -->
+                <div class="accordion-card">
+                    <button class="accordion-title" onclick="this.nextElementSibling.classList.toggle('d-none')">
+                        <span>🚗 Aggiungi Spesa o Viaggio</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="form-group">
+                            <label for="spesa-tipo">Tipologia Spesa</label>
+                            <select id="spesa-tipo">
+                                <option value="viva" selected>Spesa Viva (Marche, Copie, Cancelleria)</option>
+                                <option value="viaggio">Spesa di Viaggio (Rimborso Chilometrico)</option>
+                            </select>
+                        </div>
+
+                        <!-- Contenitore Form Dinamico Spesa -->
+                        <div id="form-container-spesa"></div>
+
+                        <button id="btn-add-spesa" class="btn btn-accent" style="width: 100%; margin-top: 10px;">➕ Aggiungi Spesa</button>
+                    </div>
+                </div>
+
+                <!-- CARD 4: PARAMETRI DI NOTULA (Global & Quota) -->
+                <div class="accordion-card">
+                    <button class="accordion-title" onclick="this.nextElementSibling.classList.toggle('d-none')">
+                        <span>⚙️ Ripartizione & Parametri Notula</span>
+                        <span>▼</span>
+                    </button>
+                    <div class="accordion-content">
+                        <h4 style="margin-bottom: 10px; font-size: 0.85rem; text-transform: uppercase; color: var(--primary-color);">Maggiorazioni Generali</h4>
+                        <div class="form-group">
+                            <label for="coeff-art52">Maggiorazione eccezionale importanza (Art. 52 DPR 115/02)</label>
+                            <div class="slider-container">
+                                <input type="range" id="coeff-art52" min="1.0" max="2.0" step="0.05" value="1.0">
+                                <span id="coeff-art52-val" class="slider-val">1.0</span>
+                            </div>
+                        </div>
+
+                        <h4 style="margin: 15px 0 10px 0; font-size: 0.85rem; text-transform: uppercase; color: var(--primary-color);">Quota Ripartizione (per Proforma)</h4>
+                        <div class="form-group">
+                            <label for="quota-tipo">Quota a carico del cliente/destinatario</label>
+                            <select id="quota-tipo">
+                                <option value="intero" selected>Intero importo di causa (100%)</option>
+                                <option value="frazione">Quota frazionaria (es. 1/2, 1/3)</option>
+                                <option value="percentuale">Percentuale fissa (es. 50%)</option>
+                            </select>
+                        </div>
+                        <div class="form-group d-none" id="quota-frazione-wrapper">
+                            <label for="quota-denominatore">Denominatore quota (N in 1/N)</label>
+                            <input type="number" id="quota-denominatore" min="1" value="2" placeholder="es. 2 per metà, 3 per un terzo">
+                        </div>
+                        <div class="form-group d-none" id="quota-percentuale-wrapper">
+                            <label for="quota-percentuale">Quota percentuale (%)</label>
+                            <input type="text" id="quota-percentuale" value="50" placeholder="es. 50">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="quota-art15-tipo">Riparto Spese escluse da IVA (Art. 15)</label>
+                            <select id="quota-art15-tipo">
+                                <option value="stessa" selected>Applica la stessa quota delle prestazioni</option>
+                                <option value="intero">Addebita l'intero importo delle spese (100%)</option>
+                                <option value="manuale">Valore fisso personalizzato</option>
+                            </select>
+                        </div>
+                        <div class="form-group d-none" id="quota-art15-manuale-wrapper">
+                            <label for="quota-art15-manuale">Spese Art.15 personalizzate (€)</label>
+                            <input type="text" id="quota-art15-manuale" value="0.00">
+                        </div>
+
+                        <h4 style="margin: 15px 0 10px 0; font-size: 0.85rem; text-transform: uppercase; color: var(--primary-color);">Cassa & Oneri Professionali</h4>
+                        <div class="grid grid-2">
+                            <div class="form-group">
+                                <label for="cassa-tipo">Tipo Cassa Previdenziale</label>
+                                <select id="cassa-tipo">
+                                    <option value="Inarcassa" selected>Inarcassa</option>
+                                    <option value="Cassa Geometri">Cassa Geometri</option>
+                                    <option value="EPPI">EPPI</option>
+                                    <option value="Gestione Separata INPS">Gestione Separata INPS</option>
+                                    <option value="Cassa Chimici/Fisici">Cassa Prev.</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="percentuale-cassa">Aliquota Cassa (%)</label>
+                                <input type="number" id="percentuale-cassa" min="0" max="20" value="4">
+                            </div>
+                        </div>
+
+                        <div class="form-group-checkbox">
+                            <input type="checkbox" id="applica-bollo" checked>
+                            <label for="applica-bollo">Applica Marca da bollo (€ 2,00)</label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="acconti">Acconti già percepiti da detrarre (€)</label>
+                            <input type="text" id="acconti" value="0,00">
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT PANEL: PREVIEWS & DOCUMENT GENERATOR -->
+            <div class="right-panel">
+                
+                <!-- TABS BAR -->
+                <div class="tabs-header no-print">
+                    <div class="tab-buttons">
+                        <button id="btn-tab-dati" class="tab-btn active">📝 Voci Inserite</button>
+                        <button id="btn-tab-istanza" class="tab-btn">⚖️ Istanza Liquidazione</button>
+                        <button id="btn-tab-proforma" class="tab-btn">💼 Progetto Notula</button>
+                    </div>
+                    <div class="tab-actions">
+                        <button id="btn-word" class="btn btn-secondary" title="Esporta il documento corrente in formato Word (.doc) modificabile">📝 Esporta Word</button>
+                        <button id="btn-print" class="btn btn-primary">🖨️ Stampa / Salva PDF</button>
+                    </div>
+                </div>
+
+                <!-- TAB 1: DATI INSERITI -->
+                <div id="tab-dati" class="tab-content">
+                    <h3 style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; color: var(--primary-color);">Onorari Inseriti</h3>
+                    <div id="voci-list" class="item-list-container">
+                        <!-- Voci di compenso inserite verranno renderizzate qui -->
+                    </div>
+
+                    <h3 style="margin: 25px 0 15px 0; border-bottom: 1px solid var(--border-color); padding-bottom: 5px; color: var(--accent-color);">Spese Inserite</h3>
+                    <div id="spese-list" class="item-list-container">
+                        <!-- Spese inserite verranno renderizzate qui -->
+                    </div>
+                </div>
+
+                <!-- TAB 2: ISTANZA PREVIEW -->
+                <div id="tab-istanza" class="tab-content d-none">
+                    <div id="istanza-preview">
+                        <!-- Preview stampabile dell'Istanza -->
+                    </div>
+                </div>
+
+                <!-- TAB 3: PROFORMA PREVIEW -->
+                <div id="tab-proforma" class="tab-content d-none">
+                    <div id="proforma-preview">
+                        <!-- Preview stampabile del Progetto di Fattura -->
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+</body>
+</html>

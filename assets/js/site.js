@@ -81,28 +81,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Prepara tutte le gallerie, compresa la bio
     const galleries = {
         gallery1: [
-            'img/portfolio1a.jpg',
-            'img/portfolio1b.jpg'
+            'img/portfolio1a.webp',
+            'img/portfolio1b.webp'
         ],
         gallery2: [
-            'img/portfolio2a.jpg',
-            'img/portfolio2b.jpg'
+            'img/portfolio2a.webp',
+            'img/portfolio2b.webp'
         ],
         gallery3: [
-            'img/portfolio3a.jpg',
-            'img/portfolio3b.jpg'
+            'img/portfolio3a.webp',
+            'img/portfolio3b.webp'
         ],
         gallery4: [
-            'img/portfolio4a.jpg',
-            'img/portfolio4b.jpg'
+            'img/portfolio4a.webp',
+            'img/portfolio4b.webp'
         ],
         gallery5: [
-            'img/portfolio5a.jpg',
-            'img/portfolio5b.jpg'
+            'img/portfolio5a.webp',
+            'img/portfolio5b.webp'
         ],
         gallery6: [
-            'img/portfolio6a.jpg',
-            'img/portfolio6b.jpg'
+            'img/portfolio6a.webp',
+            'img/portfolio6b.webp'
         ],
         bio: [
             'https://inggiorgiosaggiomo.github.io/sito-giorgio/img/giorgio-saggiomo.jpg'
@@ -110,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     let currentGallery = [];
     let currentIndex = 0;
+    let lightboxTrigger = null;
     function showImage(index) {
         lightboxImg.src = currentGallery[index];
         currentIndex = index;
@@ -118,7 +119,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // Attiva lightbox su tutte le immagini lightboxable
     document.querySelectorAll('.lightboxable').forEach(img => {
-        img.addEventListener('click', () => {
+        img.setAttribute('tabindex', '0');
+        img.setAttribute('role', 'button');
+        img.setAttribute('aria-label', `${img.alt}. Apri immagine ingrandita`);
+        const openLightbox = () => {
             const galleryKey = img.dataset.gallery;
             const imgUrl = img.dataset.img || img.src;
             currentGallery = galleries[galleryKey] || [imgUrl];
@@ -129,16 +133,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (idx < 0) idx = 0;
             }
             lightbox.classList.remove('hidden');
+            lightbox.setAttribute('aria-hidden', 'false');
+            lightboxTrigger = img;
             showImage(idx);
+            lightboxClose.focus();
+        };
+        img.addEventListener('click', openLightbox);
+        img.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                openLightbox();
+            }
         });
     });
-    lightboxClose.addEventListener('click', () => lightbox.classList.add('hidden'));
-    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.classList.add('hidden'); });
+    function closeLightbox() {
+        lightbox.classList.add('hidden');
+        lightbox.setAttribute('aria-hidden', 'true');
+        if (lightboxTrigger) lightboxTrigger.focus();
+    }
+    lightboxClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
     lightboxPrev.addEventListener('click', () => { if (currentIndex > 0) showImage(currentIndex - 1); });
     lightboxNext.addEventListener('click', () => { if (currentIndex < currentGallery.length - 1) showImage(currentIndex + 1); });
     document.addEventListener('keydown', (e) => {
         if (!lightbox.classList.contains('hidden')) {
-            if (e.key === 'Escape') lightbox.classList.add('hidden');
+            if (e.key === 'Escape') closeLightbox();
             if (e.key === 'ArrowLeft') lightboxPrev.click();
             if (e.key === 'ArrowRight') lightboxNext.click();
         }

@@ -2,6 +2,7 @@ window.siteTranslations = {
     en: {
         header_title: "Eng. Giorgio Saggiomo",
         header_subtitle: "Structural Engineer, CTU/CTP, Forensic Technical Consultant",
+        header_cta: "Request a consultation",
         nav_bio: "About Me",
         nav_services: "Services",
         nav_portfolio: "Portfolio",
